@@ -14,7 +14,8 @@ export default defineNuxtConfig({
     ],
     defaultLocale: 'en',
     strategy: 'no_prefix',
-    detectBrowserLanguage: { useCookie: true, cookieKey: 'omb_locale', fallbackLocale: 'en' },
+    // English until signed in; after that the profile's locale wins (see auth.global.ts).
+    detectBrowserLanguage: false,
     vueI18n: './i18n.config.ts',
   },
 
