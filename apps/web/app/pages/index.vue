@@ -33,8 +33,10 @@ async function load(more = false) {
   if (!more) nextTick(() => list.value?.selectFirst())
 }
 
+const sidebar = useSidebar()
 async function refreshCounts() {
   counts.value = await api.counts('INBOX').catch(() => counts.value)
+  void sidebar.refresh()
 }
 
 watch(kind, () => load())
@@ -100,6 +102,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
           :aria-label="t('inbox.search')"
           class="w-full"
           size="lg"
+          @keydown.esc="($event.target as HTMLInputElement).blur()"
         >
           <template #trailing><span class="omb-kbd">/</span></template>
         </UInput>

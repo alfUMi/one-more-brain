@@ -7,6 +7,7 @@ export default {
     library: 'Library',
     settings: 'Settings',
     main: 'Main',
+    tags: 'Tags',
     soon: 'Coming soon',
   },
   auth: {
@@ -64,6 +65,25 @@ export default {
       capture: 'capture',
       ai: 'Dashed = suggested by AI. Keeping a note confirms its tags.',
     },
+  },
+  library: {
+    title: 'Library',
+    searchPlaceholder: 'Search titles, notes, quotes and links',
+    filterByStatus: 'Filter by status',
+    results: 'Results: {n}',
+    emptyTitle: 'Nothing here yet',
+    emptyBody: 'Items you keep, archive or finish show up here.',
+    noResultsTitle: 'No matches',
+    noResultsBody: 'Try fewer words or another filter.',
+    removeTag: 'Remove tag filter',
+    clear: 'Clear filters',
+  },
+  statuses: {
+    ALL: 'All',
+    INBOX: 'Inbox',
+    KEPT: 'Kept',
+    ARCHIVED: 'Archived',
+    DONE: 'Done',
   },
   kinds: {
     ALL: 'All',

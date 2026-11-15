@@ -251,6 +251,7 @@ const menu = computed(() => [
           </a>
           <span class="omb-meta">
             <template v-if="hasAiTags">{{ t('item.aiTags') }} · </template>
+            <template v-if="!triage">{{ t(`statuses.${item.status}`) }} · </template>
             {{ t(`sources.${item.source}`) }} · {{ fmt.relative(item.capturedAt) }}
           </span>
         </div>

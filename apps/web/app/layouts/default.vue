@@ -1,13 +1,20 @@
 <script setup lang="ts">
 const { t } = useI18n()
 const { user, signOut } = useCurrentUser()
+const route = useRoute()
+const sidebar = useSidebar()
+onMounted(sidebar.refresh)
 
 const nav = computed(() => [
-  { label: t('nav.inbox'), icon: 'i-lucide-inbox', to: '/' },
+  { label: t('nav.inbox'), icon: 'i-lucide-inbox', to: '/', count: sidebar.inboxCount.value },
   { label: t('nav.today'), icon: 'i-lucide-sun', to: '/today', disabled: true },
   { label: t('nav.review'), icon: 'i-lucide-refresh-cw', to: '/review', disabled: true },
-  { label: t('nav.library'), icon: 'i-lucide-book', to: '/library', disabled: true },
+  { label: t('nav.library'), icon: 'i-lucide-book', to: '/library' },
 ])
+
+/** Most used tags; the rest are reachable from the library. */
+const topTags = computed(() => sidebar.tags.value.slice(0, 10))
+const activeTag = computed(() => (route.path === '/library' ? route.query.tag : null))
 
 const userMenu = computed(() => [
   [{ label: user.value?.email ?? '', type: 'label' as const }],
@@ -19,7 +26,7 @@ const userMenu = computed(() => [
   <div class="flex min-h-dvh flex-col md:flex-row">
     <nav
       :aria-label="t('nav.main')"
-      class="flex shrink-0 flex-col gap-1 border-b border-(--omb-border) bg-(--omb-sidebar) px-3.5 py-5 md:sticky md:top-0 md:h-dvh md:w-60 md:border-r md:border-b-0"
+      class="flex shrink-0 flex-col gap-1 border-b border-(--omb-border) bg-(--omb-sidebar) px-3.5 py-5 md:sticky md:top-0 md:h-dvh md:w-60 md:overflow-y-auto md:border-r md:border-b-0"
     >
       <div class="flex items-center gap-2.5 px-3 pt-1 pb-5">
         <AppLogo class="size-7" />
@@ -36,9 +43,32 @@ const userMenu = computed(() => [
           <UIcon :name="item.icon" class="size-[18px]" />
           {{ item.label }}
         </span>
-        <NuxtLink v-else :to="item.to" class="omb-nav" active-class="omb-nav-active">
+        <NuxtLink
+          v-else
+          :to="item.to"
+          :class="['omb-nav', route.path === item.to && !activeTag && 'omb-nav-active']"
+        >
           <UIcon :name="item.icon" class="size-[18px]" />
           {{ item.label }}
+          <span v-if="item.count" class="omb-count">{{ item.count }}</span>
+        </NuxtLink>
+      </template>
+
+      <template v-if="topTags.length">
+        <div
+          class="hidden px-3 pt-[22px] pb-2 text-[11px] font-semibold tracking-[0.08em] text-(--omb-text-muted) uppercase md:block"
+        >
+          {{ t('nav.tags') }}
+        </div>
+        <NuxtLink
+          v-for="tag in topTags"
+          :key="tag.name"
+          :to="{ path: '/library', query: { tag: tag.name } }"
+          :class="['omb-nav hidden md:flex', activeTag === tag.name && 'omb-nav-active']"
+        >
+          <span class="text-(--omb-text-muted)">#</span>
+          <span class="truncate">{{ tag.name }}</span>
+          <span class="omb-count">{{ tag.count }}</span>
         </NuxtLink>
       </template>
 
@@ -59,6 +89,15 @@ const userMenu = computed(() => [
 </template>
 
 <style scoped>
+.omb-count {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--omb-text-muted);
+}
+.omb-nav-active .omb-count {
+  color: inherit;
+}
 .omb-nav {
   display: flex;
   align-items: center;
