@@ -1,5 +1,6 @@
 export * from './appearance'
 export * from './capture'
+export * from './dto'
 export * from './enums'
 export * from './ids'
 export * from './recurrence'
