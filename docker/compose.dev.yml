@@ -1,0 +1,41 @@
+# Dev services. Host ports are in the 5xxxx range so they don't clash with other local projects.
+name: one-more-brain
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: omb
+      POSTGRES_PASSWORD: omb
+      POSTGRES_DB: omb
+    ports:
+      - '55432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U omb']
+      interval: 5s
+      retries: 10
+
+  # S3-compatible object storage (MinIO-compatible; the community MinIO image is no longer published).
+  s3:
+    image: rustfs/rustfs:latest
+    environment:
+      RUSTFS_ACCESS_KEY: omb
+      RUSTFS_SECRET_KEY: omb-secret
+      RUSTFS_CONSOLE_ENABLE: 'true'
+    ports:
+      - '59000:9000'
+      - '59001:9001'
+    volumes:
+      - s3data:/data
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - '51025:1025'
+      - '58025:8025'
+
+volumes:
+  pgdata:
+  s3data:
