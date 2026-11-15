@@ -1,4 +1,6 @@
+import { newId } from '@omb/shared'
 import type {
+  AttachmentInput,
   CreateItemInput,
   ItemDto,
   ItemKind,
@@ -12,6 +14,26 @@ import type {
 } from '@omb/shared'
 
 export type KindCounts = Record<ItemKind | 'ALL', number>
+
+/** Uploads one image for an item (which may not exist yet) and returns it ready to attach. */
+async function upload(itemId: string, file: File): Promise<AttachmentInput> {
+  const id = newId()
+  const mime = file.type as AttachmentInput['mime']
+  const size = await createImageBitmap(file)
+    .then((bmp) => {
+      const s = { width: bmp.width, height: bmp.height }
+      bmp.close()
+      return s
+    })
+    .catch(() => ({ width: undefined, height: undefined }))
+  const { url } = await $fetch<{ url: string }>('/api/v1/uploads', {
+    method: 'POST',
+    body: { itemId, attachmentId: id, mime, sizeBytes: file.size },
+  })
+  const res = await fetch(url, { method: 'PUT', body: file, headers: { 'content-type': mime } })
+  if (!res.ok) throw new Error(`Upload failed: ${res.status}`)
+  return { id, kind: 'IMAGE', mime, ...size }
+}
 
 /** Thin typed wrapper over /api/v1 for items, reminders and tags. */
 export function useItemsApi() {
@@ -31,5 +53,6 @@ export function useItemsApi() {
     updateReminder: (id: string, input: UpdateReminderInput) =>
       $fetch<ReminderDto>(`/api/v1/reminders/${id}`, { method: 'PATCH', body: input }),
     tags: () => $fetch<TagDto[]>('/api/v1/tags'),
+    upload,
   }
 }

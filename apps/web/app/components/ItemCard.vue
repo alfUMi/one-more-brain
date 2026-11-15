@@ -151,6 +151,28 @@ const menu = computed(() => [
       </div>
 
       <div class="flex min-w-0 flex-1 flex-col gap-2">
+        <div v-if="item.attachments.length" class="flex flex-wrap gap-2">
+          <a
+            v-for="a in item.attachments"
+            :key="a.id"
+            :href="a.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            :aria-label="t('inbox.openImage')"
+            class="block overflow-hidden rounded-lg bg-(--omb-surface-muted)"
+            @click.stop
+          >
+            <img
+              :src="a.url"
+              alt=""
+              loading="lazy"
+              :class="[
+                'object-cover',
+                item.attachments.length === 1 ? 'max-h-60 max-w-full' : 'h-[76px] w-28',
+              ]"
+            />
+          </a>
+        </div>
         <div v-if="heading" class="text-[15px] font-semibold break-words">{{ heading }}</div>
         <blockquote
           v-if="item.quote"

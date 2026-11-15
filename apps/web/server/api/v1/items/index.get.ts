@@ -44,7 +44,7 @@ export default defineEventHandler(async (event): Promise<ItemPage> => {
   const page = items.slice(0, query.limit)
   const last = page.at(-1)
   return {
-    items: page.map(toItemDto),
+    items: await Promise.all(page.map(toItemDto)),
     nextCursor: items.length > query.limit && last ? encodeCursor(last.capturedAt, last.id) : null,
   }
 })
@@ -84,7 +84,7 @@ async function search(
   const offset = Math.max(0, Number(cursor?.startsWith('o:') ? cursor.slice(2) : 0) || 0)
   const page = matched.slice(offset, offset + limit)
   return {
-    items: page.map(toItemDto),
+    items: await Promise.all(page.map(toItemDto)),
     nextCursor: offset + limit < matched.length ? `o:${offset + limit}` : null,
   }
 }

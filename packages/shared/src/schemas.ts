@@ -15,6 +15,29 @@ const tagName = z
   .toLowerCase()
   .regex(/^[\p{L}\p{N}_-]{1,40}$/u, 'Tags are 1-40 letters, digits, "-" or "_"')
 
+export const IMAGE_MIMES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'] as const
+export type ImageMime = (typeof IMAGE_MIMES)[number]
+export const MAX_UPLOAD_BYTES = 15 * 1024 * 1024
+
+/** Asks for a presigned upload URL for one attachment of an item that may not exist yet. */
+export const createUploadSchema = z.object({
+  itemId: idSchema,
+  attachmentId: idSchema,
+  mime: z.enum(IMAGE_MIMES),
+  sizeBytes: z.number().int().min(1).max(MAX_UPLOAD_BYTES),
+})
+export type CreateUploadInput = z.input<typeof createUploadSchema>
+
+/** An uploaded file, attached when the item is created. */
+export const attachmentInputSchema = z.object({
+  id: idSchema,
+  kind: z.enum(['IMAGE', 'SCREENSHOT']),
+  mime: z.enum(IMAGE_MIMES),
+  width: z.number().int().positive().max(100_000).optional(),
+  height: z.number().int().positive().max(100_000).optional(),
+})
+export type AttachmentInput = z.input<typeof attachmentInputSchema>
+
 /** A time or recurring reminder. Ids come from the client, like items. */
 export const reminderInputSchema = z
   .object({
@@ -45,13 +68,11 @@ export const createItemSchema = z
     reminder: reminderInputSchema.optional(),
     /** Add to spaced repetition right away. */
     remember: z.boolean().default(false),
+    attachments: z.array(attachmentInputSchema).max(10).default([]),
   })
-  .refine(
-    (item) => item.body || item.quote || item.url || item.kind === 'VOICE' || item.kind === 'IMAGE',
-    {
-      message: 'An item needs text, a quote, a URL or an attachment',
-    },
-  )
+  .refine((item) => item.body || item.quote || item.url || item.attachments.length > 0, {
+    message: 'An item needs text, a quote, a URL or an attachment',
+  })
 export type CreateItemInput = z.input<typeof createItemSchema>
 
 export const updateReminderSchema = z.object({

@@ -1,4 +1,4 @@
-import { createItemSchema, startReview, type ItemDto } from '@omb/shared'
+import { createItemSchema, MAX_UPLOAD_BYTES, startReview, type ItemDto } from '@omb/shared'
 
 /**
  * Creates an item. The id comes from the client, so retries (offline outbox) are safe:
@@ -14,6 +14,18 @@ export default defineEventHandler(async (event): Promise<ItemDto> => {
       throw createError({ statusCode: 409, statusMessage: 'Id taken' })
     return toItemDto(existing)
   }
+
+  // Every listed attachment must already be uploaded, at the key we derive for it.
+  const attachments = await Promise.all(
+    input.attachments.map(async (a) => {
+      const key = storageKey(userId, input.id, a.id, a.mime)
+      const head = await headObject(key)
+      if (!head || head.sizeBytes > MAX_UPLOAD_BYTES) {
+        throw createError({ statusCode: 400, statusMessage: `Attachment ${a.id} is not uploaded` })
+      }
+      return { ...a, storageKey: key, sizeBytes: head.sizeBytes }
+    }),
+  )
 
   try {
     await db.$transaction(async (tx) => {
@@ -32,6 +44,21 @@ export default defineEventHandler(async (event): Promise<ItemDto> => {
         },
       })
       await setItemTags(tx, userId, input.id, input.tags)
+      if (attachments.length) {
+        await tx.attachment.createMany({
+          data: attachments.map((a) => ({
+            id: a.id,
+            userId,
+            itemId: input.id,
+            kind: a.kind,
+            storageKey: a.storageKey,
+            mime: a.mime,
+            sizeBytes: a.sizeBytes,
+            width: a.width ?? null,
+            height: a.height ?? null,
+          })),
+        })
+      }
       if (input.reminder) {
         await tx.reminder.create({
           data: {

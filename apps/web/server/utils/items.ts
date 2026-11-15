@@ -9,6 +9,7 @@ export const itemInclude = {
     orderBy: { fireAt: 'asc' },
   },
   review: { select: { nextAt: true, step: true, graduatedAt: true } },
+  attachments: { where: { deletedAt: null }, orderBy: { createdAt: 'asc' } },
 } satisfies Prisma.ItemInclude
 
 export type ItemWithRelations = Prisma.ItemGetPayload<{ include: typeof itemInclude }>
@@ -26,7 +27,8 @@ export function toReminderDto(r: ItemWithRelations['reminders'][number]): Remind
   }
 }
 
-export function toItemDto(item: ItemWithRelations): ItemDto {
+/** Item for the API, with short-lived URLs for its attachments. */
+export async function toItemDto(item: ItemWithRelations): Promise<ItemDto> {
   return {
     id: item.id,
     kind: item.kind,
@@ -45,7 +47,17 @@ export function toItemDto(item: ItemWithRelations): ItemDto {
     updatedAt: item.updatedAt.toISOString(),
     tags: item.tags.map((t) => ({ name: t.tag.name, suggested: t.suggested })),
     reminders: item.reminders.map(toReminderDto),
-    attachments: [],
+    attachments: await Promise.all(
+      item.attachments.map(async (a) => ({
+        id: a.id,
+        kind: a.kind,
+        mime: a.mime,
+        sizeBytes: a.sizeBytes,
+        width: a.width,
+        height: a.height,
+        url: await presignGet(a.storageKey),
+      })),
+    ),
     review:
       item.review && !item.review.graduatedAt
         ? { nextAt: item.review.nextAt.toISOString(), step: item.review.step }
