@@ -19,3 +19,7 @@ export default createConfigForNuxt({
     files: ['apps/*/app/pages/**/*.vue', 'apps/*/app/layouts/**/*.vue', 'apps/*/app/*.vue'],
     rules: { 'vue/multi-word-component-names': 'off' },
   })
+  .append({
+    // Prettier owns formatting; this rule fights it over `<input />`.
+    rules: { 'vue/html-self-closing': 'off' },
+  })
