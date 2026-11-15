@@ -11,7 +11,8 @@
   "dependencies": {
     "@omb/db": "workspace:*",
     "@omb/shared": "workspace:*",
-    "pg-boss": "^12.38.2"
+    "pg-boss": "^12.38.2",
+    "@omb/notify": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "^1.4.4"

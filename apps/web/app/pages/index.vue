@@ -109,6 +109,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
       </form>
     </header>
 
+    <PushPrompt />
+
     <CaptureBox ref="capture" @optimistic="onOptimistic" @saved="onSaved" @failed="onFailed" />
 
     <div

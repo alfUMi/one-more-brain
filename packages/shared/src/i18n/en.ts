@@ -95,6 +95,21 @@ export default {
     ARCHIVED: 'Archived',
     DONE: 'Done',
   },
+  push: {
+    title: 'Get reminders on time',
+    body: 'Turn on notifications so reminders reach you even when this tab is closed.',
+    enable: 'Turn on',
+    later: 'Not now',
+    enabled: 'Notifications are on',
+    failed: 'Notifications are blocked or unavailable in this browser.',
+  },
+  notify: {
+    untitled: 'Reminder',
+    reminder: 'Reminder · One More Brain',
+    done: 'Done',
+    snooze1h: 'Snooze 1 h',
+    tomorrow: 'Tomorrow',
+  },
   kinds: {
     ALL: 'All',
     TEXT: 'Text',

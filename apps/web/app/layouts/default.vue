@@ -4,6 +4,8 @@ const { user, signOut } = useCurrentUser()
 const route = useRoute()
 const sidebar = useSidebar()
 onMounted(sidebar.refresh)
+// Keep this browser's push subscription registered (it can rotate or move between accounts).
+onMounted(() => void usePush().sync())
 
 const nav = computed(() => [
   { label: t('nav.inbox'), icon: 'i-lucide-inbox', to: '/', count: sidebar.inboxCount.value },

@@ -114,3 +114,21 @@ export const listItemsSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(30),
 })
 export type ListItemsQuery = z.input<typeof listItemsSchema>
+
+export const SNOOZE_PRESETS = ['10m', '1h', 'tonight', 'tomorrow'] as const
+export type SnoozePreset = (typeof SNOOZE_PRESETS)[number]
+
+/** Snooze to a preset (resolved in the user's time zone) or an exact time. */
+export const snoozeSchema = z.union([
+  z.object({ preset: z.enum(SNOOZE_PRESETS) }),
+  z.object({ until: z.coerce.date() }),
+])
+export type SnoozeInput = z.input<typeof snoozeSchema>
+
+/** A browser's Web Push subscription (PushSubscription.toJSON()). */
+export const webPushChannelSchema = z.object({
+  endpoint: z.url().max(2_000),
+  keys: z.object({ p256dh: z.string().min(1).max(200), auth: z.string().min(1).max(100) }),
+  label: z.string().trim().max(100).optional(),
+})
+export type WebPushChannelInput = z.input<typeof webPushChannelSchema>

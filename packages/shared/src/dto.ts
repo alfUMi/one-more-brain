@@ -61,3 +61,17 @@ export interface TagDto {
   name: string
   count: number
 }
+
+/** What the service worker receives in a push message. */
+export interface PushPayload {
+  type: 'reminder'
+  title: string
+  body: string
+  /** Groups notifications: a new one for the same item replaces the old one. */
+  tag: string
+  /** Page to open on click. */
+  url: string
+  reminderId: string
+  itemId: string
+  actions: { action: 'done' | 'snooze-1h' | 'snooze-tomorrow'; title: string }[]
+}
