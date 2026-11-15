@@ -138,6 +138,7 @@ export default {
     gotIt: 'Got it · next in {n} days',
     gotItLast: 'Got it · done for good',
     finishedTitle: 'All reviewed',
+    emptyTitle: 'Nothing to review',
     finishedBody: 'Nothing else is due. Press M on any note to add it.',
     emptyBody: 'No reviews due. Press M (Remember) on a note and it comes back here tomorrow.',
     remember: 'Remember',

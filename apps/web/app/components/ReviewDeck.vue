@@ -115,7 +115,9 @@ async function answer(gotIt: boolean) {
     </template>
 
     <div v-else class="flex flex-col gap-1 rounded-xl bg-(--omb-surface-muted) px-[22px] py-6">
-      <span class="font-semibold">{{ total ? t('review.finishedTitle') : t('review.title') }}</span>
+      <span class="font-semibold">{{
+        total ? t('review.finishedTitle') : t('review.emptyTitle')
+      }}</span>
       <span class="omb-meta">{{ total ? t('review.finishedBody') : t('review.emptyBody') }}</span>
     </div>
   </section>

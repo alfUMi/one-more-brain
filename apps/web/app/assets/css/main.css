@@ -228,12 +228,6 @@ h3 {
     border-radius: 14px;
     background: var(--omb-surface);
   }
-  /* Inverted panel ("Inbox: 7 waiting"): dark on light themes, light on dark. */
-  .omb-panel-inverse {
-    border-color: var(--omb-text);
-    background: var(--omb-text);
-    color: var(--omb-bg);
-  }
 }
 
 /* Settings cards (mockup: Settings › Appearance). */

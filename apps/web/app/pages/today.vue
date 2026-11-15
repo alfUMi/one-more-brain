@@ -93,124 +93,133 @@ const snoozeMenu = (entry: TodayEntry) => [
 
     <PushPrompt />
 
-    <div
-      v-if="data"
-      class="grid grid-cols-[repeat(auto-fit,minmax(min(340px,100%),1fr))] items-start gap-[18px]"
-    >
-      <!-- Reminders -->
-      <section class="omb-panel" aria-labelledby="rem-h">
-        <div class="flex items-center gap-2.5">
-          <h2 id="rem-h" class="text-lg font-semibold">{{ t('today.reminders') }}</h2>
-          <span class="omb-meta">
-            {{ left ? t('today.leftToday', { n: left }) : t('today.allDone') }}
-          </span>
-        </div>
-        <p v-if="!data.reminders.length" class="omb-meta m-0">{{ t('today.noReminders') }}</p>
-        <div v-else>
-          <div
-            v-for="entry in data.reminders"
-            :key="entry.reminder.id"
-            :class="[
-              'flex items-center gap-3.5 border-t border-(--omb-border-muted) py-3',
-              (entry.state === 'done' || entry.state === 'past') && 'opacity-55',
-              entry.state === 'next' && '-mx-[22px] bg-(--omb-rem-bg)/60 px-[22px]',
-            ]"
-          >
-            <span
-              :class="[
-                'w-14 flex-none text-sm font-semibold tabular-nums',
-                entry.state === 'done' || entry.state === 'past'
-                  ? 'text-(--omb-text-muted)'
-                  : 'text-(--omb-rem-text)',
-              ]"
-            >
-              {{ entry.reminder.fireAt ? fmt.time(new Date(entry.reminder.fireAt)) : '' }}
-            </span>
-            <div class="flex min-w-0 flex-1 flex-col gap-[3px]">
-              <span
-                :class="[
-                  'text-[15px] break-words',
-                  entry.state === 'done' && 'line-through',
-                  entry.state === 'next' && 'font-medium',
-                ]"
-              >
-                {{ text(entry) }}
-              </span>
-              <span v-if="entry.state === 'next'" class="omb-meta text-(--omb-rem-text)!">
-                {{ inLabel(entry.reminder.fireAt) }}
-              </span>
-              <span v-else-if="entry.state === 'missed'" class="omb-meta text-(--omb-rem-text)!">
-                {{ t('today.overdue', { when: fmt.when(entry.reminder.fireAt!) }) }}
-              </span>
-              <span v-else-if="entry.reminder.rrule && entry.state !== 'done'" class="omb-meta">
-                {{ fmt.recurrence(entry.reminder.rrule).replace(/, \d\d:\d\d$/, '') }}
-              </span>
-            </div>
-            <span v-if="entry.state === 'done'" class="omb-meta">{{ t('today.done') }}</span>
-            <template
-              v-else-if="
-                entry.reminder.kind === 'TIME' &&
-                (entry.state === 'next' || entry.state === 'missed')
-              "
-            >
-              <UDropdownMenu :items="snoozeMenu(entry)" :content="{ align: 'end' }">
-                <button type="button" class="omb-sm">{{ t('today.snooze') }}</button>
-              </UDropdownMenu>
-              <button type="button" class="omb-sm omb-sm-solid" @click="done(entry)">
-                {{ t('today.done') }}
-              </button>
-            </template>
-            <span
-              v-else-if="entry.item.tags[0] && !entry.reminder.rrule"
-              class="omb-chip omb-chip-tag h-6 text-[12.5px]"
-            >
-              #{{ entry.item.tags[0].name }}
+    <div v-if="data" class="flex flex-col gap-[18px] md:grid md:grid-cols-2 md:items-start">
+      <!-- Two independent columns, so a short panel never leaves a gap under it.
+           On narrow screens the columns dissolve (display: contents) and `order` sets the sequence. -->
+      <div class="contents md:flex md:flex-col md:gap-[18px]">
+        <!-- Reminders -->
+        <section class="omb-panel order-1 md:order-none" aria-labelledby="rem-h">
+          <div class="flex items-center gap-2.5">
+            <h2 id="rem-h" class="text-lg font-semibold">{{ t('today.reminders') }}</h2>
+            <span class="omb-meta">
+              {{ left ? t('today.leftToday', { n: left }) : t('today.allDone') }}
             </span>
           </div>
-        </div>
-      </section>
-
-      <!-- Review -->
-      <ReviewDeck :cards="data.reviews" @answered="sidebar.refresh" />
-
-      <!-- On this day -->
-      <section class="omb-panel" aria-labelledby="otd-h">
-        <h2 id="otd-h" class="text-lg font-semibold">{{ t('today.onThisDay') }}</h2>
-        <p v-if="!data.onThisDay.length" class="omb-meta m-0">{{ t('today.nothingOnThisDay') }}</p>
-        <div
-          v-for="(entry, i) in data.onThisDay"
-          :key="entry.ago"
-          :class="['flex flex-col gap-1', i ? 'border-t border-(--omb-border-muted) pt-3' : 'pt-1']"
-        >
-          <span class="omb-meta">{{ t(`today.ago.${entry.ago}`) }}</span>
-          <span class="text-[15px] break-words">{{ text(entry) }}</span>
-        </div>
-      </section>
-
-      <!-- Inbox summary -->
-      <section class="omb-panel omb-panel-inverse" aria-labelledby="inb-h">
-        <h2 id="inb-h" class="text-lg font-semibold">
-          {{
-            data.inbox.count
-              ? t('today.inboxWaiting', { n: data.inbox.count })
-              : t('inbox.zeroTitle')
-          }}
-        </h2>
-        <p class="m-0 text-[14.5px] leading-normal opacity-80">
-          {{
-            data.inbox.oldestCapturedAt
-              ? t('today.inboxOldest', { when: fmt.relative(data.inbox.oldestCapturedAt) })
-              : t('today.inboxZero')
-          }}
-        </p>
-        <NuxtLink
-          v-if="data.inbox.count"
-          to="/"
-          class="inline-flex h-[38px] items-center self-start rounded-[10px] bg-(--omb-bg) px-4 text-sm font-semibold text-(--omb-text)"
-        >
-          {{ t('today.goToInbox') }}
-        </NuxtLink>
-      </section>
+          <p v-if="!data.reminders.length" class="omb-meta m-0">{{ t('today.noReminders') }}</p>
+          <div v-else>
+            <div
+              v-for="entry in data.reminders"
+              :key="entry.reminder.id"
+              :class="[
+                'flex items-center gap-3.5 border-t border-(--omb-border-muted) py-3',
+                (entry.state === 'done' || entry.state === 'past') && 'opacity-55',
+                entry.state === 'next' && '-mx-[22px] bg-(--omb-rem-bg)/60 px-[22px]',
+              ]"
+            >
+              <span
+                :class="[
+                  'w-14 flex-none text-sm font-semibold tabular-nums',
+                  entry.state === 'done' || entry.state === 'past'
+                    ? 'text-(--omb-text-muted)'
+                    : 'text-(--omb-rem-text)',
+                ]"
+              >
+                {{ entry.reminder.fireAt ? fmt.time(new Date(entry.reminder.fireAt)) : '' }}
+              </span>
+              <div class="flex min-w-0 flex-1 flex-col gap-[3px]">
+                <span
+                  :class="[
+                    'text-[15px] break-words',
+                    entry.state === 'done' && 'line-through',
+                    entry.state === 'next' && 'font-medium',
+                  ]"
+                >
+                  {{ text(entry) }}
+                </span>
+                <span v-if="entry.state === 'next'" class="omb-meta text-(--omb-rem-text)!">
+                  {{ inLabel(entry.reminder.fireAt) }}
+                </span>
+                <span v-else-if="entry.state === 'missed'" class="omb-meta text-(--omb-rem-text)!">
+                  {{ t('today.overdue', { when: fmt.when(entry.reminder.fireAt!) }) }}
+                </span>
+                <span v-else-if="entry.reminder.rrule && entry.state !== 'done'" class="omb-meta">
+                  {{ fmt.recurrence(entry.reminder.rrule).replace(/, \d\d:\d\d$/, '') }}
+                </span>
+              </div>
+              <span v-if="entry.state === 'done'" class="omb-meta">{{ t('today.done') }}</span>
+              <template
+                v-else-if="
+                  entry.reminder.kind === 'TIME' &&
+                  (entry.state === 'next' || entry.state === 'missed')
+                "
+              >
+                <UDropdownMenu :items="snoozeMenu(entry)" :content="{ align: 'end' }">
+                  <button type="button" class="omb-sm">{{ t('today.snooze') }}</button>
+                </UDropdownMenu>
+                <button type="button" class="omb-sm omb-sm-solid" @click="done(entry)">
+                  {{ t('today.done') }}
+                </button>
+              </template>
+              <span
+                v-else-if="entry.item.tags[0] && !entry.reminder.rrule"
+                class="omb-chip omb-chip-tag h-6 text-[12.5px]"
+              >
+                #{{ entry.item.tags[0].name }}
+              </span>
+            </div>
+          </div>
+        </section>
+        <!-- On this day -->
+        <section class="omb-panel order-3 md:order-none" aria-labelledby="otd-h">
+          <h2 id="otd-h" class="text-lg font-semibold">{{ t('today.onThisDay') }}</h2>
+          <p v-if="!data.onThisDay.length" class="omb-meta m-0">
+            {{ t('today.nothingOnThisDay') }}
+          </p>
+          <div
+            v-for="(entry, i) in data.onThisDay"
+            :key="entry.ago"
+            :class="[
+              'flex flex-col gap-1',
+              i ? 'border-t border-(--omb-border-muted) pt-3' : 'pt-1',
+            ]"
+          >
+            <span class="omb-meta">{{ t(`today.ago.${entry.ago}`) }}</span>
+            <span class="text-[15px] break-words">{{ text(entry) }}</span>
+          </div>
+        </section>
+      </div>
+      <div class="contents md:flex md:flex-col md:gap-[18px]">
+        <!-- Review -->
+        <ReviewDeck
+          class="order-2 md:order-none"
+          :cards="data.reviews"
+          @answered="sidebar.refresh"
+        />
+        <!-- Inbox summary -->
+        <section class="omb-panel order-4 md:order-none" aria-labelledby="inb-h">
+          <h2 id="inb-h" class="text-lg font-semibold">
+            {{
+              data.inbox.count
+                ? t('today.inboxWaiting', { n: data.inbox.count })
+                : t('inbox.zeroTitle')
+            }}
+          </h2>
+          <p class="m-0 text-[14.5px] leading-normal text-(--omb-text-toned)">
+            {{
+              data.inbox.oldestCapturedAt
+                ? t('today.inboxOldest', { when: fmt.relative(data.inbox.oldestCapturedAt) })
+                : t('today.inboxZero')
+            }}
+          </p>
+          <NuxtLink
+            v-if="data.inbox.count"
+            to="/"
+            class="inline-flex h-[34px] items-center self-start rounded-[9px] border border-(--omb-accent) px-3.5 text-[13px] font-semibold text-(--omb-accent) hover:bg-(--omb-accent-soft)"
+          >
+            {{ t('today.goToInbox') }}
+          </NuxtLink>
+        </section>
+      </div>
     </div>
   </section>
 </template>
