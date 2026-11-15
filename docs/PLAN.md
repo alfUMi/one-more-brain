@@ -143,24 +143,32 @@ Users choose channels per type in Settings (e.g. reminders → push + Telegram, 
 
 ## 6. Roadmap
 
-Each phase ends with something usable every day.
+Each phase ends with something usable every day. Checked items are done (with the commit that did them); ✅ = phase complete, 🚧 = in progress.
 
-### Phase 0: Foundations
-- Bun workspace monorepo, TypeScript strict, ESLint + Prettier, Vitest, GitHub Actions (lint, typecheck, test).
-- `docker compose` for dev: Postgres, S3 storage (RustFS), Mailpit.
-- `packages/db` (Prisma schema + first migration), `packages/shared` (zod contracts, i18n).
-- Auth: Better Auth with email magic link + Google, a session cookie for web, and bearer tokens for extension/mobile.
-- **Done when:** I can sign in on the local web app and see an empty Inbox.
+### Phase 0: Foundations ✅
+- [x] Bun workspace monorepo, TypeScript strict, ESLint + Prettier, Vitest, GitHub Actions (lint, typecheck, test).
+- [x] `docker compose` for dev: Postgres, S3 storage (RustFS), Mailpit.
+- [x] `packages/db` (Prisma schema + first migration), `packages/shared` (zod contracts, i18n).
+- [x] Auth: Better Auth with email magic link + Google, a session cookie for web, and bearer tokens for extension/mobile.
+- [x] **Done when:** I can sign in on the local web app and see an empty Inbox.
 
-### Phase 1: Web MVP (capture, inbox, reminders)
-- Capture box (text, links, pasted images) with smart capture (chrono-node en/ru, `#tags`).
-- Items API with client-generated UUIDv7 ids (idempotent), attachments via presigned upload to S3 storage.
-- Inbox triage, Library with full-text search (Postgres FTS + trigram), tag management.
-- AI enrichment job: title, tags, reminder-intent fallback, OCR for images (Claude).
-- Time + recurring reminders, worker scanner, Web Push delivery, snooze.
-- PWA + IndexedDB outbox (offline capture). i18n en/ru.
-- Deploy to VPS (Caddy + Docker Compose), nightly off-site Postgres backup.
-- **Done when:** I use it daily on my computer for a week.
+### Phase 1: Web MVP (capture, inbox, reminders) 🚧
+- [x] Smart-capture parser: `#tags`, `!remember`, links, one-off dates (chrono-node en/ru) and recurring phrases → RRULE, all in the user's time zone. `18f3bdd`
+- [x] Items API: create (client UUIDv7, idempotent), get, edit, soft delete, keyset paging, kind counts, tags list. `2ac13e7`
+- [x] Search: Postgres FTS prefix match + trigram substring, ranked with a recency boost. `2ac13e7`
+- [x] Reminder API: add, move, accept AI suggestion, cancel. "Remember" adds a review. `30ee310`
+- [x] Capture box with live reminder/tag chips; Inbox triage cards, remind popover, inline edit/tag, keyboard shortcuts, undo. `30ee310`
+- [x] Browser time zone saved to the profile on first sign-in. `30ee310`
+- [ ] Library page (all items, filter by status/tag/kind, search) and tags in the sidebar.
+- [ ] Attachments: pasted/dropped images, presigned upload to S3 storage, image cards.
+- [ ] Worker (`apps/worker`) with pg-boss and the minute reminder scanner (one-off + recurring).
+- [ ] Web Push delivery (VAPID), notification actions, snooze.
+- [ ] Today view: due reminders (reviews and on-this-day come in Phase 4).
+- [ ] AI enrichment job: title, tags, reminder-intent fallback, OCR for images (Claude).
+- [ ] PWA + IndexedDB outbox (offline capture).
+- [ ] Settings page: appearance, language, time zone.
+- [ ] Deploy to VPS (Caddy + Docker Compose), nightly off-site Postgres backup.
+- [ ] **Done when:** I use it daily on my computer for a week.
 
 ### Phase 2: Browser extension
 - WXT + Vue, MV3. Context menus (selection / page / image), hotkey popup, screenshot.
