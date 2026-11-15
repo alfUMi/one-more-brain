@@ -169,15 +169,15 @@ Each phase ends with something usable every day. Checked items are done (with th
 - [x] Settings page: appearance, language, time zone, notifications on this device. `9d965f9`
 - [x] Deploy setup: app image, `compose.prod.yml` (Caddy TLS, migrate, web, worker, Postgres, RustFS), nightly backup with retention + off-site mirror, GHCR build + SSH rollout workflow, runbook in [DEPLOY.md](./DEPLOY.md). `35a219a`
 - [ ] First deploy to the VPS: server, DNS, `.env`, GitHub deploy variables and secrets (needs the server details).
-- [ ] **Match the web mockups** ([mockups](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL); they are the spec for layout):
-  - [ ] Inbox: right column with "Up next today", "Remember" (reviews due + Start review) and "On this day".
-  - [ ] Inbox: image cards with the thumbnail beside the text, not above it.
-  - [ ] Sidebar: counts on Today and Review; Review enabled.
-  - [ ] Today: grid of panels: Reminders (today's list with done rows struck through, the next one highlighted with "in 25 min", Snooze and Done), Review (card with Forgot / Got it), On this day, Inbox summary ("7 waiting", oldest age, Go to Inbox).
-  - [ ] Review page (sidebar link) with the same review card.
-  - [ ] Settings: own layout with "Back to Inbox" and section tabs: Account, Appearance, Language & region, Reminders & digest, Notifications, Telegram, Devices, Export & data.
-  - [ ] Settings › Appearance: live preview column; "More" with Show keyboard hints and Compact cards.
-  - [ ] Sections whose features come in later phases (Telegram: Phase 3, Export: Phase 7, voice button: Phase 3) keep their place with a "coming in phase N" state.
+- [x] **Match the web mockups** ([mockups](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL); they are the spec for layout):
+  - [x] Inbox: right column with "Up next today", "Remember" (reviews due + Start review) and "On this day". `1b6c675`
+  - [x] Inbox: image cards with the thumbnail beside the text, not above it. `1b6c675`
+  - [x] Sidebar: counts on Today and Review; Review enabled. `1b6c675`
+  - [x] Today: grid of panels: Reminders (today's list with done rows struck through, the next one highlighted with "in 25 min", Snooze and Done), Review (card with Forgot / Got it), On this day, Inbox summary ("7 waiting", oldest age, Go to Inbox). `1b6c675`
+  - [x] Review page (sidebar link) with the same review card. `1b6c675`
+  - [x] Settings: own layout with "Back to Inbox" and section tabs: Account, Appearance, Language & region, Reminders & digest, Notifications, Telegram, Devices, Export & data. `114d802`
+  - [x] Settings › Appearance: live preview column; "More" with Show keyboard hints and Compact cards. `114d802`
+  - [x] Sections whose features come in later phases (Telegram: Phase 3, Export: Phase 7, voice button: Phase 3) keep their place with a "coming in phase N" state. `114d802`
 - [ ] **Done when:** I use it daily on my computer for a week.
 
 ### Phase 2: Browser extension
