@@ -1,0 +1,7 @@
+node_modules
+.nuxt
+.output
+bun.lock
+packages/db/src/generated
+packages/db/prisma/migrations
+docs

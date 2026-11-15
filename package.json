@@ -1,0 +1,33 @@
+{
+  "name": "one-more-brain",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.4.4",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --cwd apps/web dev",
+    "build": "bun run --cwd apps/web build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "bun run --filter '*' typecheck",
+    "test": "vitest run",
+    "db:up": "docker compose -f docker/compose.dev.yml up -d",
+    "db:down": "docker compose -f docker/compose.dev.yml down",
+    "db:generate": "bun run --cwd packages/db generate",
+    "db:migrate": "bun run --cwd packages/db migrate",
+    "db:studio": "bun run --cwd packages/db studio",
+    "postinstall": "bun run db:generate"
+  },
+  "devDependencies": {
+    "@nuxt/eslint-config": "^1.17.0",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "~5.9.3",
+    "vitest": "^5.1.0"
+  }
+}
