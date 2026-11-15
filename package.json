@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "dev": "bun run --cwd apps/web dev",
+    "dev:worker": "bun run --cwd apps/worker dev",
     "build": "bun run --cwd apps/web build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
