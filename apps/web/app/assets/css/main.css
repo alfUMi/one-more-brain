@@ -207,3 +207,31 @@ h3 {
     color: var(--omb-text-muted);
   }
 }
+
+/* Panels from the mockups: Today grid (.omb-panel) and the Inbox side column (.omb-side). */
+@layer components {
+  .omb-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px 22px;
+    border: 1px solid var(--omb-border);
+    border-radius: 16px;
+    background: var(--omb-surface);
+  }
+  .omb-side {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 18px;
+    border: 1px solid var(--omb-border);
+    border-radius: 14px;
+    background: var(--omb-surface);
+  }
+  /* Inverted panel ("Inbox: 7 waiting"): dark on light themes, light on dark. */
+  .omb-panel-inverse {
+    border-color: var(--omb-text);
+    background: var(--omb-text);
+    color: var(--omb-bg);
+  }
+}

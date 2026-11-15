@@ -14,7 +14,12 @@ onMounted(outbox.start)
 const nav = computed(() => [
   { label: t('nav.inbox'), icon: 'i-lucide-inbox', to: '/', count: sidebar.inboxCount.value },
   { label: t('nav.today'), icon: 'i-lucide-sun', to: '/today', count: sidebar.todayCount.value },
-  { label: t('nav.review'), icon: 'i-lucide-refresh-cw', to: '/review', disabled: true },
+  {
+    label: t('nav.review'),
+    icon: 'i-lucide-refresh-cw',
+    to: '/review',
+    count: sidebar.reviewCount.value,
+  },
   { label: t('nav.library'), icon: 'i-lucide-book', to: '/library' },
 ])
 
@@ -39,26 +44,16 @@ const userMenu = computed(() => [
         <span class="font-display text-[17px] font-bold">{{ t('app.name') }}</span>
       </div>
 
-      <template v-for="item in nav" :key="item.to">
-        <span
-          v-if="item.disabled"
-          aria-disabled="true"
-          class="omb-nav cursor-default opacity-50"
-          :title="t('nav.soon')"
-        >
-          <UIcon :name="item.icon" class="size-[18px]" />
-          {{ item.label }}
-        </span>
-        <NuxtLink
-          v-else
-          :to="item.to"
-          :class="['omb-nav', route.path === item.to && !activeTag && 'omb-nav-active']"
-        >
-          <UIcon :name="item.icon" class="size-[18px]" />
-          {{ item.label }}
-          <span v-if="item.count" class="omb-count">{{ item.count }}</span>
-        </NuxtLink>
-      </template>
+      <NuxtLink
+        v-for="item in nav"
+        :key="item.to"
+        :to="item.to"
+        :class="['omb-nav', route.path === item.to && !activeTag && 'omb-nav-active']"
+      >
+        <UIcon :name="item.icon" class="size-[18px]" />
+        {{ item.label }}
+        <span v-if="item.count" class="omb-count">{{ item.count }}</span>
+      </NuxtLink>
 
       <template v-if="topTags.length">
         <div

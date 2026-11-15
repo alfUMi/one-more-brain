@@ -152,8 +152,9 @@ const menu = computed(() => [
         <UIcon :name="kind.icon" class="size-[18px]" />
       </div>
 
-      <div class="flex min-w-0 flex-1 flex-col gap-2">
-        <div v-if="item.attachments.length" class="flex flex-wrap gap-2">
+      <!-- Images sit beside the text (mockup: 112×76 thumbnail on the left). -->
+      <div class="flex min-w-0 flex-1 flex-wrap gap-3.5">
+        <div v-if="item.attachments.length" class="flex flex-none flex-col gap-2">
           <a
             v-for="a in item.attachments"
             :key="a.id"
@@ -164,131 +165,125 @@ const menu = computed(() => [
             class="block overflow-hidden rounded-lg bg-(--omb-surface-muted)"
             @click.stop
           >
-            <img
-              :src="a.url"
-              alt=""
-              loading="lazy"
-              :class="[
-                'object-cover',
-                item.attachments.length === 1 ? 'max-h-60 max-w-full' : 'h-[76px] w-28',
-              ]"
-            />
+            <img :src="a.url" alt="" loading="lazy" class="h-[76px] w-28 object-cover" />
           </a>
         </div>
-        <div v-if="heading" class="text-[15px] font-semibold break-words">{{ heading }}</div>
-        <blockquote
-          v-if="item.quote"
-          class="m-0 rounded-lg bg-(--omb-highlight-quote) px-3 py-2 text-[14.5px] leading-normal text-(--omb-quote-text)"
-        >
-          “{{ item.quote }}”
-        </blockquote>
-
-        <textarea
-          v-if="editing"
-          ref="editor"
-          v-model="draft"
-          :aria-label="t('item.edit')"
-          class="field-sizing-content min-h-[3lh] w-full resize-none rounded-lg border border-(--omb-border) bg-(--omb-surface-muted) px-3 py-2 text-[15px] leading-normal outline-0 focus:border-(--omb-accent)"
-          @keydown="onEditKeydown"
-          @click.stop
-        />
-        <p
-          v-else-if="text"
-          :class="[
-            'm-0 leading-[1.45] break-words whitespace-pre-line',
-            heading ? 'line-clamp-4 text-[14.5px] text-(--omb-quote-text)' : 'text-[15.5px]',
-          ]"
-        >
-          {{ text }}
-        </p>
-        <p
-          v-if="item.extractedText && !editing"
-          class="m-0 line-clamp-3 text-[14px] whitespace-pre-line text-(--omb-quote-text)"
-        >
-          <span class="text-(--omb-text-muted)">{{ t('item.imageText') }}</span>
-          {{ item.extractedText }}
-        </p>
-        <div v-if="editing" class="flex gap-2" @click.stop>
-          <UButton size="sm" @click="commitEdit">{{ t('actions.save') }}</UButton>
-          <UButton size="sm" color="neutral" variant="ghost" @click="editing = false">
-            {{ t('actions.cancel') }}
-          </UButton>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2">
-          <template v-for="r in item.reminders" :key="r.id">
-            <template v-if="r.isAiSuggested">
-              <span class="omb-chip omb-chip-rem-ai">
-                <UIcon name="i-lucide-clock" class="size-3.5" />
-                {{ t('reminder.suggested', { when: fmt.reminder(r) }) }}
-              </span>
-              <button
-                type="button"
-                class="h-[26px] rounded-full bg-(--omb-rem-solid) px-2.5 text-[12.5px] font-semibold text-(--omb-surface)"
-                @click.stop="emit('acceptReminder', r.id)"
-              >
-                {{ t('actions.accept') }}
-              </button>
-            </template>
-            <span v-else class="omb-chip omb-chip-rem group pr-1">
-              <UIcon
-                :name="r.kind === 'RECURRING' ? 'i-lucide-repeat' : 'i-lucide-clock'"
-                class="size-3.5"
-              />
-              {{ fmt.reminder(r) }}
-              <button
-                type="button"
-                :aria-label="t('reminder.remove')"
-                class="flex size-5 items-center justify-center rounded-full opacity-60 hover:bg-black/10 hover:opacity-100"
-                @click.stop="emit('removeReminder', r.id)"
-              >
-                <UIcon name="i-lucide-x" class="size-3" />
-              </button>
-            </span>
-          </template>
-          <span v-if="item.review" class="omb-chip omb-chip-tag">
-            <UIcon name="i-lucide-refresh-cw" class="size-3.5" />
-            {{ t('item.review', { when: fmt.relative(item.review.nextAt) }) }}
-          </span>
-          <NuxtLink
-            v-for="tag in item.tags"
-            :key="tag.name"
-            :to="{ path: '/library', query: { tag: tag.name } }"
-            :class="['omb-chip', tag.suggested ? 'omb-chip-ai' : 'omb-chip-tag']"
-            @click.stop
+        <div class="flex min-w-0 flex-[1_1_220px] flex-col gap-2">
+          <div v-if="heading" class="text-[15px] font-semibold break-words">{{ heading }}</div>
+          <blockquote
+            v-if="item.quote"
+            class="m-0 rounded-lg bg-(--omb-highlight-quote) px-3 py-2 text-[14.5px] leading-normal text-(--omb-quote-text)"
           >
-            #{{ tag.name }}
-          </NuxtLink>
-          <input
-            v-if="tagging"
-            ref="tagInput"
-            v-model="tagDraft"
-            :aria-label="t('item.addTag')"
-            :placeholder="t('item.tagPlaceholder')"
-            class="h-[26px] w-32 rounded-full border border-(--omb-accent) bg-(--omb-surface) px-2.5 text-[13px] outline-0"
-            @keydown="onTagKeydown"
-            @blur="tagging = false"
+            “{{ item.quote }}”
+          </blockquote>
+
+          <textarea
+            v-if="editing"
+            ref="editor"
+            v-model="draft"
+            :aria-label="t('item.edit')"
+            class="field-sizing-content min-h-[3lh] w-full resize-none rounded-lg border border-(--omb-border) bg-(--omb-surface-muted) px-3 py-2 text-[15px] leading-normal outline-0 focus:border-(--omb-accent)"
+            @keydown="onEditKeydown"
             @click.stop
           />
-          <a
-            v-if="item.url && linkLabel"
-            :href="item.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="omb-meta max-w-64 truncate text-(--omb-link-text)! hover:underline"
-            @click.stop
+          <p
+            v-else-if="text"
+            :class="[
+              'm-0 leading-[1.45] break-words whitespace-pre-line',
+              heading ? 'line-clamp-4 text-[14.5px] text-(--omb-quote-text)' : 'text-[15.5px]',
+            ]"
           >
-            {{ linkLabel }}
-          </a>
-          <span v-if="pending" class="omb-meta inline-flex items-center gap-1">
-            <UIcon name="i-lucide-cloud-off" class="size-3.5" />
-            {{ t('offline.pending') }}
-          </span>
-          <span class="omb-meta">
-            <template v-if="hasAiTags">{{ t('item.aiTags') }} · </template>
-            <template v-if="!triage">{{ t(`statuses.${item.status}`) }} · </template>
-            {{ t(`sources.${item.source}`) }} · {{ fmt.relative(item.capturedAt) }}
-          </span>
+            {{ text }}
+          </p>
+          <p
+            v-if="item.extractedText && !editing"
+            class="m-0 line-clamp-3 text-[14px] whitespace-pre-line text-(--omb-quote-text)"
+          >
+            <span class="text-(--omb-text-muted)">{{ t('item.imageText') }}</span>
+            {{ item.extractedText }}
+          </p>
+          <div v-if="editing" class="flex gap-2" @click.stop>
+            <UButton size="sm" @click="commitEdit">{{ t('actions.save') }}</UButton>
+            <UButton size="sm" color="neutral" variant="ghost" @click="editing = false">
+              {{ t('actions.cancel') }}
+            </UButton>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <template v-for="r in item.reminders" :key="r.id">
+              <template v-if="r.isAiSuggested">
+                <span class="omb-chip omb-chip-rem-ai">
+                  <UIcon name="i-lucide-clock" class="size-3.5" />
+                  {{ t('reminder.suggested', { when: fmt.reminder(r) }) }}
+                </span>
+                <button
+                  type="button"
+                  class="h-[26px] rounded-full bg-(--omb-rem-solid) px-2.5 text-[12.5px] font-semibold text-(--omb-surface)"
+                  @click.stop="emit('acceptReminder', r.id)"
+                >
+                  {{ t('actions.accept') }}
+                </button>
+              </template>
+              <span v-else class="omb-chip omb-chip-rem group pr-1">
+                <UIcon
+                  :name="r.kind === 'RECURRING' ? 'i-lucide-repeat' : 'i-lucide-clock'"
+                  class="size-3.5"
+                />
+                {{ fmt.reminder(r) }}
+                <button
+                  type="button"
+                  :aria-label="t('reminder.remove')"
+                  class="flex size-5 items-center justify-center rounded-full opacity-60 hover:bg-black/10 hover:opacity-100"
+                  @click.stop="emit('removeReminder', r.id)"
+                >
+                  <UIcon name="i-lucide-x" class="size-3" />
+                </button>
+              </span>
+            </template>
+            <span v-if="item.review" class="omb-chip omb-chip-tag">
+              <UIcon name="i-lucide-refresh-cw" class="size-3.5" />
+              {{ t('item.review', { when: fmt.relative(item.review.nextAt) }) }}
+            </span>
+            <NuxtLink
+              v-for="tag in item.tags"
+              :key="tag.name"
+              :to="{ path: '/library', query: { tag: tag.name } }"
+              :class="['omb-chip', tag.suggested ? 'omb-chip-ai' : 'omb-chip-tag']"
+              @click.stop
+            >
+              #{{ tag.name }}
+            </NuxtLink>
+            <input
+              v-if="tagging"
+              ref="tagInput"
+              v-model="tagDraft"
+              :aria-label="t('item.addTag')"
+              :placeholder="t('item.tagPlaceholder')"
+              class="h-[26px] w-32 rounded-full border border-(--omb-accent) bg-(--omb-surface) px-2.5 text-[13px] outline-0"
+              @keydown="onTagKeydown"
+              @blur="tagging = false"
+              @click.stop
+            />
+            <a
+              v-if="item.url && linkLabel"
+              :href="item.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="omb-meta max-w-64 truncate text-(--omb-link-text)! hover:underline"
+              @click.stop
+            >
+              {{ linkLabel }}
+            </a>
+            <span v-if="pending" class="omb-meta inline-flex items-center gap-1">
+              <UIcon name="i-lucide-cloud-off" class="size-3.5" />
+              {{ t('offline.pending') }}
+            </span>
+            <span class="omb-meta">
+              <template v-if="hasAiTags">{{ t('item.aiTags') }} · </template>
+              <template v-if="!triage">{{ t(`statuses.${item.status}`) }} · </template>
+              {{ t(`sources.${item.source}`) }} · {{ fmt.relative(item.capturedAt) }}
+            </span>
+          </div>
         </div>
       </div>
 

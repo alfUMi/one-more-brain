@@ -55,6 +55,11 @@ export function useItemsApi() {
       $fetch<ReminderDto>(`/api/v1/reminders/${id}`, { method: 'PATCH', body: input }),
     tags: () => $fetch<TagDto[]>('/api/v1/tags'),
     today: () => $fetch<TodayDto>('/api/v1/today'),
+    answerReview: (itemId: string, gotIt: boolean) =>
+      $fetch<{ nextAt: string; step: number; graduated: boolean }>(
+        `/api/v1/items/${itemId}/review/answer`,
+        { method: 'POST', body: { gotIt } },
+      ),
     snooze: (id: string, input: SnoozeInput) =>
       $fetch<ReminderDto>(`/api/v1/reminders/${id}/snooze`, { method: 'POST', body: input }),
     upload,

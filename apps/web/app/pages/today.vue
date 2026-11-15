@@ -10,16 +10,20 @@ const toast = useToast()
 const sidebar = useSidebar()
 
 const data = ref<TodayDto | null>(null)
-const loading = ref(true)
 
 async function load() {
-  try {
-    data.value = await api.today()
-  } finally {
-    loading.value = false
-  }
+  data.value = await api.today().catch(() => data.value)
+  void sidebar.refresh()
 }
 onMounted(load)
+// "In 25 minutes" and which reminder is next both move with the clock.
+const now = ref(Date.now())
+const ticker = setInterval(() => (now.value = Date.now()), 30_000)
+onBeforeUnmount(() => clearInterval(ticker))
+watch(now, () => {
+  const next = data.value?.reminders.find((r) => r.state === 'next')
+  if (next?.reminder.fireAt && new Date(next.reminder.fireAt).getTime() <= now.value) void load()
+})
 
 const dateLabel = computed(() =>
   new Intl.DateTimeFormat(locale.value, {
@@ -27,50 +31,36 @@ const dateLabel = computed(() =>
     day: 'numeric',
     month: 'long',
     timeZone: fmt.timeZone.value,
-  }).format(new Date()),
+  }).format(new Date(now.value)),
 )
 
-const sections = computed(() =>
-  data.value
-    ? (
-        [
-          { key: 'missed', title: t('today.missed'), entries: data.value.missed },
-          { key: 'today', title: t('today.later'), entries: data.value.today },
-          { key: 'upcoming', title: t('today.upcoming'), entries: data.value.upcoming },
-        ] as const
-      ).filter((s) => s.entries.length)
-    : [],
+const left = computed(
+  () => data.value?.reminders.filter((r) => r.state !== 'done' && r.state !== 'past').length ?? 0,
 )
 
-function text(entry: TodayEntry) {
+function text(entry: { item: TodayEntry['item'] }) {
   const i = entry.item
-  return i.title ?? i.body ?? i.quote ?? i.pageTitle ?? i.url ?? ''
+  return i.title ?? i.body ?? i.quote ?? i.extractedText ?? i.pageTitle ?? i.url ?? ''
 }
 
-/** Missed entries show when they fired; the rest the day and time they will fire. */
-function timeLabel(entry: TodayEntry, section: string) {
-  const at = entry.reminder.fireAt
+function inLabel(at: string | null) {
   if (!at) return ''
-  return section === 'today' ? fmt.time(new Date(at)) : fmt.when(at)
-}
-
-function drop(reminderId: string) {
-  if (!data.value) return
-  for (const key of ['missed', 'today', 'upcoming'] as const) {
-    data.value[key] = data.value[key].filter((e) => e.reminder.id !== reminderId)
-  }
+  const minutes = Math.max(1, Math.round((new Date(at).getTime() - now.value) / 60_000))
+  const unit = (n: number, u: 'minute' | 'hour') =>
+    new Intl.NumberFormat(locale.value, { style: 'unit', unit: u, unitDisplay: 'long' }).format(n)
+  return t('today.in', {
+    time: minutes < 60 ? unit(minutes, 'minute') : unit(Math.round(minutes / 60), 'hour'),
+  })
 }
 
 async function done(entry: TodayEntry) {
-  drop(entry.reminder.id)
   try {
     await api.updateReminder(entry.reminder.id, { status: 'DONE' })
-    toast.add({ title: t('today.done') })
+    toast.add({ title: t('today.markedDone') })
   } catch {
     toast.add({ title: t('toasts.saveFailed'), color: 'error' })
   }
   void load()
-  void sidebar.refresh()
 }
 
 async function snooze(entry: TodayEntry, preset: SnoozePreset) {
@@ -81,7 +71,6 @@ async function snooze(entry: TodayEntry, preset: SnoozePreset) {
     toast.add({ title: t('toasts.saveFailed'), color: 'error' })
   }
   void load()
-  void sidebar.refresh()
 }
 
 const snoozeMenu = (entry: TodayEntry) => [
@@ -94,95 +83,156 @@ const snoozeMenu = (entry: TodayEntry) => [
 </script>
 
 <template>
-  <section class="flex max-w-[820px] flex-col gap-[18px]">
+  <section class="flex flex-col gap-[22px]">
     <header class="flex flex-wrap items-baseline gap-3">
       <h1 class="text-[30px] font-bold">{{ t('today.title') }}</h1>
-      <span class="text-sm text-(--omb-text-muted) first-letter:uppercase">{{ dateLabel }}</span>
+      <span class="text-[15px] text-(--omb-text-muted) first-letter:uppercase">{{
+        dateLabel
+      }}</span>
     </header>
 
     <PushPrompt />
 
     <div
-      v-for="section in sections"
-      :key="section.key"
-      class="flex flex-col gap-1 rounded-[14px] border border-(--omb-border) bg-(--omb-surface) px-[18px] py-4"
+      v-if="data"
+      class="grid grid-cols-[repeat(auto-fit,minmax(min(340px,100%),1fr))] items-start gap-[18px]"
     >
-      <h2
-        :class="[
-          'mb-1 text-base font-semibold',
-          section.key === 'missed' && 'text-(--omb-rem-text)',
-        ]"
-      >
-        {{ section.title }}
-      </h2>
-      <div
-        v-for="entry in section.entries"
-        :key="entry.reminder.id"
-        class="flex items-start gap-3 border-t border-(--omb-border-muted) py-2.5 first-of-type:border-t-0"
-      >
-        <span
-          class="w-[116px] flex-none pt-0.5 text-[13px] font-semibold text-(--omb-rem-text) tabular-nums"
-        >
-          <UIcon
-            v-if="entry.reminder.kind === 'RECURRING'"
-            name="i-lucide-repeat"
-            class="mr-1 size-3 align-[-1px]"
-          />
-          {{ timeLabel(entry, section.key) }}
-        </span>
-        <div class="flex min-w-0 flex-1 flex-col gap-1.5">
-          <NuxtLink
-            :to="{ path: '/library', query: { q: text(entry).slice(0, 60) } }"
-            :title="t('today.open')"
-            class="line-clamp-2 text-[14.5px] break-words hover:underline"
+      <!-- Reminders -->
+      <section class="omb-panel" aria-labelledby="rem-h">
+        <div class="flex items-center gap-2.5">
+          <h2 id="rem-h" class="text-lg font-semibold">{{ t('today.reminders') }}</h2>
+          <span class="omb-meta">
+            {{ left ? t('today.leftToday', { n: left }) : t('today.allDone') }}
+          </span>
+        </div>
+        <p v-if="!data.reminders.length" class="omb-meta m-0">{{ t('today.noReminders') }}</p>
+        <div v-else>
+          <div
+            v-for="entry in data.reminders"
+            :key="entry.reminder.id"
+            :class="[
+              'flex items-center gap-3.5 border-t border-(--omb-border-muted) py-3',
+              (entry.state === 'done' || entry.state === 'past') && 'opacity-55',
+              entry.state === 'next' && '-mx-[22px] bg-(--omb-rem-bg)/60 px-[22px]',
+            ]"
           >
-            {{ text(entry) }}
-          </NuxtLink>
-          <div v-if="entry.item.tags.length" class="flex flex-wrap gap-1.5">
             <span
-              v-for="tag in entry.item.tags"
-              :key="tag.name"
-              :class="['omb-chip h-[22px] text-xs', tag.suggested ? 'omb-chip-ai' : 'omb-chip-tag']"
+              :class="[
+                'w-14 flex-none text-sm font-semibold tabular-nums',
+                entry.state === 'done' || entry.state === 'past'
+                  ? 'text-(--omb-text-muted)'
+                  : 'text-(--omb-rem-text)',
+              ]"
             >
-              #{{ tag.name }}
+              {{ entry.reminder.fireAt ? fmt.time(new Date(entry.reminder.fireAt)) : '' }}
+            </span>
+            <div class="flex min-w-0 flex-1 flex-col gap-[3px]">
+              <span
+                :class="[
+                  'text-[15px] break-words',
+                  entry.state === 'done' && 'line-through',
+                  entry.state === 'next' && 'font-medium',
+                ]"
+              >
+                {{ text(entry) }}
+              </span>
+              <span v-if="entry.state === 'next'" class="omb-meta text-(--omb-rem-text)!">
+                {{ inLabel(entry.reminder.fireAt) }}
+              </span>
+              <span v-else-if="entry.state === 'missed'" class="omb-meta text-(--omb-rem-text)!">
+                {{ t('today.overdue', { when: fmt.when(entry.reminder.fireAt!) }) }}
+              </span>
+              <span v-else-if="entry.reminder.rrule && entry.state !== 'done'" class="omb-meta">
+                {{ fmt.recurrence(entry.reminder.rrule).replace(/, \d\d:\d\d$/, '') }}
+              </span>
+            </div>
+            <span v-if="entry.state === 'done'" class="omb-meta">{{ t('today.done') }}</span>
+            <template
+              v-else-if="
+                entry.reminder.kind === 'TIME' &&
+                (entry.state === 'next' || entry.state === 'missed')
+              "
+            >
+              <UDropdownMenu :items="snoozeMenu(entry)" :content="{ align: 'end' }">
+                <button type="button" class="omb-sm">{{ t('today.snooze') }}</button>
+              </UDropdownMenu>
+              <button type="button" class="omb-sm omb-sm-solid" @click="done(entry)">
+                {{ t('today.done') }}
+              </button>
+            </template>
+            <span
+              v-else-if="entry.item.tags[0] && !entry.reminder.rrule"
+              class="omb-chip omb-chip-tag h-6 text-[12.5px]"
+            >
+              #{{ entry.item.tags[0].name }}
             </span>
           </div>
         </div>
-        <div v-if="entry.reminder.kind === 'TIME'" class="flex flex-none gap-1.5">
-          <UDropdownMenu :items="snoozeMenu(entry)" :content="{ align: 'end' }">
-            <UButton
-              color="neutral"
-              variant="outline"
-              size="sm"
-              icon="i-lucide-alarm-clock"
-              :aria-label="t('today.snooze')"
-              :title="t('today.snooze')"
-            />
-          </UDropdownMenu>
-          <UButton
-            color="neutral"
-            variant="outline"
-            size="sm"
-            icon="i-lucide-check"
-            :aria-label="t('actions.done')"
-            :title="t('actions.done')"
-            @click="done(entry)"
-          />
-        </div>
-      </div>
-    </div>
+      </section>
 
-    <div
-      v-if="!loading && !sections.length"
-      class="flex flex-col items-center gap-2 rounded-[14px] border border-(--omb-border) bg-(--omb-surface) px-6 py-12 text-center"
-    >
-      <span
-        class="mb-1 flex size-10 items-center justify-center rounded-[10px] bg-(--omb-rem-bg) text-(--omb-rem-text)"
-      >
-        <UIcon name="i-lucide-sun" class="size-5" />
-      </span>
-      <h2 class="text-lg font-semibold">{{ t('today.emptyTitle') }}</h2>
-      <p class="max-w-sm text-sm text-(--omb-text-muted)">{{ t('today.emptyBody') }}</p>
+      <!-- Review -->
+      <ReviewDeck :cards="data.reviews" @answered="sidebar.refresh" />
+
+      <!-- On this day -->
+      <section class="omb-panel" aria-labelledby="otd-h">
+        <h2 id="otd-h" class="text-lg font-semibold">{{ t('today.onThisDay') }}</h2>
+        <p v-if="!data.onThisDay.length" class="omb-meta m-0">{{ t('today.nothingOnThisDay') }}</p>
+        <div
+          v-for="(entry, i) in data.onThisDay"
+          :key="entry.ago"
+          :class="['flex flex-col gap-1', i ? 'border-t border-(--omb-border-muted) pt-3' : 'pt-1']"
+        >
+          <span class="omb-meta">{{ t(`today.ago.${entry.ago}`) }}</span>
+          <span class="text-[15px] break-words">{{ text(entry) }}</span>
+        </div>
+      </section>
+
+      <!-- Inbox summary -->
+      <section class="omb-panel omb-panel-inverse" aria-labelledby="inb-h">
+        <h2 id="inb-h" class="text-lg font-semibold">
+          {{
+            data.inbox.count
+              ? t('today.inboxWaiting', { n: data.inbox.count })
+              : t('inbox.zeroTitle')
+          }}
+        </h2>
+        <p class="m-0 text-[14.5px] leading-normal opacity-80">
+          {{
+            data.inbox.oldestCapturedAt
+              ? t('today.inboxOldest', { when: fmt.relative(data.inbox.oldestCapturedAt) })
+              : t('today.inboxZero')
+          }}
+        </p>
+        <NuxtLink
+          v-if="data.inbox.count"
+          to="/"
+          class="inline-flex h-[38px] items-center self-start rounded-[10px] bg-(--omb-bg) px-4 text-sm font-semibold text-(--omb-text)"
+        >
+          {{ t('today.goToInbox') }}
+        </NuxtLink>
+      </section>
     </div>
   </section>
 </template>
+
+<style scoped>
+.omb-sm {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--omb-border);
+  border-radius: 8px;
+  background: var(--omb-surface);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.omb-sm:hover {
+  background: var(--omb-hover);
+}
+.omb-sm-solid,
+.omb-sm-solid:hover {
+  border-color: var(--omb-text);
+  background: var(--omb-text);
+  color: var(--omb-bg);
+}
+</style>

@@ -78,17 +78,35 @@ export interface PushPayload {
   actions: { action: 'done' | 'snooze-1h' | 'snooze-tomorrow'; title: string }[]
 }
 
+/** Where a reminder stands within today (Today › Reminders panel). */
+/** past = a recurring reminder that already fired today and moved on to its next date. */
+export type TodayState = 'done' | 'past' | 'missed' | 'next' | 'later'
+
 export interface TodayEntry {
   reminder: ReminderDto
   item: ItemDto
+  state: TodayState
 }
 
-/** Reminders around today, in the user's time zone. */
+export interface ReviewCardDto {
+  item: ItemDto
+  step: number
+  lapses: number
+  nextAt: string
+}
+
+export interface OnThisDayEntry {
+  ago: 'week' | 'month' | 'year'
+  item: ItemDto
+}
+
+/** Everything the Today page and the Inbox side column show, in the user's time zone. */
 export interface TodayDto {
-  /** One-off reminders that fired in the last week and haven't been dealt with. */
-  missed: TodayEntry[]
-  /** Due between now and the end of today. */
-  today: TodayEntry[]
-  /** Due in the next seven days after today. */
-  upcoming: TodayEntry[]
+  /** Today's reminders in time order, plus missed ones from the last week first. */
+  reminders: TodayEntry[]
+  /** Reviews due now, oldest first (at most 20 cards). */
+  reviews: ReviewCardDto[]
+  reviewsDue: number
+  onThisDay: OnThisDayEntry[]
+  inbox: { count: number; oldestCapturedAt: string | null }
 }
