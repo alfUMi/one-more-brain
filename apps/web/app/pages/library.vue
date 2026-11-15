@@ -99,7 +99,7 @@ const segment = (active: boolean) => [
 </script>
 
 <template>
-  <section class="flex max-w-[820px] flex-col gap-[18px]">
+  <section class="flex flex-col gap-[18px]">
     <header class="flex items-baseline gap-3">
       <h1 class="text-[30px] font-bold">{{ t('library.title') }}</h1>
       <span v-if="filters.q && !loading" class="text-sm text-(--omb-text-muted)">

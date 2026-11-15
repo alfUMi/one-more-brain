@@ -110,16 +110,3 @@ export interface TodayDto {
   onThisDay: OnThisDayEntry[]
   inbox: { count: number; oldestCapturedAt: string | null }
 }
-
-/** Review page side column: when cards come back, and overall numbers. */
-export interface ReviewScheduleDto {
-  dueTomorrow: number
-  /** After tomorrow, within the next 7 days. */
-  dueThisWeek: number
-  dueLater: number
-  /** Cards still being learned. */
-  inReview: number
-  /** Cards past the last interval. */
-  learned: number
-  upcoming: { itemId: string; text: string; nextAt: string }[]
-}
