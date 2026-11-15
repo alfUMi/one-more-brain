@@ -164,7 +164,7 @@ Each phase ends with something usable every day. Checked items are done (with th
 - [x] Worker (`apps/worker`) with pg-boss and the minute reminder scanner (one-off + recurring). `dfc567c`
 - [x] Web Push delivery (VAPID), notification actions, snooze. `91a7af3` (server path tested with a fake push service; first real notification in a browser still to confirm)
 - [x] Today view: missed, later today and next 7 days, with done and snooze (reviews and on-this-day come in Phase 4). `aa66c9b`
-- [ ] AI enrichment job: title, tags, reminder-intent fallback, OCR for images (Claude).
+- [x] AI enrichment job: title, tags, reminder-intent fallback, OCR for images (Claude Haiku 5.5, per-user monthly token budget). `8265a69`
 - [ ] PWA + IndexedDB outbox (offline capture).
 - [ ] Settings page: appearance, language, time zone.
 - [ ] Deploy to VPS (Caddy + Docker Compose), nightly off-site Postgres backup.
