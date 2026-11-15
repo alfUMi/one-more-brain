@@ -160,7 +160,7 @@ Each phase ends with something usable every day. Checked items are done (with th
 - [x] Capture box with live reminder/tag chips; Inbox triage cards, remind popover, inline edit/tag, keyboard shortcuts, undo. `30ee310`
 - [x] Browser time zone saved to the profile on first sign-in. `30ee310`
 - [x] Library page (all items, filter by status/tag/kind, search) and tags in the sidebar. `c9a3000`
-- [ ] Attachments: pasted/dropped images, presigned upload to S3 storage, image cards.
+- [x] Attachments: pasted/dropped images, presigned upload to S3 storage, image cards. `d2d2461`
 - [ ] Worker (`apps/worker`) with pg-boss and the minute reminder scanner (one-off + recurring).
 - [ ] Web Push delivery (VAPID), notification actions, snooze.
 - [ ] Today view: due reminders (reviews and on-this-day come in Phase 4).
