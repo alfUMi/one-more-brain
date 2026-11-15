@@ -1,3 +1,4 @@
+import type { Me } from '~~/server/utils/me'
 import { ACCENTS, THEMES, type Accent, type Theme } from '@omb/shared'
 
 declare module '#app' {
@@ -19,6 +20,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
         ? (me.accent as Accent)
         : 'teal'
       useAppearance().apply(theme, accent)
+      // New accounts start on UTC; adopt the browser's zone so dates in captures mean local time.
+      const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone
+      if (me.timezone === 'UTC' && browserTz && browserTz !== 'UTC') {
+        user.value = await $fetch<Me>('/api/v1/me', {
+          method: 'PATCH',
+          body: { timezone: browserTz },
+        }).catch(() => me)
+      }
       await useNuxtApp().$i18n.setLocale(me.locale === 'ru' ? 'ru' : 'en')
     }
   }

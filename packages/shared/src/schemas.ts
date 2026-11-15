@@ -54,6 +54,14 @@ export const createItemSchema = z
   )
 export type CreateItemInput = z.input<typeof createItemSchema>
 
+export const updateReminderSchema = z.object({
+  fireAt: z.coerce.date().optional(),
+  status: z.enum(['ACTIVE', 'DONE', 'CANCELLED']).optional(),
+  /** Accept an AI-suggested reminder so it starts firing. */
+  accept: z.literal(true).optional(),
+})
+export type UpdateReminderInput = z.input<typeof updateReminderSchema>
+
 export const updateItemSchema = z.object({
   title: z.string().trim().max(300).nullable().optional(),
   body: z.string().max(50_000).nullable().optional(),

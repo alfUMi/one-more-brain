@@ -35,6 +35,20 @@
   --omb-highlight-bg: #fff6d6;
   --omb-highlight-quote: #fff9e3;
   --omb-highlight-text: #7a5a00;
+  --omb-kind-bg: #f0f1f4;
+  --omb-kind-text: #3c414d;
+  --omb-voice-bg: #eaf5ee;
+  --omb-voice-text: #1f6b3a;
+  --omb-image-bg: #f3ecfb;
+  --omb-image-text: #5b2d91;
+  --omb-link-bg: #e8f1fb;
+  --omb-link-text: #1d4f86;
+  --omb-ai-text: #4b5160;
+  --omb-ai-border: #9aa1af;
+  --omb-rem-ai-border: #d9a066;
+  --omb-rem-solid: #8a4300;
+  --omb-kbd-border: #d5d8df;
+  --omb-quote-text: #2a2d35;
 
   /* Brand panel on the sign-in page. */
   --omb-hero-bg: var(--omb-accent);
@@ -63,6 +77,20 @@
   --omb-highlight-bg: #3a3212;
   --omb-highlight-quote: #26241a;
   --omb-highlight-text: #f5d77a;
+  --omb-kind-bg: #232830;
+  --omb-kind-text: #c3c8d2;
+  --omb-voice-bg: #15301f;
+  --omb-voice-text: #8fdcaa;
+  --omb-image-bg: #2a2040;
+  --omb-image-text: #cdb4f5;
+  --omb-link-bg: #172a40;
+  --omb-link-text: #9cc4f0;
+  --omb-ai-text: #c3c8d2;
+  --omb-ai-border: #5b6170;
+  --omb-rem-ai-border: #a0743a;
+  --omb-rem-solid: #ffc97a;
+  --omb-kbd-border: #3a404b;
+  --omb-quote-text: #d6d9e0;
 
   --omb-hero-bg: var(--omb-accent-soft);
   --omb-hero-text: var(--omb-text);
@@ -127,4 +155,55 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
+}
+
+/* Shared bits of the inbox and library. */
+@layer components {
+  .omb-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .omb-chip-tag {
+    background: var(--omb-tag-bg);
+    color: var(--omb-tag-text);
+  }
+  .omb-chip-ai {
+    background: var(--omb-surface);
+    color: var(--omb-ai-text);
+    border: 1px dashed var(--omb-ai-border);
+  }
+  .omb-chip-rem {
+    background: var(--omb-rem-bg);
+    color: var(--omb-rem-text);
+  }
+  .omb-chip-rem-ai {
+    background: var(--omb-surface);
+    color: var(--omb-rem-text);
+    border: 1px dashed var(--omb-rem-ai-border);
+  }
+  .omb-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border: 1px solid var(--omb-kbd-border);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    font: 600 11px/1 var(--font-sans);
+    color: var(--omb-text-toned);
+    background: var(--omb-surface);
+  }
+  .omb-meta {
+    font-size: 12.5px;
+    color: var(--omb-text-muted);
+  }
 }
