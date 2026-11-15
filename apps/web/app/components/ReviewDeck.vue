@@ -2,7 +2,11 @@
 import { REVIEW_INTERVALS_DAYS, type ReviewCardDto } from '@omb/shared'
 
 /** Spaced-repetition cards, one at a time (Today › Review panel and the Review page). */
-const props = defineProps<{ cards: ReviewCardDto[] }>()
+const props = defineProps<{
+  cards: ReviewCardDto[]
+  /** The page already says "Review" (the Review tab), so the panel doesn't repeat it. */
+  hideTitle?: boolean
+}>()
 const emit = defineEmits<{ answered: [] }>()
 
 const { t } = useI18n()
@@ -52,9 +56,13 @@ async function answer(gotIt: boolean) {
 </script>
 
 <template>
-  <section class="omb-panel border-2! border-(--omb-accent)!" aria-labelledby="review-h">
-    <div class="flex items-center gap-2.5">
-      <h2 id="review-h" class="text-lg font-semibold">{{ t('review.title') }}</h2>
+  <section
+    class="omb-panel border-2! border-(--omb-accent)!"
+    :aria-labelledby="hideTitle ? undefined : 'review-h'"
+    :aria-label="hideTitle ? t('review.title') : undefined"
+  >
+    <div v-if="!hideTitle || card" class="flex items-center gap-2.5">
+      <h2 v-if="!hideTitle" id="review-h" class="text-lg font-semibold">{{ t('review.title') }}</h2>
       <span v-if="card" class="omb-meta">
         {{ t('review.cardOf', { i: index + 1, n: total }) }}
       </span>
