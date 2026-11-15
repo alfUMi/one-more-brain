@@ -169,8 +169,10 @@ const snoozeMenu = (entry: TodayEntry) => [
             </div>
           </div>
         </section>
+      </div>
+      <div class="contents md:flex md:flex-col md:gap-[18px]">
         <!-- On this day -->
-        <section class="omb-panel order-3 md:order-none" aria-labelledby="otd-h">
+        <section class="omb-panel order-2 md:order-none" aria-labelledby="otd-h">
           <h2 id="otd-h" class="text-lg font-semibold">{{ t('today.onThisDay') }}</h2>
           <p v-if="!data.onThisDay.length" class="omb-meta m-0">
             {{ t('today.nothingOnThisDay') }}
@@ -187,16 +189,8 @@ const snoozeMenu = (entry: TodayEntry) => [
             <span class="text-[15px] break-words">{{ text(entry) }}</span>
           </div>
         </section>
-      </div>
-      <div class="contents md:flex md:flex-col md:gap-[18px]">
-        <!-- Review -->
-        <ReviewDeck
-          class="order-2 md:order-none"
-          :cards="data.reviews"
-          @answered="sidebar.refresh"
-        />
         <!-- Inbox summary -->
-        <section class="omb-panel order-4 md:order-none" aria-labelledby="inb-h">
+        <section class="omb-panel order-3 md:order-none" aria-labelledby="inb-h">
           <h2 id="inb-h" class="text-lg font-semibold">
             {{
               data.inbox.count

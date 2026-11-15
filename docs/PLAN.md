@@ -173,7 +173,7 @@ Each phase ends with something usable every day. Checked items are done (with th
   - [x] Inbox: right column with "Up next today", "Remember" (reviews due + Start review) and "On this day". `1b6c675`
   - [x] Inbox: image cards with the thumbnail beside the text, not above it. `1b6c675`
   - [x] Sidebar: counts on Today and Review; Review enabled. `1b6c675`
-  - [x] Today: grid of panels: Reminders (today's list with done rows struck through, the next one highlighted with "in 25 min", Snooze and Done), Review (card with Forgot / Got it), On this day, Inbox summary ("7 waiting", oldest age, Go to Inbox). `1b6c675`
+  - [x] Today: panels Reminders (today's list with done rows struck through, the next one highlighted with "in 25 min", Snooze and Done), On this day, Inbox summary ("7 waiting", oldest age, Go to Inbox). `1b6c675` Decision 2026-11-15: no Review panel on Today; reviewing lives only in the Review tab (sidebar badge shows cards due).
   - [x] Review page (sidebar link) with the same review card. `1b6c675`
   - [x] Settings: own layout with "Back to Inbox" and section tabs: Account, Appearance, Language & region, Reminders & digest, Notifications, Telegram, Devices, Export & data. `114d802`
   - [x] Settings › Appearance: live preview column; "More" with Show keyboard hints and Compact cards. `114d802`

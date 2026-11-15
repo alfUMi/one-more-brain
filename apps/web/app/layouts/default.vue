@@ -55,9 +55,10 @@ const userMenu = computed(() => [
         <span v-if="item.count" class="omb-count">{{ item.count }}</span>
       </NuxtLink>
 
-      <template v-if="topTags.length">
+      <!-- One wrapper hides the whole tag list on small screens (.omb-nav sets display itself). -->
+      <div v-if="topTags.length" class="hidden flex-col gap-1 md:flex">
         <div
-          class="hidden px-3 pt-[22px] pb-2 text-[11px] font-semibold tracking-[0.08em] text-(--omb-text-muted) uppercase md:block"
+          class="px-3 pt-[22px] pb-2 text-[11px] font-semibold tracking-[0.08em] text-(--omb-text-muted) uppercase"
         >
           {{ t('nav.tags') }}
         </div>
@@ -65,13 +66,13 @@ const userMenu = computed(() => [
           v-for="tag in topTags"
           :key="tag.name"
           :to="{ path: '/library', query: { tag: tag.name } }"
-          :class="['omb-nav hidden md:flex', activeTag === tag.name && 'omb-nav-active']"
+          :class="['omb-nav', activeTag === tag.name && 'omb-nav-active']"
         >
           <span class="text-(--omb-text-muted)">#</span>
           <span class="truncate">{{ tag.name }}</span>
           <span class="omb-count">{{ tag.count }}</span>
         </NuxtLink>
-      </template>
+      </div>
 
       <div class="hidden flex-1 md:block" />
 
