@@ -147,14 +147,14 @@ Each phase ends with something usable every day.
 
 ### Phase 0: Foundations
 - Bun workspace monorepo, TypeScript strict, ESLint + Prettier, Vitest, GitHub Actions (lint, typecheck, test).
-- `docker compose` for dev: Postgres, MinIO, Mailpit.
+- `docker compose` for dev: Postgres, S3 storage (RustFS), Mailpit.
 - `packages/db` (Prisma schema + first migration), `packages/shared` (zod contracts, i18n).
 - Auth: Better Auth with email magic link + Google, a session cookie for web, and bearer tokens for extension/mobile.
 - **Done when:** I can sign in on the local web app and see an empty Inbox.
 
 ### Phase 1: Web MVP (capture, inbox, reminders)
 - Capture box (text, links, pasted images) with smart capture (chrono-node en/ru, `#tags`).
-- Items API with client-generated UUIDv7 ids (idempotent), attachments via presigned upload to MinIO.
+- Items API with client-generated UUIDv7 ids (idempotent), attachments via presigned upload to S3 storage.
 - Inbox triage, Library with full-text search (Postgres FTS + trigram), tag management.
 - AI enrichment job: title, tags, reminder-intent fallback, OCR for images (Claude).
 - Time + recurring reminders, worker scanner, Web Push delivery, snooze.
@@ -219,5 +219,5 @@ Each phase ends with something usable every day.
 | AI suggestions might be wrong | Never apply silently: AI tags are dimmed until kept, AI reminders appear as an accept chip |
 | Offline sync conflicts | Client-generated ids + append-mostly data. Last-write-wins on edits (single-user scale). |
 | Notifications not delivered (iOS web push, Doze) | Multiple channels. Telegram is a reliable fallback. Delivery log + retries. |
-| Data loss on a single VPS | Nightly `pg_dump` + MinIO sync to off-site object storage, with a monthly restore test |
+| Data loss on a single VPS | Nightly `pg_dump` + object-storage sync to off-site object storage, with a monthly restore test |
 | Apple Developer account ($99/yr) needed for iOS push & TestFlight | Required before Phase 5 iOS work |

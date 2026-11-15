@@ -31,7 +31,7 @@ Related docs: [PLAN.md](./PLAN.md) · [DATA-MODEL.md](./DATA-MODEL.md)
  │ • FTS + pg_trgm       │      │ • minute scanner: due reminders, │
  └───────────────────────┘      │   digests, reviews               │
  ┌───────────────────────┐      │ • senders: WebPush, FCM, Telegram│
- │ MinIO (S3 API)        │◄─────┤                                  │
+ │ S3 storage (RustFS)   │◄─────┤                                  │
  │ audio, images         │      └───────┬──────────────┬───────────┘
  └───────────────────────┘              ▼              ▼
                                  Claude API      Speech-to-text API
@@ -42,7 +42,7 @@ Related docs: [PLAN.md](./PLAN.md) · [DATA-MODEL.md](./DATA-MODEL.md)
 - **A separate worker** for anything slow or scheduled (AI, reminders, digests), so the web process stays fast and
   stateless. It uses the same packages (`db`, `ai`, `shared`).
 - **pg-boss** (a Postgres-backed queue) means no Redis, one fewer service on the VPS.
-- **MinIO** speaks the S3 API, so moving to Cloudflare R2 / S3 later is a config change.
+- **S3-compatible storage** (RustFS: MinIO-compatible; the community MinIO image is no longer published). Code only speaks the S3 API, so moving to Cloudflare R2 / S3 later is a config change.
 
 ## 2. Monorepo layout (Bun workspaces)
 
@@ -85,7 +85,7 @@ one-more-brain/
 | ORM / DB | Prisma + Postgres 17 | `pg_trgm`, generated `tsvector` column via raw SQL |
 | Auth | Better Auth | magic link, Google OAuth, Prisma adapter, bearer plugin |
 | Queue | pg-boss | AI jobs, retries, backoff |
-| Files | MinIO (S3) | presigned PUT/GET, private bucket |
+| Files | S3 API (RustFS on the VPS) | presigned PUT/GET, private bucket |
 | AI | Claude API: `claude-haiku-5-5` | titles, tags, intent/date fallback, OCR via vision |
 | Speech-to-text | Hosted STT API behind an `Stt` interface | e.g. Whisper-class API; self-hosted faster-whisper later |
 | Dates / recurrence | chrono-node (en, ru), rrule, Temporal polyfill or date-fns-tz | all stored in UTC + IANA tz |
@@ -189,7 +189,7 @@ docker compose (prod)
 ├─ web        Nuxt/Nitro on Bun             (stateless, can scale ×N)
 ├─ worker     Bun                           (1 replica; scanners use SKIP LOCKED so ×N is safe)
 ├─ postgres   17 + volume
-├─ minio      + volume
+├─ s3         RustFS + volume
 └─ backup     cron: pg_dump + mc mirror → off-site bucket (nightly), keep 14 dailies / 8 weeklies
 ```
 - CI (GitHub Actions): lint → typecheck → test → build images → push to GHCR → SSH deploy (`compose pull && up -d`).
