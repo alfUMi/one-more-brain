@@ -6,10 +6,125 @@
   --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, sans-serif;
 }
 
-/* Darker accent shade in light mode, lighter in dark mode (matches the mockups). */
+/*
+ * Design tokens from the mockups (docs/PLAN.md, "Visual design").
+ * Our own tokens (--omb-*) feed Nuxt UI's --ui-* variables, so its components match the mockups.
+ * The accent is picked with data-accent on <html>; light/dark comes from the color-mode class.
+ */
 :root {
-  --ui-primary: var(--ui-color-primary-700);
+  --omb-bg: #f5f6f8;
+  --omb-sidebar: #fafafb;
+  --omb-surface: #ffffff;
+  --omb-surface-muted: #f7f8fa;
+  --omb-hover: #eceef2;
+  --omb-border: #e3e5ea;
+  --omb-border-muted: #eef0f3;
+  --omb-text: #15171c;
+  --omb-text-toned: #3c414d;
+  --omb-text-muted: #5b6170;
+  --omb-on-accent: #ffffff;
+
+  --omb-accent: #0f766e;
+  --omb-accent-soft: #e0f2ef;
+
+  /* Fixed tints that never follow the accent. */
+  --omb-rem-bg: #fff3e2;
+  --omb-rem-text: #8a4300;
+  --omb-tag-bg: #eef1fb;
+  --omb-tag-text: #2b3f9e;
+  --omb-highlight-bg: #fff6d6;
+  --omb-highlight-quote: #fff9e3;
+  --omb-highlight-text: #7a5a00;
+
+  /* Brand panel on the sign-in page. */
+  --omb-hero-bg: var(--omb-accent);
+  --omb-hero-text: var(--omb-on-accent);
 }
 .dark {
-  --ui-primary: var(--ui-color-primary-300);
+  --omb-bg: #0f1115;
+  --omb-sidebar: #13161b;
+  --omb-surface: #181b21;
+  --omb-surface-muted: #1f232a;
+  --omb-hover: #1c2027;
+  --omb-border: #2a2f38;
+  --omb-border-muted: #22262e;
+  --omb-text: #e8eaee;
+  --omb-text-toned: #c3c8d2;
+  --omb-text-muted: #a0a6b3;
+  --omb-on-accent: #0f1115;
+
+  --omb-accent: #4fd1c5;
+  --omb-accent-soft: #12302d;
+
+  --omb-rem-bg: #3a2a12;
+  --omb-rem-text: #ffc97a;
+  --omb-tag-bg: #1e2747;
+  --omb-tag-text: #b7c6ff;
+  --omb-highlight-bg: #3a3212;
+  --omb-highlight-quote: #26241a;
+  --omb-highlight-text: #f5d77a;
+
+  --omb-hero-bg: var(--omb-accent-soft);
+  --omb-hero-text: var(--omb-text);
+}
+
+:root[data-accent='violet'] {
+  --omb-accent: #6d4ae0;
+  --omb-accent-soft: #eee9fc;
+}
+:root[data-accent='blue'] {
+  --omb-accent: #2f5bea;
+  --omb-accent-soft: #e8ecfb;
+}
+:root[data-accent='rose'] {
+  --omb-accent: #c0365a;
+  --omb-accent-soft: #fbe7ed;
+}
+:root[data-accent='graphite'] {
+  --omb-accent: #15171c;
+  --omb-accent-soft: #eceef2;
+}
+.dark[data-accent='violet'] {
+  --omb-accent: #b79cff;
+  --omb-accent-soft: #2a2245;
+}
+.dark[data-accent='blue'] {
+  --omb-accent: #7c98ff;
+  --omb-accent-soft: #1e2747;
+}
+.dark[data-accent='rose'] {
+  --omb-accent: #ff8fab;
+  --omb-accent-soft: #3a1a24;
+}
+.dark[data-accent='graphite'] {
+  --omb-accent: #e8eaee;
+  --omb-accent-soft: #2a2f38;
+}
+
+:root,
+.dark {
+  --ui-primary: var(--omb-accent);
+  --ui-bg: var(--omb-surface);
+  --ui-bg-muted: var(--omb-bg);
+  --ui-bg-elevated: var(--omb-surface-muted);
+  --ui-bg-accented: var(--omb-hover);
+  --ui-border: var(--omb-border);
+  --ui-border-muted: var(--omb-border-muted);
+  --ui-border-accented: var(--omb-border);
+  --ui-text: var(--omb-text);
+  --ui-text-highlighted: var(--omb-text);
+  --ui-text-toned: var(--omb-text-toned);
+  --ui-text-muted: var(--omb-text-muted);
+  --ui-text-dimmed: var(--omb-text-muted);
+}
+
+body {
+  background: var(--omb-bg);
+  color: var(--omb-text);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
 }
