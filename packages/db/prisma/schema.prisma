@@ -1,0 +1,342 @@
+// Data model: see docs/DATA-MODEL.md.
+// Ids are UUIDv7. Items, attachments and reminders get their ids on the client (offline capture).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────── Users & auth (Better Auth) ─────────────────────────
+
+model User {
+  id            String    @id @db.Uuid
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  name          String    @default("")
+  image         String?
+  locale        String    @default("en")
+  timezone      String    @default("UTC")
+  digestTime    String    @default("08:00")
+  digestEnabled Boolean   @default(true)
+  lastDigestOn  DateTime? @db.Date
+  theme         String    @default("system")
+  accent        String    @default("teal")
+  prefs         Json      @default("{}")
+  aiTokensMonth Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions Session[]
+  accounts Account[]
+  items    Item[]
+  tags     Tag[]
+  places   Place[]
+  channels Channel[]
+}
+
+model Session {
+  id        String   @id @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @db.Uuid
+  userId                String    @db.Uuid
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @db.Uuid
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+// ───────────────────────── Items ─────────────────────────
+
+enum ItemKind {
+  TEXT
+  LINK
+  HIGHLIGHT
+  VOICE
+  IMAGE
+}
+
+enum ItemStatus {
+  INBOX
+  KEPT
+  ARCHIVED
+  DONE
+}
+
+enum ItemSource {
+  WEB
+  EXTENSION
+  MOBILE
+  SHARE_SHEET
+  TELEGRAM
+}
+
+enum AiStatus {
+  PENDING
+  DONE
+  FAILED
+  SKIPPED
+}
+
+model Item {
+  id         String     @id @db.Uuid
+  userId     String     @db.Uuid
+  kind       ItemKind
+  status     ItemStatus @default(INBOX)
+  source     ItemSource
+  title      String?
+  titleIsAi  Boolean    @default(false)
+  body       String?
+  quote      String?
+  url        String?
+  pageTitle  String?
+  favicon    String?
+  language   String?
+  aiStatus   AiStatus   @default(PENDING)
+  capturedAt DateTime
+  triagedAt  DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  deletedAt  DateTime?
+  /// Generated from title, quote, body, pageTitle and url (see the init migration). Never written by the app.
+  search     Unsupported("tsvector")? @default(dbgenerated())
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags        ItemTag[]
+  attachments Attachment[]
+  reminders   Reminder[]
+  review      Review?
+
+  @@index([userId, status, capturedAt(sort: Desc)])
+  @@index([userId, updatedAt])
+  @@index([userId, capturedAt])
+  @@index([search], type: Gin)
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([body(ops: raw("gin_trgm_ops"))], type: Gin)
+}
+
+enum AttachmentKind {
+  IMAGE
+  SCREENSHOT
+  AUDIO
+}
+
+model Attachment {
+  id          String         @id @db.Uuid
+  userId      String         @db.Uuid
+  itemId      String         @db.Uuid
+  kind        AttachmentKind
+  storageKey  String
+  mime        String
+  sizeBytes   Int
+  width       Int?
+  height      Int?
+  durationSec Float?
+  createdAt   DateTime       @default(now())
+  deletedAt   DateTime?
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId])
+}
+
+// ───────────────────────── Tags ─────────────────────────
+
+model Tag {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @db.Uuid
+  name      String
+  color     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items ItemTag[]
+
+  @@unique([userId, name])
+}
+
+model ItemTag {
+  itemId    String   @db.Uuid
+  tagId     String   @db.Uuid
+  suggested Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, tagId])
+  @@index([tagId])
+}
+
+// ───────────────────────── Reminders ─────────────────────────
+
+enum ReminderKind {
+  TIME
+  RECURRING
+  LOCATION
+}
+
+enum ReminderStatus {
+  ACTIVE
+  FIRED
+  DONE
+  CANCELLED
+}
+
+enum GeoTrigger {
+  ENTER
+  EXIT
+}
+
+model Reminder {
+  id            String         @id @db.Uuid
+  userId        String         @db.Uuid
+  itemId        String         @db.Uuid
+  kind          ReminderKind
+  status        ReminderStatus @default(ACTIVE)
+  fireAt        DateTime?
+  rrule         String?
+  timezone      String
+  untilAt       DateTime?
+  placeId       String?        @db.Uuid
+  geoTrigger    GeoTrigger?
+  isAiSuggested Boolean        @default(false)
+  lastFiredAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+
+  item       Item       @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  place      Place?     @relation(fields: [placeId], references: [id])
+  deliveries Delivery[]
+
+  @@index([status, fireAt])
+  @@index([userId, updatedAt])
+}
+
+model Place {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @db.Uuid
+  label     String
+  latitude  Float
+  longitude Float
+  radiusM   Int       @default(150)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminders Reminder[]
+}
+
+// ───────────────────────── Spaced repetition ─────────────────────────
+
+model Review {
+  itemId         String    @id @db.Uuid
+  userId         String    @db.Uuid
+  step           Int       @default(0)
+  nextAt         DateTime
+  lastReviewedAt DateTime?
+  lapses         Int       @default(0)
+  graduatedAt    DateTime?
+  updatedAt      DateTime  @updatedAt
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([userId, nextAt])
+}
+
+// ───────────────────────── Delivery channels ─────────────────────────
+
+enum ChannelKind {
+  WEB_PUSH
+  EXTENSION_PUSH
+  FCM
+  TELEGRAM
+}
+
+model Channel {
+  id         String      @id @default(uuid(7)) @db.Uuid
+  userId     String      @db.Uuid
+  kind       ChannelKind
+  address    String
+  keys       Json?
+  label      String?
+  enabled    Boolean     @default(true)
+  lastSeenAt DateTime?
+  createdAt  DateTime    @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries Delivery[]
+
+  @@unique([kind, address])
+}
+
+enum DeliveryType {
+  REMINDER
+  DIGEST
+  REVIEW
+}
+
+enum DeliveryStatus {
+  SENT
+  FAILED
+  EXPIRED
+}
+
+model Delivery {
+  id         String         @id @default(uuid(7)) @db.Uuid
+  userId     String         @db.Uuid
+  channelId  String         @db.Uuid
+  reminderId String?        @db.Uuid
+  type       DeliveryType
+  status     DeliveryStatus
+  error      String?
+  sentAt     DateTime       @default(now())
+
+  channel  Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  reminder Reminder? @relation(fields: [reminderId], references: [id], onDelete: SetNull)
+
+  @@index([reminderId])
+  @@index([userId, sentAt])
+}
