@@ -80,6 +80,11 @@ const userMenu = computed(() => [
 
       <div class="hidden flex-1 md:block" />
 
+      <NuxtLink to="/settings" :class="['omb-nav', route.path === '/settings' && 'omb-nav-active']">
+        <UIcon name="i-lucide-settings" class="size-[18px]" />
+        {{ t('nav.settings') }}
+      </NuxtLink>
+
       <UDropdownMenu :items="userMenu" :content="{ side: 'top', align: 'start' }">
         <button type="button" class="omb-nav">
           <UIcon name="i-lucide-circle-user" class="size-[18px] shrink-0" />

@@ -89,5 +89,12 @@ export function usePush() {
     await subscription.unsubscribe()
   }
 
-  return { supported, permission, enable, sync, disable }
+  /** Whether this browser currently holds a push subscription. */
+  async function isSubscribed(): Promise<boolean> {
+    if (!supported) return false
+    const registration = await navigator.serviceWorker.getRegistration()
+    return Boolean(await registration?.pushManager.getSubscription())
+  }
+
+  return { supported, permission, enable, sync, disable, isSubscribed }
 }
