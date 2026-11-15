@@ -58,6 +58,20 @@ function onSaved(item: ItemDto) {
   const i = items.value.findIndex((x) => x.id === item.id)
   if (i !== -1) items.value.splice(i, 1, item)
   void refreshCounts()
+  if (item.aiStatus === 'PENDING') void awaitAi(item.id)
+}
+
+/** The AI pass takes a few seconds; refresh the card once it lands (gives up after ~20 s). */
+async function awaitAi(id: string) {
+  for (let attempt = 0; attempt < 8; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 2500))
+    const fresh = await api.get(id).catch(() => null)
+    if (!fresh || fresh.aiStatus === 'PENDING') continue
+    const i = items.value.findIndex((x) => x.id === id)
+    if (i !== -1) items.value.splice(i, 1, fresh)
+    void refreshCounts()
+    return
+  }
 }
 function onFailed(id: string) {
   items.value = items.value.filter((x) => x.id !== id)

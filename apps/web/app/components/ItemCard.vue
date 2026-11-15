@@ -199,6 +199,13 @@ const menu = computed(() => [
         >
           {{ text }}
         </p>
+        <p
+          v-if="item.extractedText && !editing"
+          class="m-0 line-clamp-3 text-[14px] whitespace-pre-line text-(--omb-quote-text)"
+        >
+          <span class="text-(--omb-text-muted)">{{ t('item.imageText') }}</span>
+          {{ item.extractedText }}
+        </p>
         <div v-if="editing" class="flex gap-2" @click.stop>
           <UButton size="sm" @click="commitEdit">{{ t('actions.save') }}</UButton>
           <UButton size="sm" color="neutral" variant="ghost" @click="editing = false">

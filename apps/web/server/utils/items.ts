@@ -41,6 +41,7 @@ export async function toItemDto(item: ItemWithRelations): Promise<ItemDto> {
     url: item.url,
     pageTitle: item.pageTitle,
     favicon: item.favicon,
+    extractedText: item.extractedText,
     aiStatus: item.aiStatus,
     capturedAt: item.capturedAt.toISOString(),
     triagedAt: item.triagedAt?.toISOString() ?? null,

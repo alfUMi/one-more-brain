@@ -167,6 +167,7 @@ export default {
   },
   item: {
     aiTags: 'Теги предложены ИИ',
+    imageText: 'Текст на картинке:',
     review: 'Повторение {when}',
     edit: 'Изменить заметку',
     addTag: 'Добавить тег',

@@ -42,6 +42,8 @@ export interface ItemDto {
   url: string | null
   pageTitle: string | null
   favicon: string | null
+  /** Text the AI read from the item's images. */
+  extractedText: string | null
   aiStatus: 'PENDING' | 'DONE' | 'FAILED' | 'SKIPPED'
   capturedAt: string
   triagedAt: string | null

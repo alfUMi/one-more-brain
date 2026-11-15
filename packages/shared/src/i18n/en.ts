@@ -164,6 +164,7 @@ export default {
   },
   item: {
     aiTags: 'AI-suggested tags',
+    imageText: 'Text in image:',
     review: 'Review {when}',
     edit: 'Edit note',
     addTag: 'Add a tag',

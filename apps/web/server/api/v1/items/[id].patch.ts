@@ -19,6 +19,11 @@ export default defineEventHandler(async (event): Promise<ItemDto> => {
       },
     })
     if (input.tags) await setItemTags(tx, userId, id, input.tags)
+    // New text deserves a fresh AI pass (title, suggested tags); the user's own title is kept.
+    if (input.body !== undefined && (input.body || null) !== item.body) {
+      await tx.item.update({ where: { id }, data: { aiStatus: 'PENDING' } })
+      await enqueueEnrich(tx, id)
+    }
     // Keeping an item confirms the tags the AI suggested for it.
     if (input.status === 'KEPT') {
       await tx.itemTag.updateMany({

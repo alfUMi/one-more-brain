@@ -128,6 +128,7 @@ function localCopy(input: CreateItemInput, previews: string[]): ItemDto {
     url: input.url ?? null,
     pageTitle: null,
     favicon: null,
+    extractedText: null,
     aiStatus: 'PENDING',
     capturedAt: now,
     triagedAt: null,

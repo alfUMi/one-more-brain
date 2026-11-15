@@ -11,17 +11,17 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1169.0",
-    "@aws-sdk/s3-request-presigner": "^3.1169.0",
     "@iconify-json/lucide": "^1.2.155",
     "@iconify-json/simple-icons": "^1.2.102",
     "@nuxt/ui": "^4.12.0",
     "@nuxtjs/i18n": "^10.6.0",
     "@omb/db": "workspace:*",
     "@omb/shared": "workspace:*",
+    "@omb/storage": "workspace:*",
     "better-auth": "^1.7.25",
     "nodemailer": "^10.5.0",
     "nuxt": "^4.6.4",
+    "pg-boss": "12.38.2",
     "tailwindcss": "^4.1.0",
     "zod": "^4.6.7"
   },

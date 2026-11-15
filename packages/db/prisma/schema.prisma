@@ -27,6 +27,8 @@ model User {
   accent        String    @default("teal")
   prefs         Json      @default("{}")
   aiTokensMonth Int       @default(0)
+  /// Month ("2026-11") that aiTokensMonth counts; a new month starts the count again.
+  aiMonth       String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -117,27 +119,29 @@ enum AiStatus {
 }
 
 model Item {
-  id         String     @id @db.Uuid
-  userId     String     @db.Uuid
-  kind       ItemKind
-  status     ItemStatus @default(INBOX)
-  source     ItemSource
-  title      String?
-  titleIsAi  Boolean    @default(false)
-  body       String?
-  quote      String?
-  url        String?
-  pageTitle  String?
-  favicon    String?
-  language   String?
-  aiStatus   AiStatus   @default(PENDING)
-  capturedAt DateTime
-  triagedAt  DateTime?
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  deletedAt  DateTime?
-  /// Generated from title, quote, body, pageTitle and url (see the init migration). Never written by the app.
-  search     Unsupported("tsvector")? @default(dbgenerated())
+  id            String                   @id @db.Uuid
+  userId        String                   @db.Uuid
+  kind          ItemKind
+  status        ItemStatus               @default(INBOX)
+  source        ItemSource
+  title         String?
+  titleIsAi     Boolean                  @default(false)
+  body          String?
+  quote         String?
+  url           String?
+  pageTitle     String?
+  favicon       String?
+  language      String?
+  /// Text the AI read from the item's images (OCR). Searchable.
+  extractedText String?
+  aiStatus      AiStatus                 @default(PENDING)
+  capturedAt    DateTime
+  triagedAt     DateTime?
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+  deletedAt     DateTime?
+  /// Generated from title, quote, body, extractedText, pageTitle and url (see migrations). Never written by the app.
+  search        Unsupported("tsvector")? @default(dbgenerated())
 
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   tags        ItemTag[]

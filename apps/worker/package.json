@@ -9,10 +9,12 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@omb/ai": "workspace:*",
     "@omb/db": "workspace:*",
+    "@omb/notify": "workspace:*",
     "@omb/shared": "workspace:*",
-    "pg-boss": "^12.38.2",
-    "@omb/notify": "workspace:*"
+    "@omb/storage": "workspace:*",
+    "pg-boss": "^12.38.2"
   },
   "devDependencies": {
     "@types/bun": "^1.4.4"

@@ -1,0 +1,20 @@
+{
+  "name": "@omb/storage",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1169.0",
+    "@aws-sdk/s3-request-presigner": "^3.1169.0",
+    "@omb/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6"
+  }
+}

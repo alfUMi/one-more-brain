@@ -72,6 +72,7 @@ export default defineEventHandler(async (event): Promise<ItemDto> => {
           },
         })
       }
+      await enqueueEnrich(tx, input.id)
       if (input.remember) {
         const review = startReview(new Date())
         await tx.review.create({
