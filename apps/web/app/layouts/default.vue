@@ -9,7 +9,7 @@ onMounted(() => void usePush().sync())
 
 const nav = computed(() => [
   { label: t('nav.inbox'), icon: 'i-lucide-inbox', to: '/', count: sidebar.inboxCount.value },
-  { label: t('nav.today'), icon: 'i-lucide-sun', to: '/today', disabled: true },
+  { label: t('nav.today'), icon: 'i-lucide-sun', to: '/today', count: sidebar.todayCount.value },
   { label: t('nav.review'), icon: 'i-lucide-refresh-cw', to: '/review', disabled: true },
   { label: t('nav.library'), icon: 'i-lucide-book', to: '/library' },
 ])

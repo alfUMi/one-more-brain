@@ -8,7 +8,9 @@ import type {
   ListItemsQuery,
   ReminderDto,
   ReminderInput,
+  SnoozeInput,
   TagDto,
+  TodayDto,
   UpdateItemInput,
   UpdateReminderInput,
 } from '@omb/shared'
@@ -53,6 +55,9 @@ export function useItemsApi() {
     updateReminder: (id: string, input: UpdateReminderInput) =>
       $fetch<ReminderDto>(`/api/v1/reminders/${id}`, { method: 'PATCH', body: input }),
     tags: () => $fetch<TagDto[]>('/api/v1/tags'),
+    today: () => $fetch<TodayDto>('/api/v1/today'),
+    snooze: (id: string, input: SnoozeInput) =>
+      $fetch<ReminderDto>(`/api/v1/reminders/${id}/snooze`, { method: 'POST', body: input }),
     upload,
   }
 }

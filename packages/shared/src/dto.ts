@@ -75,3 +75,18 @@ export interface PushPayload {
   itemId: string
   actions: { action: 'done' | 'snooze-1h' | 'snooze-tomorrow'; title: string }[]
 }
+
+export interface TodayEntry {
+  reminder: ReminderDto
+  item: ItemDto
+}
+
+/** Reminders around today, in the user's time zone. */
+export interface TodayDto {
+  /** One-off reminders that fired in the last week and haven't been dealt with. */
+  missed: TodayEntry[]
+  /** Due between now and the end of today. */
+  today: TodayEntry[]
+  /** Due in the next seven days after today. */
+  upcoming: TodayEntry[]
+}

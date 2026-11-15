@@ -95,6 +95,18 @@ export default {
     ARCHIVED: 'Archived',
     DONE: 'Done',
   },
+  today: {
+    title: 'Today',
+    missed: 'Missed',
+    later: 'Later today',
+    upcoming: 'Next 7 days',
+    emptyTitle: 'Nothing due',
+    emptyBody: 'Reminders you set show up here, and as notifications when they are due.',
+    snooze: 'Snooze',
+    snoozed: 'Snoozed until {when}',
+    done: 'Reminder done',
+    open: 'Show in library',
+  },
   push: {
     title: 'Get reminders on time',
     body: 'Turn on notifications so reminders reach you even when this tab is closed.',
