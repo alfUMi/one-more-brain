@@ -1,0 +1,120 @@
+# Production stack. Run from the deploy directory on the VPS (see docs/DEPLOY.md):
+#   docker compose -f compose.prod.yml up -d
+name: one-more-brain
+
+x-app: &app
+  image: ${APP_IMAGE:-ghcr.io/alfumi/one-more-brain:latest}
+  env_file: .env
+  environment:
+    DATABASE_URL: postgresql://omb:${POSTGRES_PASSWORD}@postgres:5432/omb
+    S3_ENDPOINT: http://s3:9000
+    S3_PUBLIC_ENDPOINT: https://files.${DOMAIN}
+    BETTER_AUTH_URL: https://${DOMAIN}
+  restart: unless-stopped
+
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [web, s3]
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: omb
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: omb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U omb']
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+
+  s3:
+    image: rustfs/rustfs:latest
+    environment:
+      RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${S3_SECRET_KEY}
+      RUSTFS_CONSOLE_ENABLE: 'false'
+    volumes:
+      - s3data:/data
+    restart: unless-stopped
+
+  # Applies Prisma migrations, then exits; web and worker start only after it succeeds.
+  migrate:
+    <<: *app
+    command: ['bun', 'run', '--cwd', 'packages/db', 'migrate:deploy']
+    restart: 'no'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    <<: *app
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'bun',
+          '-e',
+          "fetch('http://localhost:3000/api/v1/auth/providers').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  worker:
+    <<: *app
+    command: ['bun', 'apps/worker/src/index.ts']
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  backup:
+    build:
+      context: .
+      dockerfile: backup.Dockerfile
+    environment:
+      DATABASE_URL: postgresql://omb:${POSTGRES_PASSWORD}@postgres:5432/omb
+      S3_BUCKET: ${S3_BUCKET:-omb}
+      OFFSITE_BUCKET: ${OFFSITE_BUCKET:-}
+      # rclone remotes: "local" is the RustFS bucket, "offsite" any S3-compatible storage.
+      RCLONE_CONFIG_LOCAL_TYPE: s3
+      RCLONE_CONFIG_LOCAL_PROVIDER: Other
+      RCLONE_CONFIG_LOCAL_ENDPOINT: http://s3:9000
+      RCLONE_CONFIG_LOCAL_ACCESS_KEY_ID: ${S3_ACCESS_KEY}
+      RCLONE_CONFIG_LOCAL_SECRET_ACCESS_KEY: ${S3_SECRET_KEY}
+      RCLONE_CONFIG_OFFSITE_TYPE: s3
+      RCLONE_CONFIG_OFFSITE_PROVIDER: ${OFFSITE_PROVIDER:-Other}
+      RCLONE_CONFIG_OFFSITE_ENDPOINT: ${OFFSITE_ENDPOINT:-}
+      RCLONE_CONFIG_OFFSITE_REGION: ${OFFSITE_REGION:-auto}
+      RCLONE_CONFIG_OFFSITE_ACCESS_KEY_ID: ${OFFSITE_ACCESS_KEY:-}
+      RCLONE_CONFIG_OFFSITE_SECRET_ACCESS_KEY: ${OFFSITE_SECRET_KEY:-}
+    volumes:
+      - backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  s3data:
+  backups:
+  caddy_data:
+  caddy_config:

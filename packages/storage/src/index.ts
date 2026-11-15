@@ -13,18 +13,28 @@ import type { ImageMime } from '@omb/shared'
 /** S3-compatible object storage (RustFS on the VPS). Private bucket; access only via presigned URLs. */
 const bucket = process.env.S3_BUCKET ?? 'omb'
 
-export const s3 = new S3Client({
-  endpoint: process.env.S3_ENDPOINT,
-  region: process.env.S3_REGION ?? 'us-east-1',
-  forcePathStyle: true,
-  credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY ?? '',
-    secretAccessKey: process.env.S3_SECRET_KEY ?? '',
-  },
-  // Plain presigned PUTs; not every S3-compatible server understands the SDK's default checksums.
-  requestChecksumCalculation: 'WHEN_REQUIRED',
-  responseChecksumValidation: 'WHEN_REQUIRED',
-})
+function client(endpoint: string | undefined) {
+  return new S3Client({
+    endpoint,
+    region: process.env.S3_REGION ?? 'us-east-1',
+    forcePathStyle: true,
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY ?? '',
+      secretAccessKey: process.env.S3_SECRET_KEY ?? '',
+    },
+    // Plain presigned PUTs; not every S3-compatible server understands the SDK's default checksums.
+    requestChecksumCalculation: 'WHEN_REQUIRED',
+    responseChecksumValidation: 'WHEN_REQUIRED',
+  })
+}
+
+/** Server-side calls use the internal endpoint (e.g. http://s3:9000 inside Docker). */
+export const s3 = client(process.env.S3_ENDPOINT)
+/**
+ * Presigned URLs are opened by browsers, so they are signed for the public endpoint
+ * (e.g. https://files.example.com). Same as S3_ENDPOINT in development.
+ */
+const s3Public = process.env.S3_PUBLIC_ENDPOINT ? client(process.env.S3_PUBLIC_ENDPOINT) : s3
 
 const EXTENSIONS: Record<ImageMime, string> = {
   'image/png': 'png',
@@ -41,14 +51,14 @@ export function storageKey(userId: string, itemId: string, attachmentId: string,
 
 export function presignPut(key: string, mime: string, sizeBytes: number) {
   return getSignedUrl(
-    s3,
+    s3Public,
     new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: mime, ContentLength: sizeBytes }),
     { expiresIn: 15 * 60 },
   )
 }
 
 export function presignGet(key: string) {
-  return getSignedUrl(s3, new GetObjectCommand({ Bucket: bucket, Key: key }), {
+  return getSignedUrl(s3Public, new GetObjectCommand({ Bucket: bucket, Key: key }), {
     expiresIn: 60 * 60,
   })
 }

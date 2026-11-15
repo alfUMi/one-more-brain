@@ -190,7 +190,7 @@ docker compose (prod)
 ├─ worker     Bun                           (1 replica; scanners use SKIP LOCKED so ×N is safe)
 ├─ postgres   17 + volume
 ├─ s3         RustFS + volume
-└─ backup     cron: pg_dump + mc mirror → off-site bucket (nightly), keep 14 dailies / 8 weeklies
+└─ backup     cron: pg_dump + rclone mirror → off-site bucket (nightly), keep 14 dailies / 8 weeklies
 ```
 - CI (GitHub Actions): lint → typecheck → test → build images → push to GHCR → SSH deploy (`compose pull && up -d`).
 - Migrations: `prisma migrate deploy` runs as a one-shot service before `web`/`worker` start.

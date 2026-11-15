@@ -1,0 +1,13 @@
+# TLS certificates are issued automatically for both names (point both DNS records at the VPS).
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy web:3000
+}
+
+# Object storage for presigned uploads and downloads from the browser (S3_PUBLIC_ENDPOINT).
+files.{$DOMAIN} {
+	request_body {
+		max_size 20MB
+	}
+	reverse_proxy s3:9000
+}
