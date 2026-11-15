@@ -45,8 +45,8 @@ export function usePush() {
   )
 
   async function subscribe(): Promise<boolean> {
-    const registration = await navigator.serviceWorker.register('/sw.js')
-    await navigator.serviceWorker.ready
+    await registerServiceWorker()
+    const registration = await navigator.serviceWorker.ready
     const { publicKey } = await $fetch<{ publicKey: string | null }>('/api/v1/push/key')
     if (!publicKey) return false
     const subscription =
@@ -79,7 +79,7 @@ export function usePush() {
 
   async function disable() {
     if (!supported) return
-    const registration = await navigator.serviceWorker.getRegistration('/sw.js')
+    const registration = await navigator.serviceWorker.getRegistration()
     const subscription = await registration?.pushManager.getSubscription()
     if (!subscription) return
     await $fetch('/api/v1/push/subscriptions', {

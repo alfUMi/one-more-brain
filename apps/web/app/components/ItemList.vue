@@ -16,6 +16,7 @@ const actions = useItemActions(items, {
 
 type Panel = 'editing' | 'tagging' | 'remind'
 
+const { pendingIds } = useOutbox()
 const selectedId = ref<string | null>(null)
 /** Which item has its editor, tag input or remind popover open. */
 const panels = reactive<Record<Panel, string | null>>({
@@ -63,7 +64,8 @@ function onKeydown(e: KeyboardEvent) {
   if (e.key === 'ArrowDown' || e.key === 'j') return void (e.preventDefault(), move(1))
   if (e.key === 'ArrowUp') return void (e.preventDefault(), move(-1))
   const item = selected.value
-  if (!item) return
+  // Not on the server yet (offline capture): nothing to act on until it syncs.
+  if (!item || pendingIds.value.includes(item.id)) return
   const handlers: Record<string, () => void> = {
     e: () => setPanel('editing', item.id, true),
     '#': () => setPanel('tagging', item.id, true),

@@ -18,8 +18,7 @@ import type {
 export type KindCounts = Record<ItemKind | 'ALL', number>
 
 /** Uploads one image for an item (which may not exist yet) and returns it ready to attach. */
-async function upload(itemId: string, file: File): Promise<AttachmentInput> {
-  const id = newId()
+async function upload(itemId: string, file: Blob, id: string = newId()): Promise<AttachmentInput> {
   const mime = file.type as AttachmentInput['mime']
   const size = await createImageBitmap(file)
     .then((bmp) => {

@@ -107,6 +107,11 @@ export default {
     done: 'Reminder done',
     open: 'Show in library',
   },
+  offline: {
+    banner: "You're offline. New notes are saved on this device and sync when you're back.",
+    pending: 'Waiting to sync',
+    rejected: 'A note could not be saved',
+  },
   push: {
     title: 'Get reminders on time',
     body: 'Turn on notifications so reminders reach you even when this tab is closed.',

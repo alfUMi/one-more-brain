@@ -26,6 +26,8 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const fmt = useFormat()
+/** Still on this device only: no server actions until it syncs. */
+const pending = computed(() => useOutbox().pendingIds.value.includes(props.item.id))
 
 const KIND_STYLE: Record<ItemKind, { icon: string; bg: string; fg: string }> = {
   TEXT: { icon: 'i-lucide-align-left', bg: 'var(--omb-kind-bg)', fg: 'var(--omb-kind-text)' },
@@ -278,6 +280,10 @@ const menu = computed(() => [
           >
             {{ linkLabel }}
           </a>
+          <span v-if="pending" class="omb-meta inline-flex items-center gap-1">
+            <UIcon name="i-lucide-cloud-off" class="size-3.5" />
+            {{ t('offline.pending') }}
+          </span>
           <span class="omb-meta">
             <template v-if="hasAiTags">{{ t('item.aiTags') }} · </template>
             <template v-if="!triage">{{ t(`statuses.${item.status}`) }} · </template>
@@ -286,7 +292,7 @@ const menu = computed(() => [
         </div>
       </div>
 
-      <UDropdownMenu :items="menu" :content="{ align: 'end' }">
+      <UDropdownMenu v-if="!pending" :items="menu" :content="{ align: 'end' }">
         <UButton
           icon="i-lucide-ellipsis"
           color="neutral"
@@ -300,7 +306,7 @@ const menu = computed(() => [
     </div>
 
     <div
-      v-if="selected"
+      v-if="selected && !pending"
       role="toolbar"
       :aria-label="t('inbox.triage')"
       class="flex flex-wrap gap-1.5 border-t border-(--omb-border-muted) pt-3"

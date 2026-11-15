@@ -4,20 +4,20 @@ import {
   MAX_UPLOAD_BYTES,
   newId,
   parseCapture,
+  type AttachmentInput,
   type CreateItemInput,
   type ItemDto,
 } from '@omb/shared'
 
 const emit = defineEmits<{
-  /** Fired right away with a local copy, before the server answers. */
+  /** Fired right away with a local copy; the outbox reports when the server has it. */
   optimistic: [item: ItemDto]
-  saved: [item: ItemDto]
   failed: [id: string]
 }>()
 
 const { t } = useI18n()
 const fmt = useFormat()
-const api = useItemsApi()
+const outbox = useOutbox()
 const toast = useToast()
 
 const text = ref('')
@@ -114,73 +114,30 @@ function buildInput(): CreateItemInput | null {
   }
 }
 
-function localCopy(input: CreateItemInput, previews: string[]): ItemDto {
-  const now = new Date().toISOString()
-  return {
-    id: input.id,
-    kind: input.kind,
-    status: 'INBOX',
-    source: input.source,
-    title: null,
-    titleIsAi: false,
-    body: input.body ?? null,
-    quote: null,
-    url: input.url ?? null,
-    pageTitle: null,
-    favicon: null,
-    extractedText: null,
-    aiStatus: 'PENDING',
-    capturedAt: now,
-    triagedAt: null,
-    updatedAt: now,
-    tags: (input.tags ?? []).map((name) => ({ name, suggested: false })),
-    reminders: input.reminder
-      ? [
-          {
-            id: input.reminder.id,
-            itemId: input.id,
-            kind: input.reminder.kind,
-            status: 'ACTIVE',
-            fireAt: (input.reminder.fireAt as Date).toISOString(),
-            rrule: input.reminder.rrule ?? null,
-            timezone: input.reminder.timezone,
-            isAiSuggested: false,
-          },
-        ]
-      : [],
-    attachments: previews.map((url) => ({
-      id: url,
-      kind: 'IMAGE' as const,
-      mime: 'image/png',
-      sizeBytes: 0,
-      width: null,
-      height: null,
-      url,
-    })),
-    review: null,
-  }
-}
-
 async function save() {
   const input = buildInput()
   if (!input) return
   const draft = text.value
   const draftImages = images.value
+  const files = draftImages.map((i) => ({
+    attachmentId: newId(),
+    mime: i.file.type as AttachmentInput['mime'],
+    blob: i.file as Blob,
+  }))
+  input.attachments = files.map((f) => ({ id: f.attachmentId, kind: 'IMAGE', mime: f.mime }))
   text.value = ''
   images.value = []
   dismissed.value = null
   emit(
     'optimistic',
-    localCopy(
+    localItem(
       input,
       draftImages.map((i) => i.preview),
     ),
   )
   try {
-    input.attachments = await Promise.all(draftImages.map((i) => api.upload(input.id, i.file)))
-    emit('saved', await api.create(input))
-    // Let the server copy load before dropping the local previews.
-    setTimeout(() => draftImages.forEach((i) => URL.revokeObjectURL(i.preview)), 5000)
+    // Stored on this device first; it syncs now, or as soon as the connection is back.
+    await outbox.capture(input, files)
   } catch {
     emit('failed', input.id)
     text.value = draft
