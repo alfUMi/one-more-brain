@@ -15,3 +15,12 @@ export const ACCENT_COLORS: Record<Accent, { light: string; dark: string }> = {
   rose: { light: '#C0365A', dark: '#FF8FAB' },
   graphite: { light: '#15171C', dark: '#E8EAEE' },
 }
+
+/** Soft accent backgrounds (selected nav item, chips), as in main.css. */
+export const ACCENT_SOFT: Record<Accent, { light: string; dark: string }> = {
+  teal: { light: '#E0F2EF', dark: '#12302D' },
+  violet: { light: '#EEE9FC', dark: '#2A2245' },
+  blue: { light: '#E8ECFB', dark: '#1E2747' },
+  rose: { light: '#FBE7ED', dark: '#3A1A24' },
+  graphite: { light: '#ECEEF2', dark: '#2A2F38' },
+}

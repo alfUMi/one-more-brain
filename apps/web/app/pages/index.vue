@@ -70,6 +70,7 @@ async function mergePending() {
 
 const sidebar = useSidebar()
 const fmt = useFormat()
+const { prefs } = useProfile()
 /** Side column: up next today, reviews due, on this day. */
 const today = ref<TodayDto | null>(null)
 async function refreshCounts() {
@@ -268,7 +269,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
       </div>
 
       <footer
-        v-if="items.length"
+        v-if="items.length && prefs.keyboardHints"
         class="hidden flex-wrap items-center gap-3.5 text-[12.5px] text-(--omb-text-muted) md:flex"
       >
         <span

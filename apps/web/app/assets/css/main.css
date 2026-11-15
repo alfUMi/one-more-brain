@@ -235,3 +235,20 @@ h3 {
     color: var(--omb-bg);
   }
 }
+
+/* Settings cards (mockup: Settings › Appearance). */
+@layer components {
+  .omb-card {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 22px 24px;
+    border: 1px solid var(--omb-border);
+    border-radius: 16px;
+    background: var(--omb-surface);
+  }
+  .omb-hint {
+    font-size: 13px;
+    color: var(--omb-text-muted);
+  }
+}

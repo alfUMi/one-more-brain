@@ -26,6 +26,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const fmt = useFormat()
+const { prefs } = useProfile()
 /** Still on this device only: no server actions until it syncs. */
 const pending = computed(() => useOutbox().pendingIds.value.includes(props.item.id))
 
@@ -136,10 +137,15 @@ const menu = computed(() => [
 <template>
   <article
     :class="[
-      'flex flex-col gap-3 rounded-[14px] bg-(--omb-surface) px-[18px] py-4 transition-colors',
+      'flex flex-col rounded-[14px] bg-(--omb-surface) transition-colors',
+      prefs.compactCards ? 'omb-compact gap-2' : 'gap-3',
       selected
-        ? 'border-2 border-(--omb-accent) px-[17px] py-[15px]'
-        : 'border border-(--omb-border)',
+        ? prefs.compactCards
+          ? 'border-2 border-(--omb-accent) px-[13px] py-[9px]'
+          : 'border-2 border-(--omb-accent) px-[17px] py-[15px]'
+        : prefs.compactCards
+          ? 'border border-(--omb-border) px-3.5 py-2.5'
+          : 'border border-(--omb-border) px-[18px] py-4',
     ]"
     :aria-current="selected || undefined"
     @click="emit('select')"
@@ -314,21 +320,29 @@ const menu = computed(() => [
         :class="['omb-act', a.status === 'KEPT' && triage && 'omb-act-primary']"
         @click="emit('status', a.status)"
       >
-        {{ t(a.label) }} <span class="omb-kbd">{{ a.key }}</span>
+        {{ t(a.label) }} <span v-if="prefs.keyboardHints" class="omb-kbd">{{ a.key }}</span>
       </button>
       <RemindPopover v-model:open="remindOpen" @pick="emit('remind', $event)">
         <button type="button" class="omb-act">
-          {{ t('actions.remind') }} <span class="omb-kbd">R</span>
+          {{ t('actions.remind') }} <span v-if="prefs.keyboardHints" class="omb-kbd">R</span>
         </button>
       </RemindPopover>
       <button type="button" class="omb-act" @click="emit('remember')">
-        {{ t('actions.remember') }} <span class="omb-kbd">M</span>
+        {{ t('actions.remember') }} <span v-if="prefs.keyboardHints" class="omb-kbd">M</span>
       </button>
     </div>
   </article>
 </template>
 
 <style scoped>
+/* Compact cards (Settings › Appearance › More): smaller type, tighter spacing. */
+.omb-compact :deep(p),
+.omb-compact :deep(blockquote) {
+  font-size: 14px;
+}
+.omb-compact .omb-act {
+  height: 30px;
+}
 .omb-act {
   display: inline-flex;
   align-items: center;

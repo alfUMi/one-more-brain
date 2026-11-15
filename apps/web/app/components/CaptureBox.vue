@@ -228,6 +228,16 @@ function onKeydown(e: KeyboardEvent) {
         class="hidden"
         @change="onPick"
       />
+      <!-- Voice notes arrive in phase 3 (web recorder + transcription); the button keeps its place. -->
+      <UButton
+        icon="i-lucide-mic"
+        color="neutral"
+        variant="outline"
+        disabled
+        :aria-label="t('inbox.recordVoice')"
+        :title="t('inbox.recordVoiceSoon')"
+        class="size-9 justify-center rounded-[10px]"
+      />
       <UButton
         icon="i-lucide-image"
         color="neutral"

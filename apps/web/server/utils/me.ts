@@ -1,3 +1,4 @@
+import type { UiPrefs } from '@omb/shared'
 import type { H3Event } from 'h3'
 
 /** The signed-in user's id, or a 401. Works with the session cookie and with bearer tokens. */
@@ -18,6 +19,7 @@ export const meSelect = {
   digestEnabled: true,
   theme: true,
   accent: true,
+  prefs: true,
 } as const
 
 export type Me = {
@@ -31,4 +33,5 @@ export type Me = {
   digestEnabled: boolean
   theme: string
   accent: string
+  prefs: UiPrefs
 }

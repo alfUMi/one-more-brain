@@ -91,7 +91,15 @@ export const updateItemSchema = z.object({
 })
 export type UpdateItemInput = z.input<typeof updateItemSchema>
 
+/** Small UI preferences kept in User.prefs and synced across devices. */
+export const uiPrefsSchema = z.object({
+  keyboardHints: z.boolean().optional(),
+  compactCards: z.boolean().optional(),
+})
+export type UiPrefs = z.infer<typeof uiPrefsSchema>
+
 export const updateMeSchema = z.object({
+  prefs: uiPrefsSchema.optional(),
   name: z.string().trim().max(100).optional(),
   locale: z.enum(['en', 'ru']).optional(),
   timezone: timeZone.optional(),
