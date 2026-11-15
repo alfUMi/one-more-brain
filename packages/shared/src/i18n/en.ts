@@ -1,0 +1,30 @@
+export default {
+  app: { name: 'One More Brain' },
+  nav: {
+    inbox: 'Inbox',
+    today: 'Today',
+    review: 'Review',
+    library: 'Library',
+    settings: 'Settings',
+  },
+  auth: {
+    title: 'Sign in',
+    subtitle: 'A second brain that remembers for you.',
+    email: 'Email',
+    emailPlaceholder: 'you@example.com',
+    sendLink: 'Email me a sign-in link',
+    google: 'Continue with Google',
+    or: 'or',
+    checkEmail: 'Check your inbox',
+    checkEmailBody: 'We sent a sign-in link to {email}. It expires in 10 minutes.',
+    useAnother: 'Use another email',
+    signOut: 'Sign out',
+    error: 'Something went wrong. Please try again.',
+  },
+  inbox: {
+    title: 'Inbox',
+    emptyTitle: 'Your inbox is empty',
+    emptyBody: 'Capture anything: a thought, a link, a highlight. It lands here first.',
+    capturePlaceholder: 'Type a thought… dates and #tags are picked up automatically',
+  },
+} as const
