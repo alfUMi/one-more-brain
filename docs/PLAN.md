@@ -181,14 +181,14 @@ Each phase ends with something usable every day. Checked items are done (with th
 - [ ] **Done when:** I use it daily on my computer for a week.
 
 ### Phase 2: Browser extension 🚧
-- [ ] Sign-in hand-off: `/auth/extension` in the web app issues a per-device bearer session and sends it to an allow-listed extension id (no login form in the extension); it shows up in Settings › Devices.
-- [ ] `apps/extension`: WXT + Vue 3, MV3, stable dev id, theme and accent from the profile.
-- [ ] Quick capture popup (`Ctrl/Cmd+Shift+K`) as in the [mockup](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL): smart-capture chips, "Attach this page", screenshot button, Save ⏎.
-- [ ] Context menus: Save highlight, Save page, Save image, Screenshot to Brain (quote, URL, page title, favicon).
-- [ ] In-page "Saved to Inbox" toast with Add note and Undo.
-- [ ] Offline outbox in the extension service worker (IndexedDB, retried on an alarm).
-- [ ] Reminder notifications in the extension (Web Push to its service worker, Done / Snooze buttons).
-- [ ] CI builds and zips the extension.
+- [x] Sign-in hand-off: `/auth/extension` in the web app issues a per-device bearer session and sends it to an allow-listed extension id (no login form in the extension); it shows up in Settings › Devices. `22f2d04`
+- [x] `apps/extension`: WXT + Vue 3, MV3, stable dev id, theme and accent from the profile. `ef8817f`
+- [x] Quick capture popup (`Ctrl/Cmd+Shift+K`) as in the [mockup](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL): smart-capture chips, "Attach this page", screenshot button, Save ⏎. `ef8817f`
+- [x] Context menus: Save highlight, Save page, Save image, Screenshot to Brain (quote, URL, page title, favicon). Images a site won't let us download are saved as a link. `ef8817f`
+- [x] In-page "Saved to Inbox" toast with Add note and Undo. `ef8817f`
+- [x] Offline outbox in the extension service worker (IndexedDB, retried on an alarm). `ef8817f`
+- [x] Reminder notifications in the extension (Web Push to its service worker, Done / Snooze buttons). `ef8817f` (subscription registers; first real reminder in the extension still to confirm)
+- [x] CI builds and zips the extension (artifact on each run; install steps in [DEPLOY.md](./DEPLOY.md) §6). `ef8817f`
 - [ ] **Done when:** saving a highlight takes one right-click and shows up in the web Inbox.
 
 ### Phase 3: Telegram bot + voice
