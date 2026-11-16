@@ -217,19 +217,21 @@ Telegram is postponed (Phase 3), so the digest goes out as a push notification f
 
 ### Phase 5: Mobile app 🚧
 Started 2026-11-16, ahead of Phase 3. Spec: the "Mobile · Capture" and "Mobile · Inbox swipe triage" artboards (light + dark) and the new mobile artboards below ([mockups](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL)).
-- [ ] Mockups for the mobile screens that had no artboard: Inbox list view, Hold for more, Remind sheet, Today, Review, Library, Settings, Sign in, Share sheet. Approved by the owner before building.
-- [ ] `packages/app-layer`: Nuxt layer with the composables both apps need (items API, outbox, profile, appearance, format, item actions), moved out of `apps/web`; web keeps working.
-- [ ] `apps/mobile`: Nuxt 4 SPA + `@nuxtjs/ionic` + Capacitor, iOS and Android projects, app id, icons + splash, theme and accent from the profile.
-- [ ] Sign in: Sign in screen → in-app browser → `/auth/mobile` issues a per-device bearer session → deep link `onemorebrain://auth?token=…` → secure storage. Shows up in Settings › Devices.
-- [ ] Capture tab: capture box with live chips, Save to Inbox, Photo (camera / gallery), Paste link, "Just captured" with the sync state. "Hold to talk" keeps its place with a "Phase 3" state; the location chip comes in Phase 6.
-- [ ] Inbox tab: swipe card stack (right = keep, left = archive, hold = more), Archive / Remind / Remember / Keep row, "3 of 7" progress, List view, Remind sheet, Hold for more actions.
-- [ ] Today tab and Review screen.
-- [ ] Library tab: search, status / kind filters, tags.
-- [ ] Settings screen (opened from the gear on Capture).
-- [ ] Offline: local cache for Inbox, Today and Library, outbox through `packages/api-client`, sync on resume and when the network comes back.
-- [ ] Push: FCM sender in `packages/notify` (Android, and iOS through APNs), reminders and the digest with Done / Snooze / Got it / Forgot actions, Delivery records.
-- [ ] Share sheet: Android intent filter (text, links, images) first, then the iOS Share Extension (native target, App Group hand-off).
-- [ ] CI builds an Android debug APK; install steps in [DEPLOY.md](./DEPLOY.md).
+- [x] Mockups for the mobile screens that had no artboard: Inbox list view, Hold for more, Remind sheet, Today, Review, Library, Settings, Sign in, Share sheet. Approved by the owner 2026-11-17.
+- [x] ~~`packages/app-layer`~~ Dropped: `@nuxtjs/ionic` is pinned to Ionic 8 / Capacitor 7, so mobile is plain Vite + Vue + Ionic 9 + Capacitor 8 instead of Nuxt. Web and mobile share `packages/shared` and `packages/api-client` (new typed bearer client `createApiClient`). `63ea490`
+- [x] `apps/mobile`: Vue 3 + Ionic + Capacitor 8, Android and iOS projects, app id `app.onemorebrain.mobile`, icons + splash, theme and accent from the profile. `9c04b63` `6c43fef`
+- [x] Sign in (PKCE style): Sign in screen → Google in the in-app browser or an email link → `/auth/mobile` gives a one-time code → `onemorebrain://auth?code=…` → code + verifier traded for a bearer token in secure storage. Shows up in Settings › Devices as "Mobile app · <phone>". Tested on the Android emulator. `be09263` `9c04b63`
+- [x] Capture tab: capture box with live chips, Save to Inbox, Photo (camera / gallery), Paste link, "Just captured" with the sync state. "Hold to talk" says "phase 3"; the location chip comes in Phase 6. `9c04b63`
+- [x] Inbox tab: swipe card stack (right = keep, left = archive, hold = more), Archive / Remind / Remember / Keep row, "3 of 7" progress, List view with swipe rows, Remind sheet, Hold for more actions, Undo. `9c04b63`
+- [x] Today tab and Review screen (Review is opened from the "to review" row on Today). `9c04b63`
+- [x] Library tab: search, status / kind filters, tags, infinite scroll. `9c04b63`
+- [x] Note screen (not in the mockups, needed to act on a note): text, link, images, reminders (add, accept AI, remove), tags, Remember, status, share, delete. `9c04b63`
+- [x] Settings screen (gear on Capture): account (name editable, email, sign out), theme light / dark / system and accent (saved to the profile, synced), language and time zone, digest on/off, time and test send, notifications, devices (sign out other devices), later phases labelled. `9c04b63`
+- [x] Offline: cached Inbox, Today, Library and notes (Capacitor Preferences), outbox with images in the app's data folder through `packages/api-client`, sync on start, resume, network back and every 30 s. `9c04b63` (not yet tried in airplane mode on a phone)
+- [ ] Push: FCM sender in `packages/notify`, worker sends reminders and the digest to phones with Delivery records, app registers its token and handles Done / Snooze / Got it / Forgot (iOS buttons; on Android a tap opens the right screen). Code done `be09263` `6c43fef`; needs a Firebase project and keys ([DEPLOY.md](./DEPLOY.md) §7) and a first real notification.
+- [x] Share sheet on Android: text, links and images from any app open "Save to Brain" (also on a cold start). Tested on the emulator. `6c43fef`
+- [ ] Share sheet on iOS: Share Extension target with an App Group (needs the Apple Developer account).
+- [x] CI builds an Android debug APK (artifact `one-more-brain-android-debug`); install steps in [DEPLOY.md](./DEPLOY.md) §7. `dcd7171`
 - [ ] **Done when:** shipped to my own phone (TestFlight / internal track) and used daily.
 
 ### Phase 6: Location reminders
