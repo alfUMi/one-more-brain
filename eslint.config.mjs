@@ -26,6 +26,11 @@ export default createConfigForNuxt({
     rules: { 'vue/multi-word-component-names': 'off' },
   })
   .append({
+    // Ionic's web components use the native `slot` attribute (slot="fixed", slot="bottom").
+    files: ['apps/mobile/**/*.vue'],
+    rules: { 'vue/no-deprecated-slot-attribute': 'off' },
+  })
+  .append({
     // Prettier owns formatting; this rule fights it over `<input />`.
     rules: { 'vue/html-self-closing': 'off' },
   })

@@ -384,6 +384,7 @@ export default {
     back: 'Back',
     retry: 'Try again',
     close: 'Close',
+    kind: { TEXT: 'Text', LINK: 'Link', HIGHLIGHT: 'Highlight', VOICE: 'Voice', IMAGE: 'Photo' },
     tabs: { capture: 'Capture', inbox: 'Inbox', today: 'Today', library: 'Library' },
     signIn: {
       tagline: 'Dump things in. Get them back when they matter.',

@@ -1,0 +1,311 @@
+@import './tokens.css';
+
+html,
+body {
+  background: var(--omb-bg);
+  color: var(--omb-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display,
+h1,
+h2,
+h3 {
+  font-family: 'Space Grotesk', 'Inter Variable', sans-serif;
+}
+
+/* Page header from the mockups: big title, then meta, then actions on the right. */
+.omb-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(var(--ion-safe-area-top, 0px) + 12px) 20px 8px;
+}
+.omb-header h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 26px;
+}
+.omb-header .meta {
+  font-size: 14px;
+  color: var(--omb-text-muted);
+}
+.grow {
+  flex-grow: 1;
+}
+
+.omb-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--omb-accent);
+  font: 500 16px var(--ion-font-family);
+}
+
+.omb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--omb-border);
+  border-radius: 14px;
+  background: var(--omb-surface);
+  color: var(--omb-text);
+  font: 600 16px var(--ion-font-family);
+}
+.omb-btn:disabled {
+  opacity: 0.5;
+}
+.omb-btn-primary {
+  border-color: var(--omb-accent);
+  background: var(--omb-accent);
+  color: var(--omb-on-accent);
+}
+.omb-btn-dark {
+  border-color: var(--omb-inverse-bg);
+  background: var(--omb-inverse-bg);
+  color: var(--omb-inverse-text);
+}
+.omb-btn-sm {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.omb-btn-ghost {
+  border-color: transparent;
+  background: transparent;
+}
+.omb-btn-danger {
+  color: var(--omb-danger);
+}
+
+.omb-card {
+  background: var(--omb-surface);
+  border: 1px solid var(--omb-border);
+  border-radius: 14px;
+}
+.omb-panel {
+  background: var(--omb-surface);
+  border: 1px solid var(--omb-border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.omb-panel h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.omb-meta {
+  font-size: 12.5px;
+  color: var(--omb-text-muted);
+}
+.omb-hint {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--omb-text-muted);
+  margin: 0;
+}
+
+/* Chips: amber = reminder, blue = tag, dashed = AI suggestion, accent = remember. */
+.omb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.omb-chip-sm {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+.omb-chip-rem {
+  background: var(--omb-rem-bg);
+  color: var(--omb-rem-text);
+}
+.omb-chip-tag {
+  background: var(--omb-tag-bg);
+  color: var(--omb-tag-text);
+}
+.omb-chip-ai {
+  background: transparent;
+  color: var(--omb-ai-text);
+  border: 1px dashed var(--omb-ai-border);
+}
+.omb-chip-accent {
+  background: var(--omb-accent-soft);
+  color: var(--omb-accent);
+}
+.omb-chip-place {
+  background: var(--omb-voice-bg);
+  color: var(--omb-voice-text);
+}
+.omb-chip button {
+  display: flex;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  margin-right: -2px;
+}
+
+.omb-segment {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--omb-segment);
+  border-radius: 10px;
+}
+.omb-segment button {
+  flex: 1;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: 600 13px var(--ion-font-family);
+  color: var(--omb-text-toned);
+}
+.omb-segment button[aria-pressed='true'] {
+  background: var(--omb-surface);
+  color: var(--omb-text);
+  box-shadow: 0 1px 2px rgba(21, 23, 28, 0.12);
+}
+
+.omb-input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--omb-border);
+  border-radius: 12px;
+  background: var(--omb-surface);
+  color: var(--omb-text);
+  font: 500 16px var(--ion-font-family);
+  outline: 0;
+}
+.omb-input:focus {
+  border: 2px solid var(--omb-accent);
+  padding: 0 13px;
+}
+textarea.omb-input {
+  padding: 12px 14px;
+  line-height: 1.4;
+  resize: none;
+}
+textarea.omb-input:focus {
+  padding: 11px 13px;
+}
+.omb-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--omb-text-toned);
+}
+
+.omb-banner {
+  margin: 0 16px 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--omb-rem-bg);
+  color: var(--omb-rem-text);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.omb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 48px 24px;
+  color: var(--omb-text-muted);
+}
+.omb-empty h2 {
+  margin: 0;
+  color: var(--omb-text);
+  font-size: 20px;
+}
+.omb-empty p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Bottom sheets (Remind, Share, edit): rounded top, grabber. */
+ion-modal.omb-sheet {
+  --border-radius: 24px;
+  --background: var(--omb-surface);
+}
+ion-toast.omb-toast {
+  --background: var(--omb-inverse-bg);
+  --color: var(--omb-inverse-text);
+  --button-color: var(--omb-accent-soft);
+  --border-radius: 12px;
+}
+ion-toast.omb-toast-error {
+  --background: var(--omb-danger);
+}
+ion-action-sheet {
+  --button-color: var(--omb-text);
+}
+ion-tab-bar {
+  height: 60px;
+}
+ion-tab-button {
+  font: 500 11px var(--ion-font-family);
+}
+ion-tab-button.tab-selected {
+  font-weight: 700;
+}
+ion-badge.omb-badge {
+  --background: var(--omb-badge);
+  --color: #ffffff;
+  font-size: 10.5px;
+  min-width: 18px;
+}
+
+/* Sheets as tall as their content. */
+ion-modal.omb-auto-sheet {
+  --height: auto;
+}
+ion-modal.omb-auto-sheet .ion-page {
+  position: relative;
+  display: block;
+  contain: content;
+}
+ion-modal.omb-auto-sheet .sheet-body {
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 18px 20px calc(var(--ion-safe-area-bottom, 0px) + 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}

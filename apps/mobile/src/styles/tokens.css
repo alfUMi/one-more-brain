@@ -1,0 +1,159 @@
+/*
+ * Design tokens from the mockups (same names and values as the web app's main.css).
+ * The accent comes from data-accent on <html>; dark from the `dark` class (Settings › Appearance).
+ */
+:root {
+  --omb-bg: #f5f6f8;
+  --omb-surface: #ffffff;
+  --omb-surface-muted: #f7f8fa;
+  --omb-hover: #eceef2;
+  --omb-segment: #e9ebef;
+  --omb-border: #e3e5ea;
+  --omb-border-muted: #eef0f3;
+  --omb-text: #15171c;
+  --omb-text-toned: #3c414d;
+  --omb-text-muted: #5b6170;
+  --omb-on-accent: #ffffff;
+  --omb-tabbar: #ffffff;
+  --omb-danger: #b42318;
+  --omb-badge: #c2410c;
+  --omb-scrim: rgba(15, 17, 21, 0.45);
+
+  --omb-accent: #0f766e;
+  --omb-accent-soft: #e0f2ef;
+
+  --omb-keep: #1f7a45;
+  --omb-on-keep: #ffffff;
+  --omb-archive: #5b6170;
+  --omb-rem-bg: #fff1dc;
+  --omb-rem-text: #8a4300;
+  --omb-rem-row: #fff8ee;
+  --omb-tag-bg: #eef1fb;
+  --omb-tag-text: #2b3f9e;
+  --omb-highlight-bg: #fff6d6;
+  --omb-highlight-quote: #fff9e3;
+  --omb-highlight-text: #7a5a00;
+  --omb-kind-bg: #f0f1f4;
+  --omb-kind-text: #3c414d;
+  --omb-voice-bg: #e6f4ec;
+  --omb-voice-text: #1f6b3a;
+  --omb-image-bg: #f1ecff;
+  --omb-image-text: #5b3cc4;
+  --omb-link-bg: #eef1fb;
+  --omb-link-text: #2b3f9e;
+  --omb-link: #2f5bea;
+  --omb-ai-text: #4b5160;
+  --omb-ai-border: #9aa1af;
+  --omb-quote-text: #2a2d35;
+  --omb-inverse-bg: #15171c;
+  --omb-inverse-text: #ffffff;
+  --omb-inverse-muted: #c9ccd4;
+}
+
+:root.dark {
+  --omb-bg: #0f1115;
+  --omb-surface: #1c1f26;
+  --omb-surface-muted: #181b21;
+  --omb-hover: #232830;
+  --omb-segment: #23272f;
+  --omb-border: #2e333c;
+  --omb-border-muted: #262a32;
+  --omb-text: #e8eaee;
+  --omb-text-toned: #c3c8d2;
+  --omb-text-muted: #a0a6b3;
+  --omb-on-accent: #0f1115;
+  --omb-tabbar: #13161b;
+  --omb-danger: #ff8a80;
+  --omb-badge: #e0662f;
+  --omb-scrim: rgba(0, 0, 0, 0.6);
+
+  --omb-accent: #4fd1c5;
+  --omb-accent-soft: #12302d;
+
+  --omb-keep: #3fb56a;
+  --omb-on-keep: #0f1115;
+  --omb-archive: #3a404b;
+  --omb-rem-bg: #3a2a12;
+  --omb-rem-text: #ffc97a;
+  --omb-rem-row: #2a2114;
+  --omb-tag-bg: #1e2747;
+  --omb-tag-text: #b7c6ff;
+  --omb-highlight-bg: #332b10;
+  --omb-highlight-quote: #26220f;
+  --omb-highlight-text: #f2cf63;
+  --omb-kind-bg: #232830;
+  --omb-kind-text: #c3c8d2;
+  --omb-voice-bg: #15301f;
+  --omb-voice-text: #8fdcaa;
+  --omb-image-bg: #2a2040;
+  --omb-image-text: #cdb4f5;
+  --omb-link-bg: #172a40;
+  --omb-link-text: #9cc4f0;
+  --omb-link: #9db2ff;
+  --omb-ai-text: #b3b9c6;
+  --omb-ai-border: #5a6170;
+  --omb-quote-text: #ede6c8;
+  --omb-inverse-bg: #e8eaee;
+  --omb-inverse-text: #0f1115;
+  --omb-inverse-muted: #3c414d;
+}
+
+:root[data-accent='violet'] {
+  --omb-accent: #6d4ae0;
+  --omb-accent-soft: #eee9fc;
+}
+:root[data-accent='blue'] {
+  --omb-accent: #2f5bea;
+  --omb-accent-soft: #e8ecfb;
+}
+:root[data-accent='rose'] {
+  --omb-accent: #c0365a;
+  --omb-accent-soft: #fbe7ed;
+}
+:root[data-accent='graphite'] {
+  --omb-accent: #15171c;
+  --omb-accent-soft: #eceef2;
+}
+:root.dark[data-accent='violet'] {
+  --omb-accent: #b79cff;
+  --omb-accent-soft: #2a2245;
+}
+:root.dark[data-accent='blue'] {
+  --omb-accent: #7c98ff;
+  --omb-accent-soft: #1e2747;
+}
+:root.dark[data-accent='rose'] {
+  --omb-accent: #ff8fab;
+  --omb-accent-soft: #3a1a24;
+}
+:root.dark[data-accent='graphite'] {
+  --omb-accent: #e8eaee;
+  --omb-accent-soft: #2a2f38;
+}
+
+/* Ionic follows our tokens. */
+:root {
+  --ion-font-family: 'Inter Variable', Inter, system-ui, sans-serif;
+  --ion-background-color: var(--omb-bg);
+  --ion-background-color-rgb: 245, 246, 248;
+  --ion-text-color: var(--omb-text);
+  --ion-text-color-rgb: 21, 23, 28;
+  --ion-item-background: var(--omb-surface);
+  --ion-toolbar-background: var(--omb-bg);
+  --ion-toolbar-border-color: transparent;
+  --ion-tab-bar-background: var(--omb-tabbar);
+  --ion-tab-bar-border-color: var(--omb-border);
+  --ion-tab-bar-color: var(--omb-text-muted);
+  --ion-tab-bar-color-selected: var(--omb-accent);
+  --ion-border-color: var(--omb-border-muted);
+  --ion-color-primary: var(--omb-accent);
+  --ion-color-primary-contrast: var(--omb-on-accent);
+  --ion-color-primary-shade: var(--omb-accent);
+  --ion-color-primary-tint: var(--omb-accent);
+  --ion-color-step-50: var(--omb-surface-muted);
+  --ion-overlay-background-color: var(--omb-surface);
+}
+:root.dark {
+  --ion-background-color-rgb: 15, 17, 21;
+  --ion-text-color-rgb: 232, 234, 238;
+}

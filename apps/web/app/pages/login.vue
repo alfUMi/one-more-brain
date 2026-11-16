@@ -37,6 +37,11 @@ async function sendLink() {
 async function google() {
   await authClient.signIn.social({ provider: 'google', callbackURL: next.value })
 }
+
+// The mobile app opens /login?provider=google to go straight to Google.
+onMounted(() => {
+  if (route.query.provider === 'google' && providers.value.google) void google()
+})
 </script>
 
 <template>

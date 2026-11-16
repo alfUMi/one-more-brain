@@ -391,6 +391,7 @@ export default {
     back: 'Назад',
     retry: 'Повторить',
     close: 'Закрыть',
+    kind: { TEXT: 'Текст', LINK: 'Ссылка', HIGHLIGHT: 'Цитата', VOICE: 'Голос', IMAGE: 'Фото' },
     tabs: { capture: 'Запись', inbox: 'Входящие', today: 'Сегодня', library: 'Библиотека' },
     signIn: {
       tagline: 'Скидывайте всё сюда. Оно вернётся, когда понадобится.',
