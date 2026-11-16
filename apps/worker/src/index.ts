@@ -1,4 +1,5 @@
 import { getBoss, getDb, QUEUES } from '@omb/db'
+import { notifyDigest, scanDigests } from './digest'
 import { aiEnrich } from './enrich'
 import { log } from './log'
 import { notifyReminder } from './notify'
@@ -16,9 +17,15 @@ await boss.work(QUEUES.scanReminders, async () => {
   if (fired) log.info('reminders scanned', { fired })
 })
 await boss.work(QUEUES.notifyReminder, notifyReminder(db))
+await boss.work(QUEUES.scanDigests, async () => {
+  const queued = await scanDigests(db, boss)
+  if (queued) log.info('digests queued', { queued })
+})
+await boss.work(QUEUES.notifyDigest, notifyDigest(db))
 await boss.work(QUEUES.aiEnrich, { batchSize: 1 }, aiEnrich(db))
 // Every minute; pg-boss makes sure only one worker runs each tick.
 await boss.schedule(QUEUES.scanReminders, '* * * * *')
+await boss.schedule(QUEUES.scanDigests, '* * * * *')
 
 log.info('worker started')
 

@@ -6,6 +6,10 @@ export const QUEUES = {
   scanReminders: 'reminders.scan',
   /** Deliver one fired reminder to the user's channels. */
   notifyReminder: 'notify.reminder',
+  /** Cron, every minute: find users whose digest time has come and enqueue their digest. */
+  scanDigests: 'digest.scan',
+  /** Build and deliver one user's daily digest. */
+  notifyDigest: 'notify.digest',
   /** Title, tags, reminder suggestion and image text for a new or edited item. */
   aiEnrich: 'ai.enrich',
 } as const
@@ -21,6 +25,14 @@ export interface NotifyReminderJob {
   reminderId: string
   /** The occurrence that fired (the reminder's fireAt before it advanced). */
   firedAt: string
+}
+
+export interface NotifyDigestJob {
+  userId: string
+  /** When this digest was claimed; channels that got a digest since then are skipped on retry. */
+  since: string
+  /** Sent from Settings: goes out even when there is nothing to say. */
+  test?: boolean
 }
 
 let boss: PgBoss | undefined

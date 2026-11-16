@@ -1,26 +1,12 @@
-import { fromLocal, toLocal, type TodayDto, type TodayEntry, type TodayState } from '@omb/shared'
+import {
+  localDayStart,
+  onThisDayWindows,
+  type TodayDto,
+  type TodayEntry,
+  type TodayState,
+} from '@omb/shared'
 
 const DAY_MS = 86_400_000
-
-/** Start of a local calendar day, `days` from today (negative = past), in `timeZone`. */
-function localDayStart(now: Date, timeZone: string, days: number, months = 0, years = 0): Date {
-  const l = toLocal(now, timeZone)
-  const year = l.year + years
-  const month0 = l.month - 1 + months
-  // Clamp the day so "a month ago" from 31 March is 28/29 February, not 3 March.
-  const lastDay = new Date(Date.UTC(year, month0 + 1, 0)).getUTCDate()
-  const d = new Date(Date.UTC(year, month0, Math.min(l.day, lastDay) + days))
-  return fromLocal(
-    {
-      year: d.getUTCFullYear(),
-      month: d.getUTCMonth() + 1,
-      day: d.getUTCDate(),
-      hour: 0,
-      minute: 0,
-    },
-    timeZone,
-  )
-}
 
 export default defineEventHandler(async (event): Promise<TodayDto> => {
   const userId = await requireUserId(event)
@@ -80,19 +66,13 @@ export default defineEventHandler(async (event): Promise<TodayDto> => {
         orderBy: { capturedAt: 'asc' },
         select: { capturedAt: true },
       }),
-      ...(
-        [
-          ['week', localDayStart(now, tz, -7)],
-          ['month', localDayStart(now, tz, 0, -1)],
-          ['year', localDayStart(now, tz, 0, 0, -1)],
-        ] as const
-      ).map(async ([ago, start]) => {
+      ...onThisDayWindows(now, tz).map(async ({ ago, start, end }) => {
         const item = await db.item.findFirst({
           where: {
             userId,
             deletedAt: null,
             status: { not: 'DONE' },
-            capturedAt: { gte: start, lt: new Date(start.getTime() + DAY_MS) },
+            capturedAt: { gte: start, lt: end },
           },
           include: itemInclude,
           orderBy: { capturedAt: 'asc' },

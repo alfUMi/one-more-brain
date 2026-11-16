@@ -9,6 +9,23 @@ watch(
   () => user.value?.digestTime,
   (v) => v && (time.value = v),
 )
+const toast = useToast()
+const testing = ref(false)
+async function sendTest() {
+  testing.value = true
+  try {
+    const { channels } = await $fetch<{ channels: number }>('/api/v1/digest/test', {
+      method: 'POST',
+    })
+    if (channels) toast.add({ title: t('settings.digestTestSent'), color: 'success' })
+    else toast.add({ title: t('settings.digestTestNoDevices'), color: 'warning' })
+  } catch {
+    toast.add({ title: t('settings.digestTestFailed'), color: 'error' })
+  } finally {
+    testing.value = false
+  }
+}
+
 function saveTime() {
   if (/^([01]\d|2[0-3]):[0-5]\d$/.test(time.value) && time.value !== user.value?.digestTime) {
     void save({ digestTime: time.value })
@@ -44,7 +61,18 @@ function saveTime() {
           />
         </label>
       </div>
-      <p class="omb-hint m-0">{{ t('settings.digestPhase') }}</p>
+      <div class="flex flex-wrap items-center gap-3 border-t border-(--omb-border-muted) pt-4">
+        <UButton
+          color="neutral"
+          variant="outline"
+          icon="i-lucide-send"
+          :loading="testing"
+          @click="sendTest"
+        >
+          {{ t('settings.digestTest') }}
+        </UButton>
+        <span class="omb-hint">{{ t('settings.digestChannels') }}</span>
+      </div>
     </section>
 
     <section class="omb-card gap-1!" aria-labelledby="defaults-h">

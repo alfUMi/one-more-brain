@@ -323,12 +323,12 @@ function onPush(event: PushEventLike) {
   } catch {
     data = null
   }
-  if (!data || data.type !== 'reminder') return
+  if (!data || (data.type !== 'reminder' && data.type !== 'digest')) return
   event.waitUntil(
     sw.registration.showNotification(data.title, {
       body: data.body,
       tag: data.tag,
-      requireInteraction: true,
+      requireInteraction: data.type === 'reminder',
       icon: browser.runtime.getURL('/icon/128.png'),
       data,
       // Chrome shows up to two buttons.
@@ -340,12 +340,20 @@ function onPush(event: PushEventLike) {
 function onNotificationClick(event: NotificationEventLike) {
   const data = event.notification.data
   event.notification.close()
-  if (!data?.itemId) return
-  const run: Record<string, () => Promise<unknown>> = {
-    done: () => api.update(data.itemId, { status: 'DONE' }),
-    'snooze-1h': () => api.snooze(data.reminderId, { preset: '1h' }),
-    'snooze-tomorrow': () => api.snooze(data.reminderId, { preset: 'tomorrow' }),
-  }
+  if (!data) return
+  const run: Record<string, () => Promise<unknown>> =
+    data.type === 'reminder'
+      ? {
+          done: () => api.update(data.itemId, { status: 'DONE' }),
+          'snooze-1h': () => api.snooze(data.reminderId, { preset: '1h' }),
+          'snooze-tomorrow': () => api.snooze(data.reminderId, { preset: 'tomorrow' }),
+        }
+      : data.reviewItemId
+        ? {
+            'review-got': () => api.answerReview(data.reviewItemId!, true),
+            'review-forgot': () => api.answerReview(data.reviewItemId!, false),
+          }
+        : {}
   const action = run[event.action]
   event.waitUntil(action ? action().catch(() => openApp(data.url)) : openApp(data.url))
 }

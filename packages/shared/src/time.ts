@@ -75,3 +75,44 @@ export function isValidTimeZone(timeZone: string): boolean {
     return false
   }
 }
+
+const DAY_MS = 86_400_000
+
+/**
+ * Start of a local calendar day in `timeZone`, `days` from today (negative = past), optionally also
+ * `months` / `years` away. The day is clamped, so "a month ago" from 31 March is the end of February.
+ */
+export function localDayStart(
+  now: Date,
+  timeZone: string,
+  days: number,
+  months = 0,
+  years = 0,
+): Date {
+  const l = toLocal(now, timeZone)
+  const year = l.year + years
+  const month0 = l.month - 1 + months
+  const lastDay = new Date(Date.UTC(year, month0 + 1, 0)).getUTCDate()
+  const d = new Date(Date.UTC(year, month0, Math.min(l.day, lastDay) + days))
+  return fromLocal(
+    {
+      year: d.getUTCFullYear(),
+      month: d.getUTCMonth() + 1,
+      day: d.getUTCDate(),
+      hour: 0,
+      minute: 0,
+    },
+    timeZone,
+  )
+}
+
+/** Day windows for "on this day": the same local date a week, a month and a year ago. */
+export function onThisDayWindows(now: Date, timeZone: string) {
+  return (
+    [
+      ['week', localDayStart(now, timeZone, -7)],
+      ['month', localDayStart(now, timeZone, 0, -1)],
+      ['year', localDayStart(now, timeZone, 0, 0, -1)],
+    ] as const
+  ).map(([ago, start]) => ({ ago, start, end: new Date(start.getTime() + DAY_MS) }))
+}

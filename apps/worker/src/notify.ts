@@ -1,6 +1,6 @@
 import type { NotifyReminderJob, PrismaClient } from '@omb/db'
 import { sendWebPush, type WebPushTarget } from '@omb/notify'
-import { PUSH_CHANNEL_KINDS, type PushPayload } from '@omb/shared'
+import { PUSH_CHANNEL_KINDS, type ReminderPushPayload } from '@omb/shared'
 import { messages } from '@omb/shared/i18n'
 import type { Job } from 'pg-boss'
 import { log } from './log'
@@ -68,7 +68,7 @@ async function deliver(db: PrismaClient, { reminderId, firedAt }: NotifyReminder
     }),
   ])
   const t = messages[user.locale === 'ru' ? 'ru' : 'en'].notify
-  const payload: PushPayload = {
+  const payload: ReminderPushPayload = {
     type: 'reminder',
     title: notificationTitle(reminder.item) ?? t.untitled,
     body: t.reminder,

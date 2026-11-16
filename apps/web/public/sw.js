@@ -1,6 +1,6 @@
 /* One More Brain service worker:
  * - keeps the app shell cached so the app opens offline (data comes from the client's own cache/outbox),
- * - shows reminder notifications and handles their buttons (payload: PushPayload in packages/shared/src/dto.ts).
+ * - shows reminder and daily digest notifications and handles their buttons (payload: PushPayload in packages/shared/src/dto.ts).
  * Bump SHELL when the caching rules change; old caches are dropped on activate. */
 
 const SHELL = 'omb-shell-v1'
@@ -96,13 +96,14 @@ self.addEventListener('push', (event) => {
   } catch {
     data = null
   }
-  if (!data || data.type !== 'reminder') return
+  if (!data || (data.type !== 'reminder' && data.type !== 'digest')) return
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
       tag: data.tag,
       renotify: true,
-      requireInteraction: true,
+      // Reminders stay until handled; the digest can fade like any other message.
+      requireInteraction: data.type === 'reminder',
       data,
       actions: data.actions,
     }),
@@ -136,6 +137,10 @@ self.addEventListener('notificationclick', (event) => {
     'snooze-1h': () => api(`/api/v1/reminders/${data.reminderId}/snooze`, 'POST', { preset: '1h' }),
     'snooze-tomorrow': () =>
       api(`/api/v1/reminders/${data.reminderId}/snooze`, 'POST', { preset: 'tomorrow' }),
+    'review-got': () =>
+      api(`/api/v1/items/${data.reviewItemId}/review/answer`, 'POST', { gotIt: true }),
+    'review-forgot': () =>
+      api(`/api/v1/items/${data.reviewItemId}/review/answer`, 'POST', { gotIt: false }),
   }
   const run = actions[event.action]
   event.waitUntil(

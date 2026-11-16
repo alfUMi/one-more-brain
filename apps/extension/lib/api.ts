@@ -63,6 +63,8 @@ export const api = {
   update: (id: string, input: UpdateItemInput) =>
     request<ItemDto>(`/api/v1/items/${id}`, { method: 'PATCH', body: input }),
   remove: (id: string) => request<null>(`/api/v1/items/${id}`, { method: 'DELETE' }),
+  answerReview: (itemId: string, gotIt: boolean) =>
+    request(`/api/v1/items/${itemId}/review/answer`, { method: 'POST', body: { gotIt } }),
   snooze: (reminderId: string, input: SnoozeInput) =>
     request(`/api/v1/reminders/${reminderId}/snooze`, { method: 'POST', body: input }),
   pushKey: () => request<{ publicKey: string | null }>('/api/v1/push/key'),

@@ -65,7 +65,7 @@ export interface TagDto {
 }
 
 /** What the service worker receives in a push message. */
-export interface PushPayload {
+export interface ReminderPushPayload {
   type: 'reminder'
   title: string
   body: string
@@ -77,6 +77,19 @@ export interface PushPayload {
   itemId: string
   actions: { action: 'done' | 'snooze-1h' | 'snooze-tomorrow'; title: string }[]
 }
+
+/** The daily digest. Got it / Forgot answer the review card it shows (`reviewItemId`). */
+export interface DigestPushPayload {
+  type: 'digest'
+  title: string
+  body: string
+  tag: 'digest'
+  url: string
+  reviewItemId: string | null
+  actions: { action: 'review-got' | 'review-forgot'; title: string }[]
+}
+
+export type PushPayload = ReminderPushPayload | DigestPushPayload
 
 /** Where a reminder stands within today (Today › Reminders panel). */
 /** past = a recurring reminder that already fired today and moved on to its next date. */
