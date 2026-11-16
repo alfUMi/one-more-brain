@@ -180,7 +180,7 @@ Each phase ends with something usable every day. Checked items are done (with th
   - [x] Sections whose features come in later phases (Telegram: Phase 3, Export: Phase 7, voice button: Phase 3) keep their place with a "coming in phase N" state. `114d802`
 - [ ] **Done when:** I use it daily on my computer for a week.
 
-### Phase 2: Browser extension 🚧
+### Phase 2: Browser extension ✅
 - [x] Sign-in hand-off: `/auth/extension` in the web app issues a per-device bearer session and sends it to an allow-listed extension id (no login form in the extension); it shows up in Settings › Devices. `22f2d04`
 - [x] `apps/extension`: WXT + Vue 3, MV3, stable dev id, theme and accent from the profile. `ef8817f`
 - [x] Quick capture popup (`Ctrl/Cmd+Shift+K`) as in the [mockup](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL): smart-capture chips, "Attach this page", screenshot button, Save ⏎. `ef8817f`
@@ -189,14 +189,20 @@ Each phase ends with something usable every day. Checked items are done (with th
 - [x] Offline outbox in the extension service worker (IndexedDB, retried on an alarm). `ef8817f`
 - [x] Reminder notifications in the extension (Web Push to its service worker, Done / Snooze buttons). `ef8817f` (subscription registers; first real reminder in the extension still to confirm)
 - [x] CI builds and zips the extension (artifact on each run; install steps in [DEPLOY.md](./DEPLOY.md) §6). `ef8817f`
-- [ ] **Done when:** saving a highlight takes one right-click and shows up in the web Inbox.
+- [x] **Done when:** saving a highlight takes one right-click and shows up in the web Inbox. Tested by the owner 2026-11-16.
 
-### Phase 3: Telegram bot + voice
-- grammY webhook on the Nuxt server. Account linking, capture of text/link/voice/photo.
-- Voice pipeline: upload audio → speech-to-text → transcript as item body → AI enrichment.
-- Web voice recorder in the capture box.
-- Reminder + digest delivery to Telegram with inline action buttons.
-- **Done when:** I can forward a voice message to the bot from my phone and get reminded later.
+### Phase 3: Telegram bot + voice 🚧
+Spec: the "Telegram bot" artboard and the voice card + mic button in "Main" ([mockups](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL)). The morning digest in the bot artboard is Phase 4.
+- [ ] Bot plumbing: grammY bot in `apps/web`, webhook `POST /api/v1/telegram/webhook` (secret-token header), long polling in dev, Telegram sender in `packages/notify`.
+- [ ] Account linking: one-time token (10 min) → `t.me/<bot>?start=<token>` → `Channel(kind=TELEGRAM)`. Settings › Telegram: Connect, connected chat, Disconnect, send a test message.
+- [ ] Capture text and links from the bot: smart-capture parsing, reply "Saved to Inbox" with reminder/tag chips and Edit / Undo buttons.
+- [ ] Capture photos from the bot: image attachment → existing OCR enrichment.
+- [ ] Voice pipeline: speech-to-text adapter in `packages/ai`, `ai.transcribe` job (audio → transcript as body → reminders parsed → `ai.enrich`). Voice messages from the bot land as VOICE items.
+- [ ] Voice card in the web Inbox/Library: play button, waveform, duration, transcript, "Transcribed · Telegram".
+- [ ] Web voice recorder in the capture box (mic button; works offline through the outbox).
+- [ ] Reminder delivery to Telegram with Done / +1 hour / Tomorrow buttons; Delivery records like Web Push.
+- [ ] Deploy: env vars, webhook registered on rollout, [DEPLOY.md](./DEPLOY.md) steps (BotFather, STT key).
+- [ ] **Done when:** I can forward a voice message to the bot from my phone and get reminded later.
 
 ### Phase 4: Resurfacing
 - Daily digest (per-user time + timezone) across all channels.
