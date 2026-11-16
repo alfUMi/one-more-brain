@@ -90,3 +90,37 @@ and attaches `one-more-brain-extension-*.zip` to the run (Actions → CI → Art
 
 Local development: `bun run --cwd apps/extension dev` (talks to `http://localhost:3000`; set `WXT_APP_URL` to
 change it).
+
+## 7. Mobile app (Android, iOS)
+
+The app (`apps/mobile`, Ionic + Vue + Capacitor) talks to the server in `VITE_APP_URL`, set at build time.
+CI builds an Android debug APK for the `APP_URL` repository variable and attaches
+`one-more-brain-android-debug` to the run (Actions → CI → Artifacts).
+
+**Install on an Android phone:** download the artifact, copy `app-debug.apk` to the phone, open it and allow
+installs from that source. Open the app → enter your email → open the link from the email **on the phone** →
+it comes back to the app signed in (or use Google, if the server has it). The phone shows up in Settings → Devices.
+
+**Push notifications (optional, needs a Firebase project):**
+1. Firebase console → add a project → add an Android app with id `app.onemorebrain.mobile` (and an iOS app with
+   the same bundle id). Download `google-services.json` / `GoogleService-Info.plist`.
+2. Android: store `google-services.json` as the `GOOGLE_SERVICES_JSON` repository secret (CI writes it into the
+   build), or put it in `apps/mobile/android/app/` for local builds. iOS: add `GoogleService-Info.plist` to
+   `apps/mobile/ios/App/App/` in Xcode, enable the Push Notifications capability, and upload your APNs key in
+   Firebase → Project settings → Cloud Messaging.
+3. Server: Firebase → Project settings → Service accounts → Generate new private key. Put the JSON (one line or
+   base64) in `FIREBASE_SERVICE_ACCOUNT` in the server `.env`, restart `web` and `worker`.
+4. In the app: Settings → Notifications → turn on. Reminders and the digest then arrive on the phone; on iOS they
+   carry Done / Snooze / Tomorrow and Got it / Forgot buttons.
+
+Without these files the app works normally and Settings → Notifications says push isn't set up.
+
+**iOS / TestFlight:** needs an Apple Developer account. `bun run --cwd apps/mobile ios` builds and opens Xcode;
+pick your team under Signing, then Product → Archive → Distribute → TestFlight.
+
+**Local development**
+- Browser: `bun run --cwd apps/mobile dev` → http://localhost:5174 (talks to `http://localhost:3000`).
+- Android emulator: `adb reverse tcp:3000 tcp:3000`, then
+  `VITE_APP_URL=http://localhost:3000 bun run --cwd apps/mobile android` (builds, syncs, opens Android Studio).
+- iOS simulator: `VITE_APP_URL=http://localhost:3000 bun run --cwd apps/mobile ios`.
+- The share sheet (Android) and sign-in deep link (`onemorebrain://auth?code=…`) only work in the native app.

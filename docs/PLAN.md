@@ -31,7 +31,7 @@ once written, are never seen again.
 | Reminders | Specific time, recurring, location-based (mobile), context = daily digest |
 | Organization | Inbox → triage, tags only (AI-suggested) |
 | Resurfacing | Daily digest, spaced repetition, on this day |
-| Stack | Bun monorepo · Nuxt full-stack web · Nuxt + Ionic + Capacitor mobile · Chrome MV3 extension (Vue) |
+| Stack | Bun monorepo · Nuxt full-stack web · Vue + Ionic + Capacitor mobile · Chrome MV3 extension (Vue) |
 | Backend | Nuxt (Nitro) server + Prisma + Postgres |
 | AI | Light: tags/titles, reminder parsing, OCR (Claude), voice transcription (speech-to-text API) |
 | Offline | Capture offline, sync later; read from cache |
@@ -121,7 +121,7 @@ Explicit dates are applied automatically. Dates guessed by AI appear as a sugges
 - **Capture**: send text, links, voice, or photos to the bot. Each lands in the Inbox (voice → transcribed, photo → OCR).
 - **Delivery**: reminders and the daily digest, with inline buttons (✅ Done · ⏰ Snooze 1h / Tomorrow · 🗂 Archive).
 
-### Mobile app (Nuxt + Ionic + Capacitor; iOS + Android)
+### Mobile app (Vue + Ionic + Capacitor; iOS + Android)
 - Opens straight into **capture** (type / voice / camera), with Inbox and Today one tap away.
 - **Share sheet**: share links, text, and images from any app into the Inbox.
 - Push notifications (FCM/APNs) with actions. Local cache for offline viewing and an outbox for offline capture.

@@ -7,7 +7,7 @@ Related docs: [PLAN.md](./PLAN.md) · [DATA-MODEL.md](./DATA-MODEL.md)
 ```
  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
  │  Web (Nuxt)  │  │ Extension    │  │ Mobile       │  │  Telegram    │
- │  PWA + SW    │  │ WXT+Vue MV3  │  │ Nuxt+Ionic   │  │  (users)     │
+ │  PWA + SW    │  │ WXT+Vue MV3  │  │ Vue+Ionic    │  │  (users)     │
  │  IndexedDB   │  │ chrome.stor. │  │ Capacitor    │  │              │
  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘
         │ cookie          │ bearer          │ bearer          │ webhook
@@ -50,9 +50,9 @@ Related docs: [PLAN.md](./PLAN.md) · [DATA-MODEL.md](./DATA-MODEL.md)
 one-more-brain/
 ├─ apps/
 │  ├─ web/            Nuxt 4 full-stack: UI + server/api + Telegram webhook
-│  │  ├─ app/         pages, components (Nuxt UI), extends ../../packages/app-layer
+│  │  ├─ app/         pages, components (Nuxt UI)
 │  │  └─ server/      api/, middleware/, utils/ (auth, storage, queue)
-│  ├─ mobile/         Nuxt 4 SPA (ssr:false) + @nuxtjs/ionic + Capacitor (ios/, android/)
+│  ├─ mobile/         Vite + Vue 3 + Ionic + Capacitor 8 (ios/, android/)
 │  ├─ extension/      WXT + Vue 3: background, popup, content scripts, options
 │  └─ worker/         Bun entry: job handlers, scanners, notification senders
 ├─ packages/
@@ -60,17 +60,16 @@ one-more-brain/
 │  ├─ shared/         zod schemas (API contract), types, enums, SR intervals, i18n messages (en, ru),
 │  │                  smart-capture parser (chrono-node + #tags), UUIDv7
 │  ├─ api-client/     typed ofetch client + outbox/sync engine with storage adapters
-│  │                  (IndexedDB · chrome.storage · Capacitor SQLite)
+│  │                  (IndexedDB · chrome.storage · app files on the phone)
 │  ├─ ai/             Claude client, prompts, structured-output schemas, STT adapter (server-only)
 │  ├─ notify/         WebPush / FCM / Telegram senders (server-only)
-│  └─ app-layer/      Nuxt layer shared by web + mobile: Pinia stores, composables, i18n config
 ├─ docker/            compose.dev.yml, compose.prod.yml, Caddyfile, Dockerfiles
 └─ docs/
 ```
 
 **Code sharing rules**
 - `shared` and `api-client` are framework-agnostic TS and run everywhere (web, extension, mobile, server).
-- `app-layer` is a Nuxt layer used only by the two Nuxt apps. UI components differ: Nuxt UI on web, Ionic components on mobile.
+- Mobile is plain Vite + Vue + Ionic (not Nuxt: `@nuxtjs/ionic` is pinned to Ionic 8 / Capacitor 7), so there is no shared Nuxt layer. Web and mobile share `shared` (parsing, formatting, i18n, contracts) and `api-client` (typed bearer client + outbox); each keeps its own small UI-state code.
 - `db`, `ai`, and `notify` are server-only and never imported by clients (enforced by an ESLint boundary rule).
 
 ## 3. Tech choices
@@ -79,7 +78,7 @@ one-more-brain/
 |---|---|---|
 | Runtime / PM | Bun | workspaces, `bun test` optional (Vitest is the primary runner) |
 | Web | Nuxt 4, Nuxt UI, Pinia, @nuxtjs/i18n, @vite-pwa/nuxt | Nitro `bun` preset |
-| Mobile | Nuxt 4 SPA, @nuxtjs/ionic, Capacitor 7 | shares `app-layer` |
+| Mobile | Vite, Vue 3, Ionic 9, Capacitor 8 | shares `shared` + `api-client` |
 | Extension | WXT + Vue 3 (MV3) | Nuxt is a poor fit for MV3; WXT gives similar DX |
 | Validation | zod | schemas in `shared`, used by server handlers and clients |
 | ORM / DB | Prisma + Postgres 17 | `pg_trgm`, generated `tsvector` column via raw SQL |
@@ -101,7 +100,9 @@ one-more-brain/
 - **Extension:** user clicks "Sign in" → opens `https://app/auth/extension` → after sign-in the page calls
   `chrome.runtime.sendMessage(EXT_ID, { token })` (allowed by `externally_connectable`) → the extension stores the
   bearer token in `chrome.storage.local`.
-- **Mobile:** in-app browser (Capacitor Browser) → magic link / Google → deep link `onemorebrain://auth?token=…`
+- **Mobile (PKCE style):** the app keeps a random verifier and opens sign-in with its SHA-256 challenge (Google in the
+  in-app browser, or a magic link opened on the phone) → `/auth/mobile` issues a one-time code (2 min) → deep link
+  `onemorebrain://auth?code=…` → the app trades code + verifier for a bearer token (`/api/v1/auth/mobile-exchange`)
   → token stored in Secure Storage.
 - **Telegram:** one-time link token (10 min TTL) from Settings → `/start <token>` → `Channel(kind=TELEGRAM, chatId)`.
 - Bearer tokens are per-device sessions, listed and revocable in Settings → Devices.
@@ -138,7 +139,7 @@ one-more-brain/
 - **Outbox:** ordered queue of mutations `{op, entity, payload, attempt}`. It retries with backoff and drops items only on 4xx validation errors (shown to the user).
 - **Attachments offline:** blob stored locally. Upload happens on flush, before the item mutation that references it.
 - **Conflicts:** last-write-wins using server `updatedAt`. Acceptable for a personal app; revisit if collaboration is added.
-- **Cache:** web (IndexedDB via Dexie), extension (only the outbox + last 20 items), mobile (Capacitor SQLite).
+- **Cache:** web (IndexedDB via Dexie), extension (only the outbox + last 20 items), mobile (Capacitor Preferences for cached lists, the app's data folder for the outbox with images).
 
 ## 7. Background processing (apps/worker)
 
@@ -169,7 +170,7 @@ one-more-brain/
 |---|---|---|
 | `WEB_PUSH` | Web PWA | VAPID Web Push → service worker → `showNotification` with actions |
 | `EXTENSION_PUSH` | Extension | Push in MV3 service worker → `chrome.notifications` with buttons |
-| `FCM` | Android + iOS | firebase-admin → APNs/FCM. Actions handled via Capacitor push-notifications |
+| `FCM` | Android + iOS | firebase-admin → APNs/FCM (`FIREBASE_SERVICE_ACCOUNT`). Buttons via iOS notification categories, handled by `@capacitor-firebase/messaging` |
 | `TELEGRAM` | Bot chat | `sendMessage` with inline keyboard (Done / Snooze / Archive) |
 | Local (geofence) | Mobile | fired on device by the OS geofence callback, no server involved |
 
