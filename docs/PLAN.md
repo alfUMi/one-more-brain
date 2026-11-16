@@ -192,7 +192,7 @@ Each phase ends with something usable every day. Checked items are done (with th
 - [x] **Done when:** saving a highlight takes one right-click and shows up in the web Inbox. Tested by the owner 2026-11-16.
 
 ### Phase 3: Telegram bot + voice ⏸
-Postponed by the owner on 2026-11-16; Phase 4 goes first.
+Postponed by the owner on 2026-11-16; Phases 4 and 5 go first.
 Spec: the "Telegram bot" artboard and the voice card + mic button in "Main" ([mockups](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL)). The morning digest in the bot artboard is Phase 4.
 - [ ] Bot plumbing: grammY bot in `apps/web`, webhook `POST /api/v1/telegram/webhook` (secret-token header), long polling in dev, Telegram sender in `packages/notify`.
 - [ ] Account linking: one-time token (10 min) → `t.me/<bot>?start=<token>` → `Channel(kind=TELEGRAM)`. Settings › Telegram: Connect, connected chat, Disconnect, send a test message.
@@ -205,7 +205,7 @@ Spec: the "Telegram bot" artboard and the voice card + mic button in "Main" ([mo
 - [ ] Deploy: env vars, webhook registered on rollout, [DEPLOY.md](./DEPLOY.md) steps (BotFather, STT key).
 - [ ] **Done when:** I can forward a voice message to the bot from my phone and get reminded later.
 
-### Phase 4: Resurfacing 🚧
+### Phase 4: Resurfacing ✅
 Telegram is postponed (Phase 3), so the digest goes out as a push notification for now; Telegram delivery is added with Phase 3.
 - [x] Spaced repetition: "Remember" action, review steps, Review page and sidebar count. `30ee310` `1b6c675`
 - [x] On this day on the Inbox side column and the Today view. `1b6c675`
@@ -213,15 +213,24 @@ Telegram is postponed (Phase 3), so the digest goes out as a push notification f
 - [x] Digest content: today's reminders, inbox count + oldest age, reviews due, one random kept note ("Remember this?"), on this day. Skipped when there is nothing to say. `b3e2175`
 - [x] Digest delivery to Web Push and extension push: one notification that opens Today, with Got it / Forgot buttons for the review card it shows; Delivery records with type DIGEST. `b3e2175`
 - [x] Settings › Reminders & digest: drop the "phase 4" note, add "Send a test digest now". `b3e2175`
-- [ ] **Done when:** the morning digest arrives every day and I review old notes from it.
+- [x] **Done when:** the morning digest arrives every day and I review old notes from it. Closed by the owner 2026-11-16.
 
-### Phase 5: Mobile app
-- Nuxt SPA + `@nuxtjs/ionic` + Capacitor, sharing the `app-layer` (stores, API client, i18n) with web.
-- Capture-first home, Inbox swipe triage, Today, Review, Library (cached).
-- Local SQLite/Preferences cache + outbox, background sync on resume and on network change.
-- FCM/APNs push with action buttons.
-- Share sheet: Android intent filter first, then the iOS Share Extension (native target).
-- **Done when:** shipped to my own phone (TestFlight / internal track) and used daily.
+### Phase 5: Mobile app 🚧
+Started 2026-11-16, ahead of Phase 3. Spec: the "Mobile · Capture" and "Mobile · Inbox swipe triage" artboards (light + dark) and the new mobile artboards below ([mockups](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL)).
+- [ ] Mockups for the mobile screens that had no artboard: Inbox list view, Hold for more, Remind sheet, Today, Review, Library, Settings, Sign in, Share sheet. Approved by the owner before building.
+- [ ] `packages/app-layer`: Nuxt layer with the composables both apps need (items API, outbox, profile, appearance, format, item actions), moved out of `apps/web`; web keeps working.
+- [ ] `apps/mobile`: Nuxt 4 SPA + `@nuxtjs/ionic` + Capacitor, iOS and Android projects, app id, icons + splash, theme and accent from the profile.
+- [ ] Sign in: Sign in screen → in-app browser → `/auth/mobile` issues a per-device bearer session → deep link `onemorebrain://auth?token=…` → secure storage. Shows up in Settings › Devices.
+- [ ] Capture tab: capture box with live chips, Save to Inbox, Photo (camera / gallery), Paste link, "Just captured" with the sync state. "Hold to talk" keeps its place with a "Phase 3" state; the location chip comes in Phase 6.
+- [ ] Inbox tab: swipe card stack (right = keep, left = archive, hold = more), Archive / Remind / Remember / Keep row, "3 of 7" progress, List view, Remind sheet, Hold for more actions.
+- [ ] Today tab and Review screen.
+- [ ] Library tab: search, status / kind filters, tags.
+- [ ] Settings screen (opened from the gear on Capture).
+- [ ] Offline: local cache for Inbox, Today and Library, outbox through `packages/api-client`, sync on resume and when the network comes back.
+- [ ] Push: FCM sender in `packages/notify` (Android, and iOS through APNs), reminders and the digest with Done / Snooze / Got it / Forgot actions, Delivery records.
+- [ ] Share sheet: Android intent filter (text, links, images) first, then the iOS Share Extension (native target, App Group hand-off).
+- [ ] CI builds an Android debug APK; install steps in [DEPLOY.md](./DEPLOY.md).
+- [ ] **Done when:** shipped to my own phone (TestFlight / internal track) and used daily.
 
 ### Phase 6: Location reminders
 - Small custom Capacitor plugin: iOS `CLLocationManager` region monitoring, Android `GeofencingClient`.
