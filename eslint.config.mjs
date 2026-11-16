@@ -8,6 +8,7 @@ export default createConfigForNuxt({
       '**/node_modules/**',
       '**/.nuxt/**',
       '**/.output/**',
+      '**/.wxt/**',
       '**/dist/**',
       'packages/db/src/generated/**',
       'packages/db/prisma/migrations/**',
@@ -16,7 +17,12 @@ export default createConfigForNuxt({
   })
   .append({
     // Nuxt pages, layouts and the root component are named by their file path.
-    files: ['apps/*/app/pages/**/*.vue', 'apps/*/app/layouts/**/*.vue', 'apps/*/app/*.vue'],
+    files: [
+      'apps/*/app/pages/**/*.vue',
+      'apps/*/app/layouts/**/*.vue',
+      'apps/*/app/*.vue',
+      'apps/extension/entrypoints/**/*.vue',
+    ],
     rules: { 'vue/multi-word-component-names': 'off' },
   })
   .append({

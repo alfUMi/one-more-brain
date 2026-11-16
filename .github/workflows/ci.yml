@@ -22,3 +22,12 @@ jobs:
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build
+      - name: Build the browser extension
+        run: bun run --cwd apps/extension zip
+        env:
+          WXT_APP_URL: ${{ vars.APP_URL || 'http://localhost:3000' }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: one-more-brain-extension
+          path: apps/extension/.output/*.zip
+          if-no-files-found: error

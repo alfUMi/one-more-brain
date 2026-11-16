@@ -17,6 +17,9 @@ const tagName = z
 
 export const IMAGE_MIMES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'] as const
 export type ImageMime = (typeof IMAGE_MIMES)[number]
+/** Channels delivered with Web Push (VAPID): the web app and the browser extension. */
+export const PUSH_CHANNEL_KINDS = ['WEB_PUSH', 'EXTENSION_PUSH'] as const
+
 export const MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 
 /** Asks for a presigned upload URL for one attachment of an item that may not exist yet. */
@@ -63,6 +66,7 @@ export const createItemSchema = z
     quote: z.string().max(20_000).optional(),
     url: z.url().max(2_000).optional(),
     pageTitle: z.string().max(500).optional(),
+    favicon: z.url().max(2_000).optional(),
     tags: z.array(tagName).max(20).default([]),
     capturedAt: z.coerce.date(),
     reminder: reminderInputSchema.optional(),
@@ -138,5 +142,7 @@ export const webPushChannelSchema = z.object({
   endpoint: z.url().max(2_000),
   keys: z.object({ p256dh: z.string().min(1).max(200), auth: z.string().min(1).max(100) }),
   label: z.string().trim().max(100).optional(),
+  /** The browser extension's service worker registers as its own channel. */
+  kind: z.enum(PUSH_CHANNEL_KINDS).default('WEB_PUSH'),
 })
 export type WebPushChannelInput = z.input<typeof webPushChannelSchema>

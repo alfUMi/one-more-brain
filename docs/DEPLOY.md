@@ -34,6 +34,7 @@ Repository → Settings:
 | Variable | `DEPLOY_HOST` | server hostname or IP (setting it turns on automatic rollout) |
 | Variable | `DEPLOY_USER` | `deploy` (default) |
 | Variable | `DEPLOY_DIR` | `/opt/omb` (default) |
+| Variable | `APP_URL` | `https://DOMAIN`, baked into the browser extension build |
 | Secret | `DEPLOY_SSH_KEY` | private key whose public half is in `~deploy/.ssh/authorized_keys` |
 | Secret | `DEPLOY_KNOWN_HOSTS` | output of `ssh-keyscan -H <host>` |
 
@@ -75,3 +76,17 @@ Then open `https://DOMAIN`, sign in with a magic link, and check Settings → No
 | Postgres shell | `docker compose -f compose.prod.yml exec postgres psql -U omb` |
 
 Rolling back the image does not undo migrations; they are written to be additive.
+
+## 6. Browser extension
+
+CI builds the extension for the domain in the `APP_URL` repository variable (e.g. `https://brain.example.com`)
+and attaches `one-more-brain-extension-*.zip` to the run (Actions → CI → Artifacts).
+
+1. Set the `APP_URL` variable, and `NUXT_PUBLIC_EXTENSION_IDS` in the server `.env` (see `.env.prod.example`).
+2. Unzip the artifact, open `chrome://extensions`, turn on Developer mode, "Load unpacked" → the folder.
+   Builds keep a fixed id (`ealahabaammegndodbgendfkinpnflae`), so the allow-list above matches.
+3. Click the toolbar icon → Sign in. The web app asks to connect the extension; after that it saves to your
+   account and shows reminders. Disconnect it in Settings → Devices.
+
+Local development: `bun run --cwd apps/extension dev` (talks to `http://localhost:3000`; set `WXT_APP_URL` to
+change it).

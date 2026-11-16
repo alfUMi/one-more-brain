@@ -15,8 +15,8 @@ export default defineEventHandler(async (event): Promise<{ id: string }> => {
     lastSeenAt: new Date(),
   }
   const channel = await db.channel.upsert({
-    where: { kind_address: { kind: 'WEB_PUSH', address: input.endpoint } },
-    create: { kind: 'WEB_PUSH', address: input.endpoint, ...data },
+    where: { kind_address: { kind: input.kind, address: input.endpoint } },
+    create: { kind: input.kind, address: input.endpoint, ...data },
     update: data,
     select: { id: true },
   })

@@ -40,6 +40,7 @@ export default defineEventHandler(async (event): Promise<ItemDto> => {
           quote: input.quote || null,
           url: input.url || null,
           pageTitle: input.pageTitle || null,
+          favicon: input.favicon || null,
           capturedAt: input.capturedAt,
         },
       })

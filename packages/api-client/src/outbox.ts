@@ -10,6 +10,8 @@ export interface OutboxFile {
   attachmentId: string
   mime: AttachmentInput['mime']
   blob: Blob
+  /** IMAGE unless said otherwise (the extension saves SCREENSHOTs). */
+  kind?: AttachmentInput['kind']
 }
 
 export interface OutboxEntry {

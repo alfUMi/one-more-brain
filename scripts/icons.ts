@@ -29,3 +29,11 @@ png(true, 180, 'apple-touch-icon.png')
 png(false, 32, 'favicon-32.png')
 writeFileSync(out + 'icon.svg', svg(false))
 console.log('icons written to', out)
+
+// Browser extension toolbar and store icons (WXT picks up public/icon/<size>.png).
+const ext = new URL('../apps/extension/public/icon/', import.meta.url).pathname
+mkdirSync(ext, { recursive: true })
+for (const size of [16, 32, 48, 128]) {
+  const r = new Resvg(svg(false), { fitTo: { mode: 'width', value: size } })
+  writeFileSync(`${ext}${size}.png`, r.render().asPng())
+}

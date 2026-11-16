@@ -1,3 +1,4 @@
+import { PUSH_CHANNEL_KINDS } from '@omb/shared'
 import { z } from 'zod'
 
 const bodySchema = z.object({ endpoint: z.url().max(2_000) })
@@ -6,7 +7,9 @@ const bodySchema = z.object({ endpoint: z.url().max(2_000) })
 export default defineEventHandler(async (event) => {
   const userId = await requireUserId(event)
   const { endpoint } = await readValidatedBody(event, (body) => bodySchema.parse(body))
-  await db.channel.deleteMany({ where: { userId, kind: 'WEB_PUSH', address: endpoint } })
+  await db.channel.deleteMany({
+    where: { userId, kind: { in: [...PUSH_CHANNEL_KINDS] }, address: endpoint },
+  })
   setResponseStatus(event, 204)
   return null
 })

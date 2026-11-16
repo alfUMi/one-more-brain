@@ -1,6 +1,6 @@
 import type { NotifyReminderJob, PrismaClient } from '@omb/db'
 import { sendWebPush, type WebPushTarget } from '@omb/notify'
-import type { PushPayload } from '@omb/shared'
+import { PUSH_CHANNEL_KINDS, type PushPayload } from '@omb/shared'
 import { messages } from '@omb/shared/i18n'
 import type { Job } from 'pg-boss'
 import { log } from './log'
@@ -59,7 +59,9 @@ async function deliver(db: PrismaClient, { reminderId, firedAt }: NotifyReminder
 
   const [user, channels, alreadySent] = await Promise.all([
     db.user.findUniqueOrThrow({ where: { id: reminder.userId }, select: { locale: true } }),
-    db.channel.findMany({ where: { userId: reminder.userId, kind: 'WEB_PUSH', enabled: true } }),
+    db.channel.findMany({
+      where: { userId: reminder.userId, kind: { in: [...PUSH_CHANNEL_KINDS] }, enabled: true },
+    }),
     db.delivery.findMany({
       where: { reminderId, status: 'SENT', sentAt: { gte: new Date(firedAt) } },
       select: { channelId: true },
