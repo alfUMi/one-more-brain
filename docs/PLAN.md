@@ -168,7 +168,7 @@ Each phase ends with something usable every day. Checked items are done (with th
 - [x] PWA + IndexedDB outbox (offline capture): manifest + icons, offline app shell, outbox in `packages/api-client` (text and images), inbox readable offline. `2aefed2`
 - [x] Settings page: appearance, language, time zone, notifications on this device. `9d965f9`
 - [x] Deploy setup: app image, `compose.prod.yml` (Caddy TLS, migrate, web, worker, Postgres, RustFS), nightly backup with retention + off-site mirror, GHCR build + SSH rollout workflow, runbook in [DEPLOY.md](./DEPLOY.md). `35a219a`
-- [ ] First deploy to the VPS: server, DNS, `.env`, GitHub deploy variables and secrets (needs the server details).
+- [x] First deploy to the VPS: done by hand by the owner, following [DEPLOY.md](./DEPLOY.md).
 - [x] **Match the web mockups** ([mockups](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL); they are the spec for layout):
   - [x] Inbox: right column with "Up next today", "Remember" (reviews due + Start review) and "On this day". `1b6c675`
   - [x] Inbox: image cards with the thumbnail beside the text, not above it. `1b6c675`
@@ -180,10 +180,16 @@ Each phase ends with something usable every day. Checked items are done (with th
   - [x] Sections whose features come in later phases (Telegram: Phase 3, Export: Phase 7, voice button: Phase 3) keep their place with a "coming in phase N" state. `114d802`
 - [ ] **Done when:** I use it daily on my computer for a week.
 
-### Phase 2: Browser extension
-- WXT + Vue, MV3. Context menus (selection / page / image), hotkey popup, screenshot.
-- Auth hand-off from the web app, outbox, push notifications in the extension service worker.
-- **Done when:** saving a highlight takes one right-click and shows up in the web Inbox.
+### Phase 2: Browser extension 🚧
+- [ ] Sign-in hand-off: `/auth/extension` in the web app issues a per-device bearer session and sends it to an allow-listed extension id (no login form in the extension); it shows up in Settings › Devices.
+- [ ] `apps/extension`: WXT + Vue 3, MV3, stable dev id, theme and accent from the profile.
+- [ ] Quick capture popup (`Ctrl/Cmd+Shift+K`) as in the [mockup](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL): smart-capture chips, "Attach this page", screenshot button, Save ⏎.
+- [ ] Context menus: Save highlight, Save page, Save image, Screenshot to Brain (quote, URL, page title, favicon).
+- [ ] In-page "Saved to Inbox" toast with Add note and Undo.
+- [ ] Offline outbox in the extension service worker (IndexedDB, retried on an alarm).
+- [ ] Reminder notifications in the extension (Web Push to its service worker, Done / Snooze buttons).
+- [ ] CI builds and zips the extension.
+- [ ] **Done when:** saving a highlight takes one right-click and shows up in the web Inbox.
 
 ### Phase 3: Telegram bot + voice
 - grammY webhook on the Nuxt server. Account linking, capture of text/link/voice/photo.
