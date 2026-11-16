@@ -10,6 +10,13 @@ const { data: providers } = await useFetch('/api/v1/auth/providers', {
   default: () => ({ google: false }),
 })
 
+const route = useRoute()
+/** Where to land after signing in: a local path only, never another site. */
+const next = computed(() => {
+  const value = route.query.next
+  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : '/'
+})
+
 const email = ref('')
 const sentTo = ref<string | null>(null)
 const loading = ref(false)
@@ -18,14 +25,17 @@ const error = ref<string | null>(null)
 async function sendLink() {
   loading.value = true
   error.value = null
-  const { error: err } = await authClient.signIn.magicLink({ email: email.value, callbackURL: '/' })
+  const { error: err } = await authClient.signIn.magicLink({
+    email: email.value,
+    callbackURL: next.value,
+  })
   loading.value = false
   if (err) error.value = t('auth.error')
   else sentTo.value = email.value
 }
 
 async function google() {
-  await authClient.signIn.social({ provider: 'google', callbackURL: '/' })
+  await authClient.signIn.social({ provider: 'google', callbackURL: next.value })
 }
 </script>
 

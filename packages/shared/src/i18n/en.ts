@@ -48,6 +48,16 @@ export default {
     signOut: 'Sign out',
     error: 'Something went wrong. Please try again.',
     footnote: 'No password needed. New here? The same link creates your account.',
+    extension: {
+      title: 'Connect the browser extension',
+      body: 'The One More Brain extension in this browser will save to your account ({email}). You can disconnect it any time in Settings › Devices.',
+      connect: 'Connect extension',
+      doneTitle: 'Extension connected',
+      doneBody: 'You can close this tab. Press {keys} on any page to capture.',
+      unknown: "This link came from an extension we don't recognise, so nothing was sent to it.",
+      missing:
+        'The extension did not answer. Make sure it is installed and enabled in this browser, then try again.',
+    },
   },
   inbox: {
     title: 'Inbox',
@@ -223,6 +233,7 @@ export default {
     pushDevices: 'Browsers that get reminders',
     noPushDevices: 'No browser gets reminders yet. Turn them on under Notifications.',
     stopPush: 'Stop',
+    extension: 'Extension',
     unknownBrowser: 'Unknown browser',
     // Export & data
     exportTitle: 'Export your notes',

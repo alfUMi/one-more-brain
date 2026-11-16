@@ -32,6 +32,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   }
 
-  if (!user.value && !to.meta.public) return navigateTo('/login')
-  if (user.value && to.path === '/login') return navigateTo('/')
+  if (!user.value && !to.meta.public) {
+    // Come back here after signing in (only for pages other than the Inbox).
+    return navigateTo(to.path === '/' ? '/login' : { path: '/login', query: { next: to.fullPath } })
+  }
+  if (user.value && to.path === '/login') {
+    const next = to.query.next
+    return navigateTo(
+      typeof next === 'string' && next.startsWith('/') && !next.startsWith('//') ? next : '/',
+    )
+  }
 })

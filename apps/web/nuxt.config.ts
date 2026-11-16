@@ -19,6 +19,16 @@ export default defineNuxtConfig({
     vueI18n: './i18n.config.ts',
   },
 
+  runtimeConfig: {
+    public: {
+      /**
+       * Comma-separated extension ids allowed to receive a sign-in token from /auth/extension
+       * (NUXT_PUBLIC_EXTENSION_IDS). The default is the unpacked dev build's fixed id.
+       */
+      extensionIds: process.env.NODE_ENV === 'production' ? '' : 'ealahabaammegndodbgendfkinpnflae',
+    },
+  },
+
   colorMode: { preference: 'system', fallback: 'light', storageKey: 'omb-color-mode' },
 
   nitro: {

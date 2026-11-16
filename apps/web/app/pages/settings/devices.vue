@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { EXTENSION_UA_PREFIX } from '@omb/shared'
+
 definePageMeta({ layout: 'settings' })
 const { t } = useI18n()
 useHead({ title: () => `${t('settings.sections.devices')} · ${t('settings.title')}` })
@@ -24,8 +26,11 @@ const currentToken = ref<string | null>(null)
 const pushDevices = ref<PushRow[]>([])
 
 /** "Chrome on macOS" from a user agent, like the push labels. */
-function browserName(ua?: string | null) {
+function browserName(ua?: string | null): string {
   if (!ua) return t('settings.unknownBrowser')
+  if (ua.startsWith(EXTENSION_UA_PREFIX)) {
+    return `${t('settings.extension')} · ${browserName(ua.slice(EXTENSION_UA_PREFIX.length).trim())}`
+  }
   const browser = /Edg\//.test(ua)
     ? 'Edge'
     : /Firefox\//.test(ua)
@@ -93,7 +98,14 @@ async function stopPush(row: PushRow) {
         :key="row.id"
         class="flex items-center gap-3 border-t border-(--omb-border-muted) py-3"
       >
-        <UIcon name="i-lucide-monitor-smartphone" class="size-[18px] text-(--omb-text-muted)" />
+        <UIcon
+          :name="
+            row.userAgent?.startsWith(EXTENSION_UA_PREFIX)
+              ? 'i-lucide-puzzle'
+              : 'i-lucide-monitor-smartphone'
+          "
+          class="size-[18px] text-(--omb-text-muted)"
+        />
         <div class="flex min-w-0 flex-1 flex-col">
           <span class="text-sm font-medium">
             {{ browserName(row.userAgent) }}
