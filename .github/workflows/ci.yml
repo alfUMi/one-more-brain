@@ -31,6 +31,8 @@ jobs:
           name: one-more-brain-extension
           path: apps/extension/.output/*.zip
           if-no-files-found: error
+          # WXT writes to .output, a hidden folder that upload-artifact skips by default.
+          include-hidden-files: true
 
   android:
     needs: check
