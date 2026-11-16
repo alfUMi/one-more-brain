@@ -6,3 +6,6 @@ packages/db/src/generated
 packages/db/prisma/migrations
 docs
 .wxt
+apps/mobile/android
+apps/mobile/ios
+apps/mobile/dist

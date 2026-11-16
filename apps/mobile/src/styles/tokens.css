@@ -131,8 +131,9 @@
   --omb-accent-soft: #2a2f38;
 }
 
-/* Ionic follows our tokens. */
-:root {
+/* Ionic follows our tokens (also over its dark palette, which sets its own on body). */
+:root,
+html.ion-palette-dark.dark {
   --ion-font-family: 'Inter Variable', Inter, system-ui, sans-serif;
   --ion-background-color: var(--omb-bg);
   --ion-background-color-rgb: 245, 246, 248;
@@ -153,7 +154,8 @@
   --ion-color-step-50: var(--omb-surface-muted);
   --ion-overlay-background-color: var(--omb-surface);
 }
-:root.dark {
+html.dark,
+html.ion-palette-dark.dark {
   --ion-background-color-rgb: 15, 17, 21;
   --ion-text-color-rgb: 232, 234, 238;
 }

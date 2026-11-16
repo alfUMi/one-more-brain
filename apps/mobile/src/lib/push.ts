@@ -93,6 +93,7 @@ export async function initPush(appRouter: Router) {
     push.status = 'unavailable'
     return
   }
+  push.status = 'off'
   if (platform === 'android') {
     await FirebaseMessaging.createChannel({
       id: 'reminders',
@@ -122,7 +123,8 @@ export async function initPush(appRouter: Router) {
 
 /** Re-registers this phone if notifications are allowed (tokens can rotate). */
 export async function syncPush() {
-  if (push.status === 'unavailable') return
+  // Runs only after initPush found Firebase on this phone.
+  if (!isNative || push.status === 'unavailable' || push.status === 'unknown') return
   const { receive } = await FirebaseMessaging.checkPermissions()
   if (receive === 'denied') {
     push.status = 'denied'

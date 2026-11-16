@@ -17,7 +17,9 @@ const meta = computed(() =>
     formatter.value.relative(props.item.capturedAt),
   ].join(' · '),
 )
-const title = computed(() => props.item.title ?? (props.item.quote ? props.item.pageTitle : null))
+const title = computed(
+  () => props.item.title ?? (props.item.quote || props.item.url ? props.item.pageTitle : null),
+)
 /** Text under the title: the quote for highlights, else the note itself. */
 const body = computed(() => {
   if (props.item.quote) return null

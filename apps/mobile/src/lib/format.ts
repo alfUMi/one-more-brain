@@ -15,6 +15,7 @@ export const formatter = computed(() => {
 export function itemTitle(item: ItemDto): string {
   const text =
     item.title ??
+    (item.kind === 'LINK' ? item.pageTitle : null) ??
     item.body?.split('\n').find((line) => line.trim()) ??
     item.quote ??
     item.pageTitle ??

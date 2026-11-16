@@ -10,6 +10,8 @@ export default createConfigForNuxt({
       '**/.output/**',
       '**/.wxt/**',
       '**/dist/**',
+      'apps/mobile/android/**',
+      'apps/mobile/ios/**',
       'packages/db/src/generated/**',
       'packages/db/prisma/migrations/**',
       'docs/**',

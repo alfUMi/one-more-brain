@@ -50,8 +50,10 @@ watch(
 )
 
 onMounted(async () => {
+  if (isNative) void SplashScreen.hide().catch(() => undefined)
+  // Shares can arrive any moment (also the one that launched the app): listen first.
+  await initShare()
   refresh()
-  if (isNative) await SplashScreen.hide().catch(() => undefined)
 
   const status = await Network.getStatus().catch(() => ({ connected: navigator.onLine }))
   store.online = status.connected
@@ -76,8 +78,8 @@ onMounted(async () => {
       .catch(() => void toast(t('mobile.signIn.failed'), { error: true }))
   })
 
-  await initPush(router)
-  await initShare()
+  // Push setup talks to Firebase; it must never hold up the rest of the start.
+  void initPush(router).catch(() => undefined)
 
   // Sends what's waiting every 30 s while the app is open.
   setInterval(() => session.token && void flushOutbox(false), 30_000)

@@ -149,7 +149,7 @@ const cachedNote = computed(() =>
         <IonRefresherContent />
       </IonRefresher>
 
-      <div class="page" :class="view">
+      <div class="page" :class="`view-${view}`">
         <header class="omb-header">
           <h1>{{ t('mobile.tabs.inbox') }}</h1>
           <span v-if="store.inbox.length" class="meta">
@@ -200,6 +200,7 @@ const cachedNote = computed(() =>
               <TriageCard :item="current" />
             </div>
           </main>
+          <div class="grow" />
 
           <div class="actions">
             <button type="button" class="act" @click="triage(current, 'ARCHIVED')">
@@ -261,7 +262,7 @@ const cachedNote = computed(() =>
 </template>
 
 <style scoped>
-.page.cards {
+.page.view-cards {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -283,8 +284,9 @@ const cachedNote = computed(() =>
 }
 .stack {
   position: relative;
-  flex-grow: 1;
+  flex: 1 1 auto;
   min-height: 360px;
+  max-height: 470px;
   margin: 26px 20px 18px;
 }
 .under {
@@ -380,14 +382,20 @@ const cachedNote = computed(() =>
 }
 .list {
   background: transparent;
-  padding: 10px 16px 0;
+  margin: 0;
+  padding: 10px 16px 0 !important;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+.list + .hint {
+  margin-top: 10px;
+}
 .list-item {
   --background: transparent;
   --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-start: 0;
   --inner-padding-end: 0;
   --min-height: 0;
 }
