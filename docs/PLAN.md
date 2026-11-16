@@ -191,7 +191,8 @@ Each phase ends with something usable every day. Checked items are done (with th
 - [x] CI builds and zips the extension (artifact on each run; install steps in [DEPLOY.md](./DEPLOY.md) §6). `ef8817f`
 - [x] **Done when:** saving a highlight takes one right-click and shows up in the web Inbox. Tested by the owner 2026-11-16.
 
-### Phase 3: Telegram bot + voice 🚧
+### Phase 3: Telegram bot + voice ⏸
+Postponed by the owner on 2026-11-16; Phase 4 goes first.
 Spec: the "Telegram bot" artboard and the voice card + mic button in "Main" ([mockups](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL)). The morning digest in the bot artboard is Phase 4.
 - [ ] Bot plumbing: grammY bot in `apps/web`, webhook `POST /api/v1/telegram/webhook` (secret-token header), long polling in dev, Telegram sender in `packages/notify`.
 - [ ] Account linking: one-time token (10 min) → `t.me/<bot>?start=<token>` → `Channel(kind=TELEGRAM)`. Settings › Telegram: Connect, connected chat, Disconnect, send a test message.
@@ -204,11 +205,15 @@ Spec: the "Telegram bot" artboard and the voice card + mic button in "Main" ([mo
 - [ ] Deploy: env vars, webhook registered on rollout, [DEPLOY.md](./DEPLOY.md) steps (BotFather, STT key).
 - [ ] **Done when:** I can forward a voice message to the bot from my phone and get reminded later.
 
-### Phase 4: Resurfacing
-- Daily digest (per-user time + timezone) across all channels.
-- Spaced repetition: "Remember" action, Review screen, review prompts in the digest.
-- On-this-day on the Today view and in the digest.
-- **Done when:** the morning digest arrives every day and I review old notes from it.
+### Phase 4: Resurfacing 🚧
+Telegram is postponed (Phase 3), so the digest goes out as a push notification for now; Telegram delivery is added with Phase 3.
+- [x] Spaced repetition: "Remember" action, review steps, Review page and sidebar count. `30ee310` `1b6c675`
+- [x] On this day on the Inbox side column and the Today view. `1b6c675`
+- [x] Digest scanner in the worker: every minute, users whose local time has passed their digest time and who haven't had today's digest get one job (claimed via `lastDigestOn`, so it's sent once a day). `b3e2175`
+- [x] Digest content: today's reminders, inbox count + oldest age, reviews due, one random kept note ("Remember this?"), on this day. Skipped when there is nothing to say. `b3e2175`
+- [x] Digest delivery to Web Push and extension push: one notification that opens Today, with Got it / Forgot buttons for the review card it shows; Delivery records with type DIGEST. `b3e2175`
+- [x] Settings › Reminders & digest: drop the "phase 4" note, add "Send a test digest now". `b3e2175`
+- [ ] **Done when:** the morning digest arrives every day and I review old notes from it.
 
 ### Phase 5: Mobile app
 - Nuxt SPA + `@nuxtjs/ionic` + Capacitor, sharing the `app-layer` (stores, API client, i18n) with web.
