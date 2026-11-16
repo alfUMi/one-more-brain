@@ -17,6 +17,8 @@ export const auth = betterAuth({
     database: { generateId: () => newId() },
   },
   socialProviders: google ? { google } : {},
+  // The mobile app signs out and revokes devices with its bearer token from its own origin.
+  trustedOrigins: APP_ORIGINS,
   plugins: [
     magicLink({
       expiresIn: 10 * 60,

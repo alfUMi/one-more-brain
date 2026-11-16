@@ -94,8 +94,14 @@ export async function ensureBucket() {
       CORSConfiguration: {
         CORSRules: [
           {
-            // The web app, and the browser extension (its uploads also use presigned URLs).
-            AllowedOrigins: [origin, 'chrome-extension://*'],
+            // The web app, the browser extension and the mobile app (iOS, Android web views):
+            // they all upload with presigned URLs.
+            AllowedOrigins: [
+              origin,
+              'chrome-extension://*',
+              'capacitor://localhost',
+              'https://localhost',
+            ],
             AllowedMethods: ['PUT', 'GET'],
             AllowedHeaders: ['content-type'],
             MaxAgeSeconds: 3600,

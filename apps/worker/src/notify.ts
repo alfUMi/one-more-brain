@@ -1,6 +1,6 @@
 import type { NotifyReminderJob, PrismaClient } from '@omb/db'
-import { sendWebPush, type WebPushTarget } from '@omb/notify'
-import { PUSH_CHANNEL_KINDS, type ReminderPushPayload } from '@omb/shared'
+import { canDeliver, sendToChannel } from '@omb/notify'
+import { NOTIFY_CHANNEL_KINDS, type ReminderPushPayload } from '@omb/shared'
 import { messages } from '@omb/shared/i18n'
 import type { Job } from 'pg-boss'
 import { log } from './log'
@@ -21,7 +21,7 @@ export function notificationTitle(item: {
 }
 
 /**
- * Delivers a fired reminder to each enabled Web Push channel and records a Delivery per channel.
+ * Delivers a fired reminder to each enabled push channel (Web Push and the mobile app) and records a Delivery per channel.
  * Throws when a channel failed for a retryable reason, so pg-boss retries; channels that already
  * got this occurrence are skipped on the retry.
  */
@@ -60,7 +60,7 @@ async function deliver(db: PrismaClient, { reminderId, firedAt }: NotifyReminder
   const [user, channels, alreadySent] = await Promise.all([
     db.user.findUniqueOrThrow({ where: { id: reminder.userId }, select: { locale: true } }),
     db.channel.findMany({
-      where: { userId: reminder.userId, kind: { in: [...PUSH_CHANNEL_KINDS] }, enabled: true },
+      where: { userId: reminder.userId, kind: { in: [...NOTIFY_CHANNEL_KINDS] }, enabled: true },
     }),
     db.delivery.findMany({
       where: { reminderId, status: 'SENT', sentAt: { gte: new Date(firedAt) } },
@@ -86,11 +86,8 @@ async function deliver(db: PrismaClient, { reminderId, firedAt }: NotifyReminder
   const sent = new Set(alreadySent.map((d) => d.channelId))
   let retry = false
   for (const channel of channels) {
-    if (sent.has(channel.id)) continue
-    const result = await sendWebPush(
-      { endpoint: channel.address, keys: channel.keys as WebPushTarget['keys'] },
-      payload,
-    )
+    if (sent.has(channel.id) || !canDeliver(channel)) continue
+    const result = await sendToChannel(channel, payload)
     await db.delivery.create({
       data: {
         userId: reminder.userId,

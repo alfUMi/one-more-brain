@@ -1,10 +1,10 @@
-import { PUSH_CHANNEL_KINDS } from '@omb/shared'
+import { NOTIFY_CHANNEL_KINDS } from '@omb/shared'
 
 /** Browsers subscribed to this user's reminders (Settings › Devices). */
 export default defineEventHandler(async (event) => {
   const userId = await requireUserId(event)
   const channels = await db.channel.findMany({
-    where: { userId, kind: { in: [...PUSH_CHANNEL_KINDS] } },
+    where: { userId, kind: { in: [...NOTIFY_CHANNEL_KINDS] } },
     select: { id: true, label: true, enabled: true, lastSeenAt: true, createdAt: true },
     orderBy: { lastSeenAt: 'desc' },
   })

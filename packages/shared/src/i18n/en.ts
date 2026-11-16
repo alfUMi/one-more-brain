@@ -58,6 +58,15 @@ export default {
       missing:
         'The extension did not answer. Make sure it is installed and enabled in this browser, then try again.',
     },
+    mobile: {
+      title: 'Sign in to the app',
+      body: 'The One More Brain app on your phone will save to your account ({email}). You can sign it out any time in Settings › Devices.',
+      open: 'Open the app',
+      opening: 'Opening the app…',
+      hint: 'If nothing happens, tap "Open the app". The link works once and expires in 2 minutes.',
+      invalid: 'This sign-in link is broken. Start again from the app.',
+      failed: 'Could not sign the app in. Start again from the app.',
+    },
   },
   inbox: {
     title: 'Inbox',
@@ -238,6 +247,7 @@ export default {
     noPushDevices: 'No browser gets reminders yet. Turn them on under Notifications.',
     stopPush: 'Stop',
     extension: 'Extension',
+    mobileApp: 'Mobile app',
     unknownBrowser: 'Unknown browser',
     // Export & data
     exportTitle: 'Export your notes',

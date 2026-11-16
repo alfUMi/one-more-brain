@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { EXTENSION_UA_PREFIX } from '@omb/shared'
+import { EXTENSION_UA_PREFIX, MOBILE_UA_PREFIX } from '@omb/shared'
 
 definePageMeta({ layout: 'settings' })
 const { t } = useI18n()
@@ -30,6 +30,10 @@ function browserName(ua?: string | null): string {
   if (!ua) return t('settings.unknownBrowser')
   if (ua.startsWith(EXTENSION_UA_PREFIX)) {
     return `${t('settings.extension')} · ${browserName(ua.slice(EXTENSION_UA_PREFIX.length).trim())}`
+  }
+  if (ua.startsWith(MOBILE_UA_PREFIX)) {
+    const device = ua.slice(MOBILE_UA_PREFIX.length).trim()
+    return device ? `${t('settings.mobileApp')} · ${device}` : t('settings.mobileApp')
   }
   const browser = /Edg\//.test(ua)
     ? 'Edge'
@@ -102,7 +106,9 @@ async function stopPush(row: PushRow) {
           :name="
             row.userAgent?.startsWith(EXTENSION_UA_PREFIX)
               ? 'i-lucide-puzzle'
-              : 'i-lucide-monitor-smartphone'
+              : row.userAgent?.startsWith(MOBILE_UA_PREFIX)
+                ? 'i-lucide-smartphone'
+                : 'i-lucide-monitor-smartphone'
           "
           class="size-[18px] text-(--omb-text-muted)"
         />

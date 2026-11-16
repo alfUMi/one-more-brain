@@ -19,6 +19,8 @@ export const IMAGE_MIMES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'
 export type ImageMime = (typeof IMAGE_MIMES)[number]
 /** Channels delivered with Web Push (VAPID): the web app and the browser extension. */
 export const PUSH_CHANNEL_KINDS = ['WEB_PUSH', 'EXTENSION_PUSH'] as const
+/** Every channel that gets reminders and the digest: Web Push plus the mobile app (FCM). */
+export const NOTIFY_CHANNEL_KINDS = [...PUSH_CHANNEL_KINDS, 'FCM'] as const
 
 export const MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 
@@ -146,3 +148,24 @@ export const webPushChannelSchema = z.object({
   kind: z.enum(PUSH_CHANNEL_KINDS).default('WEB_PUSH'),
 })
 export type WebPushChannelInput = z.input<typeof webPushChannelSchema>
+
+/** The mobile app's Firebase Cloud Messaging token (Android, and iOS through APNs). */
+export const fcmChannelSchema = z.object({
+  token: z.string().min(20).max(4_096),
+  label: z.string().trim().max(100).optional(),
+})
+export type FcmChannelInput = z.input<typeof fcmChannelSchema>
+
+/**
+ * Mobile sign-in, PKCE style: the app sends a SHA-256 challenge of a secret verifier to the web
+ * sign-in page, gets a one-time code back through its deep link, and trades code + verifier for a
+ * bearer token. A code caught by another app is useless without the verifier.
+ */
+export const mobileChallengeSchema = z.string().regex(/^[A-Za-z0-9_-]{43}$/, 'Bad challenge')
+export const mobileCodeSchema = z.object({ challenge: mobileChallengeSchema })
+export const mobileExchangeSchema = z.object({
+  code: z.string().regex(/^[A-Za-z0-9_-]{20,100}$/),
+  verifier: z.string().regex(/^[A-Za-z0-9_-]{43,128}$/),
+  label: z.string().trim().max(100).optional(),
+})
+export type MobileExchangeInput = z.input<typeof mobileExchangeSchema>

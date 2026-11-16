@@ -1,9 +1,9 @@
 import { fromPrisma, QUEUES, type NotifyDigestJob, type PrismaClient } from '@omb/db'
-import { sendWebPush, type WebPushTarget } from '@omb/notify'
+import { canDeliver, sendToChannel } from '@omb/notify'
 import {
   localDayStart,
   onThisDayWindows,
-  PUSH_CHANNEL_KINDS,
+  NOTIFY_CHANNEL_KINDS,
   toLocal,
   type DigestPushPayload,
 } from '@omb/shared'
@@ -254,7 +254,7 @@ async function deliver(db: PrismaClient, { userId, since, test }: NotifyDigestJo
       select: { id: true, locale: true, timezone: true, digestEnabled: true },
     }),
     db.channel.findMany({
-      where: { userId, kind: { in: [...PUSH_CHANNEL_KINDS] }, enabled: true },
+      where: { userId, kind: { in: [...NOTIFY_CHANNEL_KINDS] }, enabled: true },
     }),
     db.delivery.findMany({
       where: { userId, type: 'DIGEST', status: 'SENT', sentAt: { gte: new Date(since) } },
@@ -263,7 +263,7 @@ async function deliver(db: PrismaClient, { userId, since, test }: NotifyDigestJo
   ])
   if (!user || (!user.digestEnabled && !test)) return
   const sent = new Set(alreadySent.map((d) => d.channelId))
-  const pending = channels.filter((c) => !sent.has(c.id))
+  const pending = channels.filter((c) => !sent.has(c.id) && canDeliver(c))
   if (!pending.length) return
 
   const t = messages[user.locale === 'ru' ? 'ru' : 'en'].digest
@@ -289,10 +289,7 @@ async function deliver(db: PrismaClient, { userId, since, test }: NotifyDigestJo
 
   let retry = false
   for (const channel of pending) {
-    const result = await sendWebPush(
-      { endpoint: channel.address, keys: channel.keys as WebPushTarget['keys'] },
-      payload,
-    )
+    const result = await sendToChannel(channel, payload)
     await db.delivery.create({
       data: {
         userId,
