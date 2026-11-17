@@ -78,6 +78,8 @@ const dx = ref(0)
 const dragging = ref(false)
 const flying = ref<0 | 1 | -1>(0)
 let gesture: Gesture | null = null
+/** When the last drag ended: the click that follows a drag must not open the item. */
+let dragEndedAt = 0
 const THRESHOLD = 110
 
 function attach() {
@@ -87,6 +89,8 @@ function attach() {
   gesture = createGesture({
     el: cardEl.value,
     gestureName: 'triage-swipe',
+    // Above the pull-to-refresh gesture (31), which otherwise claims every touch on the page.
+    gesturePriority: 40,
     threshold: 8,
     direction: 'x',
     onStart: () => {
@@ -97,6 +101,7 @@ function attach() {
     },
     onEnd: (d) => {
       dragging.value = false
+      dragEndedAt = Date.now()
       const item = current.value
       if (item && Math.abs(d.deltaX) > THRESHOLD) {
         const direction = d.deltaX > 0 ? 1 : -1
@@ -126,7 +131,8 @@ const reveal = computed(() => (dx.value > 0 || flying.value > 0 ? 'keep' : 'arch
 const press = useLongPress(() => current.value && openItemMenu(current.value, router))
 
 function openCurrent() {
-  if (current.value && Math.abs(dx.value) < 4) void router.push(`/item/${current.value.id}`)
+  // A drag that sprang back still ends in a click; only a plain tap opens the item.
+  if (current.value && Date.now() - dragEndedAt > 300) void router.push(`/item/${current.value.id}`)
 }
 
 // ── List view ──
