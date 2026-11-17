@@ -69,7 +69,7 @@ jobs:
           printf '%s\n' "$KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
       - name: Copy stack files
-        run: scp -i ~/.ssh/id_deploy docker/compose.prod.yml docker/Caddyfile docker/backup.Dockerfile docker/backup.sh "$USER@$HOST:$DIR/"
+        run: scp -i ~/.ssh/id_deploy docker/compose.prod.yml docker/backup.Dockerfile docker/backup.sh "$USER@$HOST:$DIR/"
       - name: Roll out
         run: |
           ssh -i ~/.ssh/id_deploy "$USER@$HOST" "cd $DIR && \

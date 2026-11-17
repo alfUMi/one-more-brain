@@ -1,13 +1,17 @@
-# TLS certificates are issued automatically for both names (point both DNS records at the VPS).
-{$DOMAIN} {
+# Site blocks for the Caddy already running on the server. Not used by compose: paste them into the
+# server's Caddyfile, replace brain.example.com with DOMAIN (and the ports, if WEB_PORT / S3_PORT are set
+# in .env), then `sudo systemctl reload caddy`. Caddy issues TLS for both names; point both DNS records here.
+
+brain.example.com {
 	encode zstd gzip
-	reverse_proxy web:3000
+	reverse_proxy 127.0.0.1:3000
 }
 
-# Object storage for presigned uploads and downloads from the browser (S3_PUBLIC_ENDPOINT).
-files.{$DOMAIN} {
+# Object storage for presigned uploads and downloads from the browser and the app (S3_PUBLIC_ENDPOINT).
+# The original Host header must reach RustFS (Caddy's default), or presigned signatures stop matching.
+files.brain.example.com {
 	request_body {
 		max_size 20MB
 	}
-	reverse_proxy s3:9000
+	reverse_proxy 127.0.0.1:9000
 }

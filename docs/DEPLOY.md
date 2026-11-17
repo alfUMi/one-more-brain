@@ -2,27 +2,31 @@
 
 Related docs: [ARCHITECTURE.md](./ARCHITECTURE.md) (section 10) · [PLAN.md](./PLAN.md)
 
-One VPS runs everything with Docker Compose: Caddy (TLS), the web app, the worker, Postgres, RustFS
-(object storage) and a nightly backup job. The stack lives in `docker/`; CI builds the app image.
+One VPS runs the stack with Docker Compose: the web app, the worker, Postgres, RustFS (object storage) and a
+nightly backup job. TLS is the Caddy already on the server, shared with its other sites: the stack publishes
+web and storage on 127.0.0.1 only. The stack lives in `docker/`; CI builds the app image.
 
 ```
-caddy :443 ── brain.example.com ──────► web:3000      (Nuxt/Nitro)
-          └── files.brain.example.com ─► s3:9000       (presigned uploads/downloads)
+host caddy :443 ── brain.example.com ──────► 127.0.0.1:3000 → web   (Nuxt/Nitro)
+               └── files.brain.example.com ─► 127.0.0.1:9000 → s3    (presigned uploads/downloads)
 migrate (one-shot) → web, worker → postgres, s3
 backup: 03:00 UTC pg_dump → /backups (14 daily + 8 weekly) → rclone → off-site bucket
 ```
 
 ## 1. One-time server setup
 
-1. A VPS with 2+ GB RAM (4 GB comfortable), Docker Engine and the compose plugin.
-2. DNS: `A`/`AAAA` records for `DOMAIN` and `files.DOMAIN` pointing at the server. Open ports 80 and 443.
+1. A VPS with 2+ GB RAM (4 GB comfortable), Docker Engine, the compose plugin and Caddy installed on the host.
+2. DNS: `A`/`AAAA` records for `DOMAIN` and `files.DOMAIN` pointing at the server.
 3. A deploy user that may run Docker, and the stack directory:
    ```sh
    sudo useradd -m -G docker deploy && sudo install -d -o deploy /opt/omb
    ```
 4. Copy `docker/.env.prod.example` to `/opt/omb/.env` and fill it in (`chmod 600`). Generate secrets with
    `openssl rand -hex 32`, VAPID keys with the command in the file.
-5. If the GitHub package is private, let the server pull it: `docker login ghcr.io` as the deploy user with a
+5. Caddy: paste the two site blocks from [`docker/Caddyfile`](../docker/Caddyfile) into the server's Caddyfile,
+   with your domain (and other ports if `WEB_PORT` / `S3_PORT` are set because 3000 or 9000 are taken), then
+   `sudo systemctl reload caddy`. Deploys never touch it.
+6. If the GitHub package is private, let the server pull it: `docker login ghcr.io` as the deploy user with a
    token that has `read:packages`.
 
 ## 2. Wire up GitHub Actions
@@ -45,7 +49,7 @@ they succeed. Run it by hand from the Actions tab ("Deploy" → Run workflow).
 ## 3. First start (manual alternative)
 
 ```sh
-cd /opt/omb   # with compose.prod.yml, Caddyfile, backup.Dockerfile, backup.sh and .env
+cd /opt/omb   # with compose.prod.yml, backup.Dockerfile, backup.sh and .env
 docker compose -f compose.prod.yml up -d
 docker compose -f compose.prod.yml logs -f web worker
 ```

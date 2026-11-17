@@ -14,7 +14,7 @@ Related docs: [PLAN.md](./PLAN.md) · [DATA-MODEL.md](./DATA-MODEL.md)
         └─────────────────┴───────┬─────────┴─────────────────┘
                                   ▼
                  ┌─────────────────────────────────┐
-                 │  Caddy (TLS, reverse proxy)     │
+                 │  Caddy on the host (TLS, proxy) │
                  └────────────────┬────────────────┘
                                   ▼
  ┌────────────────────────────────────────────────────────────────┐
@@ -63,7 +63,7 @@ one-more-brain/
 │  │                  (IndexedDB · chrome.storage · app files on the phone)
 │  ├─ ai/             Claude client, prompts, structured-output schemas, STT adapter (server-only)
 │  ├─ notify/         WebPush / Telegram senders, digest and app schedule (server-only)
-├─ docker/            compose.dev.yml, compose.prod.yml, Caddyfile, Dockerfiles
+├─ docker/            compose.dev.yml, compose.prod.yml, Caddyfile (host snippet), Dockerfiles
 └─ docs/
 ```
 
@@ -185,8 +185,8 @@ Notification actions call `POST /reminders/:id/snooze` or `PATCH /items/:id` wit
 ## 10. Deployment (VPS)
 
 ```
+host Caddy (shared with other sites; auto TLS) → 127.0.0.1:3000 web, 127.0.0.1:9000 s3
 docker compose (prod)
-├─ caddy      :80/:443 → web:3000          (auto TLS)
 ├─ web        Nuxt/Nitro on Bun             (stateless, can scale ×N)
 ├─ worker     Bun                           (1 replica; scanners use SKIP LOCKED so ×N is safe)
 ├─ postgres   17 + volume

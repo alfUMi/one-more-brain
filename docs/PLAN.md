@@ -167,7 +167,7 @@ Each phase ends with something usable every day. Checked items are done (with th
 - [x] AI enrichment job: title, tags, reminder-intent fallback, OCR for images (Claude Haiku 5.5, per-user monthly token budget). `8265a69`
 - [x] PWA + IndexedDB outbox (offline capture): manifest + icons, offline app shell, outbox in `packages/api-client` (text and images), inbox readable offline. `2aefed2`
 - [x] Settings page: appearance, language, time zone, notifications on this device. `9d965f9`
-- [x] Deploy setup: app image, `compose.prod.yml` (Caddy TLS, migrate, web, worker, Postgres, RustFS), nightly backup with retention + off-site mirror, GHCR build + SSH rollout workflow, runbook in [DEPLOY.md](./DEPLOY.md). `35a219a`
+- [x] Deploy setup: app image, `compose.prod.yml` (migrate, web, worker, Postgres, RustFS), nightly backup with retention + off-site mirror, GHCR build + SSH rollout workflow, runbook in [DEPLOY.md](./DEPLOY.md). `35a219a` (TLS by the host's own Caddy since `CADDYHASH`)
 - [x] First deploy to the VPS: done by hand by the owner, following [DEPLOY.md](./DEPLOY.md).
 - [x] **Match the web mockups** ([mockups](https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL); they are the spec for layout):
   - [x] Inbox: right column with "Up next today", "Remember" (reviews due + Start review) and "On this day". `1b6c675`
