@@ -228,13 +228,13 @@ model Review {
 
 // ───────────────────────── Delivery channels ─────────────────────────
 
-enum ChannelKind { WEB_PUSH EXTENSION_PUSH FCM TELEGRAM }
+enum ChannelKind { WEB_PUSH EXTENSION_PUSH APP TELEGRAM }
 
 model Channel {
   id         String      @id @default(uuid(7)) @db.Uuid
   userId     String      @db.Uuid
   kind       ChannelKind
-  address    String                              // push endpoint / FCM token / Telegram chatId
+  address    String                              // push endpoint / sha256 of the app's schedule key / Telegram chatId
   keys       Json?                               // web push p256dh + auth
   label      String?                             // "Chrome on MacBook", "Pixel 9"
   enabled    Boolean     @default(true)

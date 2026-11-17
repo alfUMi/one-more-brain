@@ -3,6 +3,7 @@ import { IonToggle } from '@ionic/vue'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SettingsShell from '../../components/settings/SettingsShell.vue'
+import { testDigestHere } from '../../lib/notifications'
 import { api, session, updateProfile } from '../../lib/session'
 import { saveFailed, toast } from '../../lib/toast'
 
@@ -30,8 +31,9 @@ async function saveTime() {
 async function test() {
   testing.value = true
   try {
-    const { channels } = await api.testDigest()
-    void toast(channels ? t('settings.digestTestSent') : t('settings.digestTestNoDevices'))
+    // This phone shows its own; browsers with notifications on get one from the server.
+    const [here, { channels }] = await Promise.all([testDigestHere(), api.testDigest()])
+    void toast(here || channels ? t('settings.digestTestSent') : t('settings.digestTestNoDevices'))
   } catch {
     void toast(t('settings.digestTestFailed'), { error: true })
   } finally {

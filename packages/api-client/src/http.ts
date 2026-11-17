@@ -1,7 +1,8 @@
 import type {
+  AppChannelInput,
+  AppSchedule,
   AttachmentInput,
   CreateItemInput,
-  FcmChannelInput,
   ItemDto,
   ItemKind,
   ItemPage,
@@ -185,8 +186,10 @@ export function createApiClient(opts: ApiClientOptions) {
       post<ReminderDto>(`/api/v1/reminders/${id}/snooze`, input),
 
     // Notifications
-    registerFcm: (input: FcmChannelInput) => post<{ id: string }>('/api/v1/push/fcm', input),
-    unregisterFcm: (token: string) => del<null>('/api/v1/push/fcm', { token }),
+    registerApp: (input: AppChannelInput) => post<{ id: string }>('/api/v1/push/app', input),
+    unregisterApp: (key: string) => del<null>('/api/v1/push/app', { key }),
+    notificationSchedule: (opts: { test?: boolean } = {}) =>
+      get<AppSchedule>(`/api/v1/notifications/schedule${opts.test ? '?test=1' : ''}`),
     pushDevices: () => get<PushDeviceRow[]>('/api/v1/push/subscriptions'),
     removePushDevice: (id: string) => del<null>(`/api/v1/push/subscriptions/${id}`),
     testDigest: () => post<{ channels: number }>('/api/v1/digest/test'),

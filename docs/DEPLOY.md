@@ -101,19 +101,12 @@ CI builds an Android debug APK for the `APP_URL` repository variable and attache
 installs from that source. Open the app → enter your email → open the link from the email **on the phone** →
 it comes back to the app signed in (or use Google, if the server has it). The phone shows up in Settings → Devices.
 
-**Push notifications (optional, needs a Firebase project):**
-1. Firebase console → add a project → add an Android app with id `app.onemorebrain.mobile` (and an iOS app with
-   the same bundle id). Download `google-services.json` / `GoogleService-Info.plist`.
-2. Android: store `google-services.json` as the `GOOGLE_SERVICES_JSON` repository secret (CI writes it into the
-   build), or put it in `apps/mobile/android/app/` for local builds. iOS: add `GoogleService-Info.plist` to
-   `apps/mobile/ios/App/App/` in Xcode, enable the Push Notifications capability, and upload your APNs key in
-   Firebase → Project settings → Cloud Messaging.
-3. Server: Firebase → Project settings → Service accounts → Generate new private key. Put the JSON (one line or
-   base64) in `FIREBASE_SERVICE_ACCOUNT` in the server `.env`, restart `web` and `worker`.
-4. In the app: Settings → Notifications → turn on. Reminders and the digest then arrive on the phone; on iOS they
-   carry Done / Snooze / Tomorrow and Got it / Forgot buttons.
-
-Without these files the app works normally and Settings → Notifications says push isn't set up.
+**Notifications** need no setup and no push service. The app schedules reminders and the daily digest on the
+phone itself (local notifications) from `GET /api/v1/notifications/schedule`: on start, on resume, after every
+change, and in the background every 30 minutes or so (Android; iOS decides when). Turn them on in Settings →
+Notifications. Reminders added on another device reach the phone at its next sync. On Android 12+, allow exact
+alarms when the app asks, or reminders may come a few minutes late. Reminders carry Done / Snooze 1 h / Tomorrow,
+the digest Got it / Forgot, on both Android and iOS.
 
 **iOS / TestFlight:** needs an Apple Developer account. `bun run --cwd apps/mobile ios` builds and opens Xcode;
 pick your team under Signing, then Product → Archive → Distribute → TestFlight.

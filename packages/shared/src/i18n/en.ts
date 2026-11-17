@@ -487,11 +487,15 @@ export default {
       notificationsOn: 'On for this phone',
       notificationsOff: 'Off',
       pushThisPhone: 'Reminders on this phone',
-      pushOn: 'On. Reminders and the daily digest arrive as notifications.',
+      pushOn:
+        'On. Reminders and the daily digest are scheduled on this phone and show even offline.',
       pushOff: 'Off. Turn on to get reminders as notifications.',
       pushDenied: 'Notifications are off for One More Brain in the phone settings.',
-      pushUnavailable:
-        'Push is not set up in this build yet. Reminders still show up in Today and on your other devices.',
+      pushUnavailable: 'Notifications work in the app on a phone.',
+      pushSync:
+        'Reminders you add on other devices reach this phone when the app syncs: when you open it, and in the background every so often.',
+      exactOff: 'Reminders may come a few minutes late: exact alarms are off for this app.',
+      exactFix: 'Allow exact alarms',
       openPhoneSettings: 'Open phone settings',
       soon: 'Phase {n}',
       places: 'Places',

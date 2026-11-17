@@ -6,6 +6,7 @@ import {
   type ReminderDto,
   type SnoozePreset,
 } from '@omb/shared'
+import { remindersChanged } from './changes'
 import { isNative } from './config'
 import { formatter } from './format'
 import { t } from './i18n'
@@ -38,6 +39,7 @@ export async function setStatus(item: ItemDto, status: ItemStatus): Promise<Item
   try {
     const saved = await api.update(item.id, { status })
     upsertItem(saved)
+    remindersChanged()
     if (status !== 'INBOX') {
       void toast(t(STATUS_TOAST[status]), {
         undo: () =>
@@ -77,6 +79,7 @@ export async function remind(item: ItemDto, choice: RemindChoice): Promise<ItemD
     })
     const saved = { ...item, reminders: [...item.reminders, reminder] }
     upsertItem(saved)
+    remindersChanged()
     tap()
     void toast(t('toasts.reminderSet', { when: formatter.value.reminder(reminder) }))
     void loadToday()
@@ -90,6 +93,7 @@ export async function remind(item: ItemDto, choice: RemindChoice): Promise<ItemD
 async function refetch(item: ItemDto): Promise<ItemDto> {
   const fresh = await api.get(item.id)
   upsertItem(fresh)
+  remindersChanged()
   void loadToday()
   return fresh
 }
@@ -118,6 +122,8 @@ export async function saveBody(item: ItemDto, body: string): Promise<ItemDto | n
   try {
     const saved = await api.update(item.id, { body: body.trim() ? body : null })
     upsertItem(saved)
+    // The title in its notifications comes from the text.
+    remindersChanged()
     return saved
   } catch {
     void saveFailed()
@@ -141,6 +147,7 @@ export async function removeItem(item: ItemDto): Promise<boolean> {
   dropItem(item.id)
   try {
     await api.remove(item.id)
+    remindersChanged()
     void toast(t('toasts.deleted'))
     void loadToday()
     return true
@@ -154,6 +161,7 @@ export async function removeItem(item: ItemDto): Promise<boolean> {
 export async function reminderDone(reminderId: string) {
   try {
     await api.updateReminder(reminderId, { status: 'DONE' })
+    remindersChanged()
     tap(ImpactStyle.Medium)
     void toast(t('today.markedDone'))
   } catch {
@@ -165,6 +173,7 @@ export async function reminderDone(reminderId: string) {
 export async function snooze(reminderId: string, preset: SnoozePreset) {
   try {
     const r = await api.snooze(reminderId, { preset })
+    remindersChanged()
     tap()
     void toast(t('today.snoozed', { when: formatter.value.when(r.fireAt ?? new Date()) }))
   } catch {

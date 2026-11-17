@@ -295,7 +295,7 @@ model Review {
 enum ChannelKind {
   WEB_PUSH
   EXTENSION_PUSH
-  FCM
+  APP
   TELEGRAM
 }
 

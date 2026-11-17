@@ -3,7 +3,7 @@ import { alertController } from '@ionic/vue'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SettingsShell from '../../components/settings/SettingsShell.vue'
-import { disablePush } from '../../lib/push'
+import { disableNotifications } from '../../lib/notifications'
 import { session, signOut, updateProfile } from '../../lib/session'
 import { saveFailed, toast } from '../../lib/toast'
 
@@ -35,7 +35,7 @@ async function confirmSignOut() {
   await alert.present()
   const { role } = await alert.onDidDismiss()
   if (role !== 'destructive') return
-  await disablePush({ remember: false })
+  await disableNotifications({ remember: false })
   await signOut()
 }
 </script>

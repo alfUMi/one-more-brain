@@ -3,17 +3,23 @@ import { IonToggle, onIonViewWillEnter } from '@ionic/vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SettingsShell from '../../components/settings/SettingsShell.vue'
-import { disablePush, enablePush, push, syncPush } from '../../lib/push'
+import {
+  disableNotifications,
+  enableNotifications,
+  fixExactAlarms,
+  notifications,
+  syncNotifications,
+} from '../../lib/notifications'
 import { toast } from '../../lib/toast'
 
-/** Settings › Notifications: push on this phone. */
+/** Settings › Notifications: reminders and the digest scheduled on this phone. */
 const { t } = useI18n()
 const busy = ref(false)
 
-onIonViewWillEnter(() => void syncPush())
+onIonViewWillEnter(() => void syncNotifications())
 
 const text = computed(() => {
-  switch (push.status) {
+  switch (notifications.status) {
     case 'on':
       return t('mobile.settings.pushOn')
     case 'denied':
@@ -29,8 +35,8 @@ async function toggle(event: CustomEvent<{ checked: boolean }>) {
   busy.value = true
   try {
     if (event.detail.checked) {
-      if (!(await enablePush())) void toast(text.value)
-    } else await disablePush()
+      if (!(await enableNotifications())) void toast(text.value)
+    } else await disableNotifications()
   } finally {
     busy.value = false
   }
@@ -46,8 +52,8 @@ async function toggle(event: CustomEvent<{ checked: boolean }>) {
     <div class="group">
       <div class="row">
         <IonToggle
-          :checked="push.status === 'on'"
-          :disabled="busy || push.status === 'unavailable'"
+          :checked="notifications.status === 'on'"
+          :disabled="busy || notifications.status === 'unavailable'"
           justify="space-between"
           class="toggle"
           @ion-change="toggle"
@@ -57,7 +63,13 @@ async function toggle(event: CustomEvent<{ checked: boolean }>) {
       </div>
     </div>
     <p class="omb-hint note" role="status">{{ text }}</p>
-    <p class="omb-hint note">{{ t('settings.digestChannels') }}</p>
+    <template v-if="notifications.status === 'on' && !notifications.exact">
+      <p class="omb-hint note">{{ t('mobile.settings.exactOff') }}</p>
+      <button type="button" class="omb-btn" @click="fixExactAlarms">
+        {{ t('mobile.settings.exactFix') }}
+      </button>
+    </template>
+    <p class="omb-hint note">{{ t('mobile.settings.pushSync') }}</p>
   </SettingsShell>
 </template>
 

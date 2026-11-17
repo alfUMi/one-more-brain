@@ -8,7 +8,7 @@ import AppIcon from '../../components/AppIcon.vue'
 import SettingsShell from '../../components/settings/SettingsShell.vue'
 import { accentHex, asAccent, asTheme } from '../../lib/appearance'
 import { APP_HOST, APP_VERSION } from '../../lib/config'
-import { disablePush, push } from '../../lib/push'
+import { disableNotifications, notifications } from '../../lib/notifications'
 import { api, session, signOut, updateProfile } from '../../lib/session'
 import { saveFailed } from '../../lib/toast'
 
@@ -46,7 +46,7 @@ const digestValue = computed(() =>
     : t('mobile.settings.notificationsOff'),
 )
 const pushValue = computed(() =>
-  push.status === 'on'
+  notifications.status === 'on'
     ? t('mobile.settings.notificationsOn')
     : t('mobile.settings.notificationsOff'),
 )
@@ -63,7 +63,7 @@ async function confirmSignOut() {
   await alert.present()
   const { role } = await alert.onDidDismiss()
   if (role !== 'destructive') return
-  await disablePush({ remember: false })
+  await disableNotifications({ remember: false })
   await signOut()
 }
 </script>

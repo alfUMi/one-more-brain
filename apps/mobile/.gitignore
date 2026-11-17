@@ -1,4 +1,1 @@
 dist
-# Firebase config files are per project; see docs/DEPLOY.md
-android/app/google-services.json
-ios/App/App/GoogleService-Info.plist

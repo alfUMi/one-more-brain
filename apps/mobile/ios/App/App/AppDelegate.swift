@@ -1,6 +1,6 @@
 import UIKit
 import Capacitor
-import UserNotifications
+import CapacitorBackgroundRunner
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -8,39 +8,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        registerNotificationCategories()
+        // Refreshes the notification schedule now and then while the app is closed
+        // (public/runners/background.js). Notifications themselves are local: no push service.
+        BackgroundRunnerPlugin.registerBackgroundTask()
+        BackgroundRunnerPlugin.handleApplicationDidFinishLaunching(launchOptions: launchOptions)
         return true
-    }
-
-    /// Buttons on reminder and digest notifications. The ids match the server's push payload
-    /// (`category` in packages/notify/src/fcm.ts); the app handles them in src/lib/push.ts.
-    private func registerNotificationCategories() {
-        let ru = Locale.preferredLanguages.first?.hasPrefix("ru") ?? false
-        func action(_ id: String, _ en: String, _ russian: String) -> UNNotificationAction {
-            UNNotificationAction(identifier: id, title: ru ? russian : en, options: [.foreground])
-        }
-        let reminder = UNNotificationCategory(
-            identifier: "reminder",
-            actions: [
-                action("done", "Done", "Готово"),
-                action("snooze-1h", "Snooze 1 h", "Отложить на 1 ч"),
-                action("snooze-tomorrow", "Tomorrow", "Завтра"),
-            ],
-            intentIdentifiers: [])
-        let review = UNNotificationCategory(
-            identifier: "digest-review",
-            actions: [action("review-got", "Got it", "Помню"), action("review-forgot", "Forgot", "Забыл")],
-            intentIdentifiers: [])
-        let digest = UNNotificationCategory(identifier: "digest", actions: [], intentIdentifiers: [])
-        UNUserNotificationCenter.current().setNotificationCategories([reminder, review, digest])
-    }
-
-    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)
-    }
-
-    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

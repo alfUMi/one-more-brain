@@ -1,27 +1,13 @@
 import type { NotifyReminderJob, PrismaClient } from '@omb/db'
-import { canDeliver, sendToChannel } from '@omb/notify'
-import { NOTIFY_CHANNEL_KINDS, type ReminderPushPayload } from '@omb/shared'
+import { canDeliver, notificationTitle, sendToChannel } from '@omb/notify'
+import { PUSH_CHANNEL_KINDS, type ReminderPushPayload } from '@omb/shared'
 import { messages } from '@omb/shared/i18n'
 import type { Job } from 'pg-boss'
 import { log } from './log'
 
-/** Short notification title from whatever the item has. */
-export function notificationTitle(item: {
-  title: string | null
-  body: string | null
-  quote: string | null
-  pageTitle: string | null
-  url: string | null
-}): string | null {
-  const text =
-    item.title ?? item.body?.split('\n').find((line) => line.trim()) ?? item.quote ?? item.pageTitle
-  const title = text?.trim() || item.url
-  if (!title) return null
-  return title.length > 120 ? `${title.slice(0, 119)}…` : title
-}
-
 /**
- * Delivers a fired reminder to each enabled push channel (Web Push and the mobile app) and records a Delivery per channel.
+ * Delivers a fired reminder to each enabled Web Push channel and records a Delivery per channel.
+ * The mobile app is not a channel here: it schedules the same reminders on the phone itself.
  * Throws when a channel failed for a retryable reason, so pg-boss retries; channels that already
  * got this occurrence are skipped on the retry.
  */
@@ -60,7 +46,7 @@ async function deliver(db: PrismaClient, { reminderId, firedAt }: NotifyReminder
   const [user, channels, alreadySent] = await Promise.all([
     db.user.findUniqueOrThrow({ where: { id: reminder.userId }, select: { locale: true } }),
     db.channel.findMany({
-      where: { userId: reminder.userId, kind: { in: [...NOTIFY_CHANNEL_KINDS] }, enabled: true },
+      where: { userId: reminder.userId, kind: { in: [...PUSH_CHANNEL_KINDS] }, enabled: true },
     }),
     db.delivery.findMany({
       where: { reminderId, status: 'SENT', sentAt: { gte: new Date(firedAt) } },

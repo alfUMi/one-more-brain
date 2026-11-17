@@ -1,30 +1,14 @@
 import { fromPrisma, QUEUES, type NotifyDigestJob, type PrismaClient } from '@omb/db'
-import { canDeliver, sendToChannel } from '@omb/notify'
-import {
-  localDayStart,
-  onThisDayWindows,
-  NOTIFY_CHANNEL_KINDS,
-  toLocal,
-  type DigestPushPayload,
-} from '@omb/shared'
-import { messages, type DeepStringRecord } from '@omb/shared/i18n'
+import { canDeliver, composeDigest, loadDigest, sendToChannel } from '@omb/notify'
+import { PUSH_CHANNEL_KINDS, toLocal, type DigestPushPayload } from '@omb/shared'
+import { messages } from '@omb/shared/i18n'
 import type { Job, PgBoss } from 'pg-boss'
 import { log } from './log'
-import { notificationTitle } from './notify'
+
+export { composeDigest, loadDigest, type DigestContent } from '@omb/notify'
 
 /** A digest that is more than this late (worker down all morning) is skipped, not sent at noon. */
 export const DIGEST_LATE_MINUTES = 180
-
-type Ago = 'week' | 'month' | 'year'
-type DigestStrings = DeepStringRecord<(typeof messages)['en']['digest']>
-
-interface TextFields {
-  title: string | null
-  body: string | null
-  quote: string | null
-  pageTitle: string | null
-  url: string | null
-}
 
 // ───────────────────────── When ─────────────────────────
 
@@ -95,151 +79,9 @@ export async function scanDigests(db: PrismaClient, boss: PgBoss, now = new Date
   })
 }
 
-// ───────────────────────── What ─────────────────────────
-
-export interface DigestContent {
-  /** Today's reminders still to come, in order: local "HH:MM" and the item's text. */
-  reminders: { time: string; text: string }[]
-  inbox: { count: number; oldestCapturedAt: Date | null }
-  reviewsDue: number
-  /** The first review card due; Got it / Forgot answer it from the notification. */
-  review: { itemId: string; text: string } | null
-  /** A random kept note, shown when no review is due. */
-  pastNote: string | null
-  onThisDay: { ago: Ago; text: string } | null
-}
-
-const clip = (text: string, max: number) => {
-  const flat = text.replace(/\s+/g, ' ').trim()
-  return flat.length > max ? `${flat.slice(0, max - 1)}…` : flat
-}
-
-const fill = (template: string, values: Record<string, string | number>) =>
-  template.replace(/\{(\w+)\}/g, (_, key: string) => String(values[key] ?? ''))
-
-function age(since: Date, now: Date, t: DigestStrings) {
-  const hours = Math.max(1, Math.floor((now.getTime() - since.getTime()) / 3_600_000))
-  return hours < 24 ? fill(t.hours, { n: hours }) : fill(t.days, { n: Math.floor(hours / 24) })
-}
-
-/** The notification text, or null when there is nothing worth sending (unless it's a test). */
-export function composeDigest(
-  c: DigestContent,
-  t: DigestStrings,
-  now: Date,
-  test = false,
-): { title: string; body: string } | null {
-  const lines: string[] = []
-  if (c.reminders.length) {
-    const shown = c.reminders.slice(0, 3).map((r) => `${r.time} ${clip(r.text, 40)}`)
-    if (c.reminders.length > 3) shown.push(fill(t.more, { n: c.reminders.length - 3 }))
-    lines.push(fill(t.reminders, { list: shown.join(' · ') }))
-  }
-  if (c.inbox.count === 1) lines.push(t.inboxOne)
-  else if (c.inbox.count > 1) {
-    const oldest = c.inbox.oldestCapturedAt
-    lines.push(fill(t.inbox, { n: c.inbox.count, age: oldest ? age(oldest, now, t) : '' }))
-  }
-  if (c.reviewsDue > 1) lines.push(fill(t.reviews, { n: c.reviewsDue }))
-  if (c.review) lines.push(fill(t.rememberThis, { text: clip(c.review.text, 90) }))
-  else if (c.pastNote) lines.push(fill(t.fromPast, { text: clip(c.pastNote, 90) }))
-  if (c.onThisDay) lines.push(`${t.ago[c.onThisDay.ago]}: ${clip(c.onThisDay.text, 70)}`)
-
-  if (!lines.length) {
-    if (!test) return null
-    lines.push(t.nothing)
-  }
-  return { title: test ? t.testTitle : t.title, body: lines.join('\n') }
-}
-
-/** What the review card shows: the quote for highlights, else the usual title. */
-const cardText = (item: TextFields) => item.quote ?? notificationTitle(item)
-
-const textSelect = { title: true, body: true, quote: true, pageTitle: true, url: true } as const
-
-export async function loadDigest(
-  db: PrismaClient,
-  user: { id: string; timezone: string },
-  now: Date,
-): Promise<DigestContent> {
-  const userId = user.id
-  const tz = user.timezone
-  const endOfToday = localDayStart(now, tz, 1)
-  const dueReview = { userId, graduatedAt: null, nextAt: { lte: now }, item: { deletedAt: null } }
-
-  const [reminders, inboxCount, oldest, reviewsDue, review, ...past] = await Promise.all([
-    db.reminder.findMany({
-      where: {
-        userId,
-        deletedAt: null,
-        isAiSuggested: false,
-        status: 'ACTIVE',
-        fireAt: { gte: now, lt: endOfToday },
-        item: { deletedAt: null },
-      },
-      select: { fireAt: true, item: { select: textSelect } },
-      orderBy: { fireAt: 'asc' },
-      take: 20,
-    }),
-    db.item.count({ where: { userId, deletedAt: null, status: 'INBOX' } }),
-    db.item.findFirst({
-      where: { userId, deletedAt: null, status: 'INBOX' },
-      orderBy: { capturedAt: 'asc' },
-      select: { capturedAt: true },
-    }),
-    db.review.count({ where: dueReview }),
-    db.review.findFirst({
-      where: dueReview,
-      orderBy: { nextAt: 'asc' },
-      select: { itemId: true, item: { select: textSelect } },
-    }),
-    ...onThisDayWindows(now, tz).map(async ({ ago, start, end }) => {
-      const item = await db.item.findFirst({
-        where: {
-          userId,
-          deletedAt: null,
-          status: { not: 'DONE' },
-          capturedAt: { gte: start, lt: end },
-        },
-        orderBy: { capturedAt: 'asc' },
-        select: textSelect,
-      })
-      const text = item && notificationTitle(item)
-      return text ? { ago, text } : null
-    }),
-  ])
-
-  let pastNote: string | null = null
-  if (!review) {
-    const [kept] = await db.$queryRaw<TextFields[]>`
-      SELECT title, body, quote, "pageTitle", url FROM "Item"
-      WHERE "userId" = ${userId}::uuid AND status = 'KEPT' AND "deletedAt" IS NULL
-      ORDER BY random() LIMIT 1`
-    pastNote = kept ? cardText(kept) : null
-  }
-
-  const time = (d: Date) => {
-    const l = localDate(d, tz)
-    return `${String(l.hour).padStart(2, '0')}:${String(l.minute).padStart(2, '0')}`
-  }
-  const reviewText = review && cardText(review.item)
-  return {
-    reminders: reminders.flatMap((r) => {
-      const text = notificationTitle(r.item)
-      return text && r.fireAt ? [{ time: time(r.fireAt), text }] : []
-    }),
-    inbox: { count: inboxCount, oldestCapturedAt: oldest?.capturedAt ?? null },
-    reviewsDue,
-    review: review && reviewText ? { itemId: review.itemId, text: reviewText } : null,
-    pastNote,
-    // The year-old note is the most surprising, so it wins.
-    onThisDay: past.filter((x) => x !== null).at(-1) ?? null,
-  }
-}
-
 // ───────────────────────── Delivery ─────────────────────────
 
-/** pg-boss handler: builds the digest and sends it to every enabled push channel once. */
+/** pg-boss handler: builds the digest and sends it to every enabled Web Push channel once (the app schedules its own). */
 export function notifyDigest(db: PrismaClient) {
   return async (jobs: Job<NotifyDigestJob>[]) => {
     for (const job of jobs) await deliver(db, job.data)
@@ -254,7 +96,7 @@ async function deliver(db: PrismaClient, { userId, since, test }: NotifyDigestJo
       select: { id: true, locale: true, timezone: true, digestEnabled: true },
     }),
     db.channel.findMany({
-      where: { userId, kind: { in: [...NOTIFY_CHANNEL_KINDS] }, enabled: true },
+      where: { userId, kind: { in: [...PUSH_CHANNEL_KINDS] }, enabled: true },
     }),
     db.delivery.findMany({
       where: { userId, type: 'DIGEST', status: 'SENT', sentAt: { gte: new Date(since) } },

@@ -91,6 +91,25 @@ export interface DigestPushPayload {
 
 export type PushPayload = ReminderPushPayload | DigestPushPayload
 
+/**
+ * What the mobile app schedules as local notifications on the phone (no push service involved).
+ * `key` names one occurrence, so the app and its background refresh never show it twice.
+ */
+export interface AppSchedule {
+  generatedAt: string
+  reminders: { key: string; reminderId: string; itemId: string; at: string; title: string }[]
+  /** The next daily digest, with today's content as it stands now; null when off or empty. */
+  digest: {
+    key: string
+    at: string
+    title: string
+    body: string
+    reviewItemId: string | null
+  } | null
+  /** The reminder body text in the user's language (the background runner has no i18n). */
+  reminderBody: string
+}
+
 /** Where a reminder stands within today (Today › Reminders panel). */
 /** past = a recurring reminder that already fired today and moved on to its next date. */
 export type TodayState = 'done' | 'past' | 'missed' | 'next' | 'later'

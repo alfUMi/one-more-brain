@@ -19,8 +19,8 @@ export const IMAGE_MIMES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'
 export type ImageMime = (typeof IMAGE_MIMES)[number]
 /** Channels delivered with Web Push (VAPID): the web app and the browser extension. */
 export const PUSH_CHANNEL_KINDS = ['WEB_PUSH', 'EXTENSION_PUSH'] as const
-/** Every channel that gets reminders and the digest: Web Push plus the mobile app (FCM). */
-export const NOTIFY_CHANNEL_KINDS = [...PUSH_CHANNEL_KINDS, 'FCM'] as const
+/** Every device that gets reminders and the digest: Web Push plus the mobile app (APP), which schedules them itself. */
+export const NOTIFY_CHANNEL_KINDS = [...PUSH_CHANNEL_KINDS, 'APP'] as const
 
 export const MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 
@@ -149,12 +149,15 @@ export const webPushChannelSchema = z.object({
 })
 export type WebPushChannelInput = z.input<typeof webPushChannelSchema>
 
-/** The mobile app's Firebase Cloud Messaging token (Android, and iOS through APNs). */
-export const fcmChannelSchema = z.object({
-  token: z.string().min(20).max(4_096),
+/**
+ * The mobile app on one phone. `key` is a random secret the phone keeps; with it, the phone's
+ * background refresh may read its notification schedule, and nothing else.
+ */
+export const appChannelSchema = z.object({
+  key: z.string().min(32).max(128),
   label: z.string().trim().max(100).optional(),
 })
-export type FcmChannelInput = z.input<typeof fcmChannelSchema>
+export type AppChannelInput = z.input<typeof appChannelSchema>
 
 /**
  * Mobile sign-in, PKCE style: the app sends a SHA-256 challenge of a secret verifier to the web

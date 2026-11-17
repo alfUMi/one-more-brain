@@ -10,7 +10,8 @@ import { completeSignIn } from './lib/auth'
 import { isNative } from './lib/config'
 import { t } from './lib/i18n'
 import { flushOutbox, onOutbox } from './lib/outbox'
-import { disablePush, initPush, syncPush } from './lib/push'
+import { remindersChanged } from './lib/changes'
+import { disableNotifications, initNotifications, syncNotifications } from './lib/notifications'
 import { onSignedOut, refreshProfile, session } from './lib/session'
 import { initShare } from './lib/share'
 import { clearStore, loadAll, rememberRecent, store, upsertItem } from './lib/store'
@@ -34,6 +35,8 @@ onOutbox((event) => {
   if (event.type === 'synced') {
     upsertItem(event.item)
     void rememberRecent(event.item)
+    // "Call mom tomorrow 9" captured offline gets its reminder once it syncs.
+    remindersChanged()
   } else if (event.type === 'rejected') {
     void toast(`${t('offline.rejected')}: ${event.error}`, { error: true })
   }
@@ -44,8 +47,19 @@ watch(
   (id, old) => {
     if (id && id !== old) {
       refresh()
-      void syncPush()
+      void syncNotifications()
     }
+  },
+)
+
+// The digest time, its switch, the time zone or the language move or reword notifications.
+watch(
+  () => {
+    const p = session.profile
+    return p && `${p.digestEnabled}|${p.digestTime}|${p.timezone}|${p.locale}`
+  },
+  (now, before) => {
+    if (now && before && now !== before) remindersChanged()
   },
 )
 
@@ -66,7 +80,7 @@ onMounted(async () => {
   await CapApp.addListener('resume', () => {
     void refreshProfile()
     refresh()
-    void syncPush()
+    void syncNotifications()
   })
 
   // Sign-in comes back as onemorebrain://auth?code=…
@@ -78,15 +92,15 @@ onMounted(async () => {
       .catch(() => void toast(t('mobile.signIn.failed'), { error: true }))
   })
 
-  // Push setup talks to Firebase; it must never hold up the rest of the start.
-  void initPush(router).catch(() => undefined)
+  // Notification setup must never hold up the rest of the start.
+  void initNotifications(router).catch(() => undefined)
 
   // Sends what's waiting every 30 s while the app is open.
   setInterval(() => session.token && void flushOutbox(false), 30_000)
 })
 
 // Signing out stops notifications for this phone (they belong to the account).
-onSignedOut(() => void disablePush({ remember: false }))
+onSignedOut(() => void disableNotifications({ remember: false }))
 </script>
 
 <template>

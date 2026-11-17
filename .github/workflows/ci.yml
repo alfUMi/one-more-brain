@@ -51,11 +51,6 @@ jobs:
           distribution: temurin
           java-version: 21
       - run: bun install --frozen-lockfile
-      - name: Firebase config (push), when the secret is set
-        env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        if: env.GOOGLE_SERVICES_JSON != ''
-        run: printf '%s' "$GOOGLE_SERVICES_JSON" > apps/mobile/android/app/google-services.json
       - name: Build the app and sync it into the Android project
         working-directory: apps/mobile
         run: bun run build && bunx cap sync android

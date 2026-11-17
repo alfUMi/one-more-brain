@@ -30,7 +30,7 @@ Related docs: [PLAN.md](./PLAN.md) · [DATA-MODEL.md](./DATA-MODEL.md)
  │ • pg-boss queue       │      │   ai.transcribe, ai.ocr          │
  │ • FTS + pg_trgm       │      │ • minute scanner: due reminders, │
  └───────────────────────┘      │   digests, reviews               │
- ┌───────────────────────┐      │ • senders: WebPush, FCM, Telegram│
+ ┌───────────────────────┐      │ • senders: WebPush, Telegram     │
  │ S3 storage (RustFS)   │◄─────┤                                  │
  │ audio, images         │      └───────┬──────────────┬───────────┘
  └───────────────────────┘              ▼              ▼
@@ -62,7 +62,7 @@ one-more-brain/
 │  ├─ api-client/     typed ofetch client + outbox/sync engine with storage adapters
 │  │                  (IndexedDB · chrome.storage · app files on the phone)
 │  ├─ ai/             Claude client, prompts, structured-output schemas, STT adapter (server-only)
-│  ├─ notify/         WebPush / FCM / Telegram senders (server-only)
+│  ├─ notify/         WebPush / Telegram senders, digest and app schedule (server-only)
 ├─ docker/            compose.dev.yml, compose.prod.yml, Caddyfile, Dockerfiles
 └─ docs/
 ```
@@ -88,7 +88,7 @@ one-more-brain/
 | AI | Claude API: `claude-haiku-5-5` | titles, tags, intent/date fallback, OCR via vision |
 | Speech-to-text | Hosted STT API behind an `Stt` interface | e.g. Whisper-class API; self-hosted faster-whisper later |
 | Dates / recurrence | chrono-node (en, ru), rrule, Temporal polyfill or date-fns-tz | all stored in UTC + IANA tz |
-| Push | web-push (VAPID), firebase-admin (FCM for Android + iOS) | |
+| Push | web-push (VAPID); the mobile app uses local notifications (no push service) | |
 | Telegram | grammY (webhook) | |
 | Email | Resend / SMTP (magic links only) | Mailpit in dev |
 | Observability | pino logs, Sentry, Uptime Kuma | |
@@ -121,7 +121,7 @@ one-more-brain/
 | `POST /items/:id/review` · `POST /reviews/:id/answer {gotIt}` | Spaced repetition |
 | `GET /today` | Due reminders, reviews due, on-this-day |
 | `POST /parse` | Server-side smart-capture preview (AI fallback), used when the local parser is unsure |
-| `GET/POST/DELETE /channels` | Push subscriptions, FCM tokens, Telegram link token |
+| `GET/POST/DELETE /channels` | Push subscriptions, the app's schedule key, Telegram link token |
 | `GET/PATCH /me` | Profile: locale, timezone, digest time, channel prefs |
 | `GET /export` | JSON/Markdown export (Phase 7) |
 | `POST /telegram/webhook` | Telegram updates (secret-token header verified) |
@@ -170,7 +170,7 @@ one-more-brain/
 |---|---|---|
 | `WEB_PUSH` | Web PWA | VAPID Web Push → service worker → `showNotification` with actions |
 | `EXTENSION_PUSH` | Extension | Push in MV3 service worker → `chrome.notifications` with buttons |
-| `FCM` | Android + iOS | firebase-admin → APNs/FCM (`FIREBASE_SERVICE_ACCOUNT`). Buttons via iOS notification categories, handled by `@capacitor-firebase/messaging` |
+| `APP` | Android + iOS | No push. The app fetches `GET /api/v1/notifications/schedule` (the next week of reminders and the next digest) and schedules local notifications with `@capacitor/local-notifications`; `@capacitor/background-runner` refreshes it while the app is closed, authenticated by the phone's schedule key (stored hashed as the channel address). Done / Snooze / Got it / Forgot are notification action types on both platforms |
 | `TELEGRAM` | Bot chat | `sendMessage` with inline keyboard (Done / Snooze / Archive) |
 | Local (geofence) | Mobile | fired on device by the OS geofence callback, no server involved |
 

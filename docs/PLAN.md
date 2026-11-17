@@ -124,7 +124,7 @@ Explicit dates are applied automatically. Dates guessed by AI appear as a sugges
 ### Mobile app (Vue + Ionic + Capacitor; iOS + Android)
 - Opens straight into **capture** (type / voice / camera), with Inbox and Today one tap away.
 - **Share sheet**: share links, text, and images from any app into the Inbox.
-- Push notifications (FCM/APNs) with actions. Local cache for offline viewing and an outbox for offline capture.
+- Reminder and digest notifications with actions (scheduled on the phone, no push service). Local cache for offline viewing and an outbox for offline capture.
 - **Location reminders** ("when I get home") via native geofencing (Phase 6).
 
 ## 5. Reminders & resurfacing

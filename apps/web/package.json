@@ -17,6 +17,7 @@
     "@nuxtjs/i18n": "^10.6.0",
     "@omb/api-client": "workspace:*",
     "@omb/db": "workspace:*",
+    "@omb/notify": "workspace:*",
     "@omb/shared": "workspace:*",
     "@omb/storage": "workspace:*",
     "better-auth": "^1.7.25",
