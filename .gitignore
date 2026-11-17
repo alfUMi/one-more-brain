@@ -10,6 +10,7 @@ coverage
 .env
 .env.*
 !.env.example
+!.env.*.example
 .DS_Store
 packages/db/src/generated
 .wxt
