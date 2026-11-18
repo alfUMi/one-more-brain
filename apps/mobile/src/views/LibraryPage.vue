@@ -159,38 +159,42 @@ const statusLine = computed(() => {
             <AppIcon name="x" :size="16" />
           </button>
         </label>
-        <div class="omb-segment" role="group" :aria-label="t('library.filterByStatus')">
-          <button
-            v-for="s in STATUSES"
-            :key="s"
-            type="button"
-            :aria-pressed="status === s"
-            @click="status = s"
-          >
-            {{ t(`statuses.${s}`) }}
-          </button>
-        </div>
         <div class="pills">
+          <div class="statuses" role="group" :aria-label="t('library.filterByStatus')">
+            <button
+              v-for="s in STATUSES"
+              :key="s"
+              type="button"
+              class="pill"
+              :class="{ on: status === s }"
+              :aria-pressed="status === s"
+              @click="status = s"
+            >
+              {{ t(`statuses.${s}`) }}
+            </button>
+          </div>
           <button type="button" class="pill" :class="{ on: kind }" @click="pickKind">
             {{ kind ? t(`kinds.${kind}`) : t('mobile.library.kind') }}
             <AppIcon name="chevron-down" :size="14" :stroke="2" />
           </button>
+        </div>
+        <div v-if="store.tags.length" class="tags">
           <button
             v-for="x in store.tags"
             :key="x.name"
             type="button"
-            class="pill"
+            class="tag"
             :class="{ on: tag === x.name }"
             :aria-pressed="tag === x.name"
             @click="toggleTag(x.name)"
           >
-            #{{ x.name }}
+            {{ x.name }}
           </button>
         </div>
       </div>
 
       <main class="results">
-        <span v-if="loaded && items.length" class="omb-meta">
+        <span v-if="loaded && items.length" class="omb-meta count">
           {{ t('library.results', { n: items.length }) }}{{ cursor ? '+' : '' }}
         </span>
         <div v-if="loaded && !loading && !items.length" class="omb-empty">
@@ -214,6 +218,7 @@ const statusLine = computed(() => {
           :key="item.id"
           :item="item"
           show-status
+          flat
           @open="router.push(`/item/${item.id}`)"
           @hold="openItemMenu(item, router).then(() => load())"
         />
@@ -227,25 +232,28 @@ const statusLine = computed(() => {
 </template>
 
 <style scoped>
+.omb-header {
+  padding-bottom: 12px;
+}
 .synced {
   font-size: 12px;
   color: var(--omb-text-muted);
 }
 .filters {
-  padding: 6px 16px 0;
+  padding: 0 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 .search {
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 46px;
-  padding: 0 14px;
+  height: 48px;
+  padding: 0 16px;
   background: var(--omb-surface);
-  border: 1px solid var(--omb-border);
-  border-radius: 12px;
+  border-radius: 999px;
+  box-shadow: var(--omb-shadow-sm);
   color: var(--omb-text-muted);
 }
 .search input {
@@ -254,8 +262,11 @@ const statusLine = computed(() => {
   border: 0;
   outline: 0;
   background: transparent;
-  font: 500 16px var(--ion-font-family);
+  font: 400 16px var(--ion-font-family);
   color: var(--omb-text);
+}
+.search input::placeholder {
+  color: var(--omb-text-faint);
 }
 .search input::-webkit-search-cancel-button {
   display: none;
@@ -267,40 +278,69 @@ const statusLine = computed(() => {
   color: var(--omb-text-muted);
   padding: 4px;
 }
-.pills {
+.pills,
+.tags {
   display: flex;
-  gap: 8px;
   overflow-x: auto;
   margin: 0 -16px;
   padding: 0 16px;
   scrollbar-width: none;
 }
-.pills::-webkit-scrollbar {
+.pills {
+  gap: 2px;
+}
+.tags {
+  gap: 6px;
+}
+.pills::-webkit-scrollbar,
+.tags::-webkit-scrollbar {
   display: none;
+}
+.statuses {
+  display: flex;
+  gap: 2px;
 }
 .pill {
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 12px;
-  border: 1px solid var(--omb-border);
+  gap: 4px;
+  height: 32px;
+  padding: 0 14px;
+  border: 0;
   border-radius: 999px;
-  background: var(--omb-surface);
-  font: 500 13px var(--ion-font-family);
-  color: var(--omb-text-toned);
+  background: transparent;
+  font: 500 13.5px var(--ion-font-family);
+  color: var(--omb-icon);
 }
 .pill.on {
-  background: var(--omb-accent-soft);
-  border-color: var(--omb-accent);
-  color: var(--omb-accent);
-  font-weight: 600;
+  background: var(--omb-accent);
+  color: var(--omb-on-accent);
+}
+.tag {
+  flex: none;
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--omb-hover);
+  font: 400 12.5px var(--ion-font-family);
+  color: var(--omb-chip-text);
+}
+.tag.on {
+  background: var(--omb-accent);
+  color: var(--omb-on-accent);
 }
 .results {
   padding: 12px 16px 24px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+}
+.count {
+  display: block;
+  padding: 4px 4px 2px;
+}
+.count + .row {
+  border-top-color: transparent;
 }
 </style>

@@ -34,8 +34,8 @@ const KIND_STYLE: Record<ItemKind, { icon: string; bg: string; fg: string }> = {
   TEXT: { icon: 'i-lucide-align-left', bg: 'var(--omb-kind-bg)', fg: 'var(--omb-kind-text)' },
   HIGHLIGHT: {
     icon: 'i-lucide-highlighter',
-    bg: 'var(--omb-highlight-bg)',
-    fg: 'var(--omb-highlight-text)',
+    bg: 'var(--omb-kind-bg)',
+    fg: 'var(--omb-kind-text)',
   },
   VOICE: { icon: 'i-lucide-mic', bg: 'var(--omb-voice-bg)', fg: 'var(--omb-voice-text)' },
   IMAGE: { icon: 'i-lucide-image', bg: 'var(--omb-image-bg)', fg: 'var(--omb-image-text)' },
@@ -137,22 +137,22 @@ const menu = computed(() => [
 <template>
   <article
     :class="[
-      'flex flex-col rounded-[14px] bg-(--omb-surface) transition-colors',
-      prefs.compactCards ? 'omb-compact gap-2' : 'gap-3',
-      selected
-        ? prefs.compactCards
-          ? 'border-2 border-(--omb-accent) px-[13px] py-[9px]'
-          : 'border-2 border-(--omb-accent) px-[17px] py-[15px]'
-        : prefs.compactCards
-          ? 'border border-(--omb-border) px-3.5 py-2.5'
-          : 'border border-(--omb-border) px-[18px] py-4',
+      'flex flex-col rounded-[18px] transition-[background,box-shadow]',
+      prefs.compactCards ? 'omb-compact gap-2 px-4 py-3' : 'gap-3 px-5 py-[18px]',
+      triage
+        ? 'bg-(--omb-surface) shadow-(--omb-shadow)'
+        : selected
+          ? 'bg-(--omb-surface) shadow-(--omb-shadow)'
+          : 'hover:bg-(--omb-surface)',
+      selected && triage && 'ring-[1.5px] ring-(--omb-accent)/50',
     ]"
     :aria-current="selected || undefined"
     @click="emit('select')"
   >
     <div class="flex gap-3.5">
       <div
-        class="flex size-9 flex-none items-center justify-center rounded-[10px]"
+        v-if="!triage"
+        class="flex size-9 flex-none items-center justify-center rounded-[11px]"
         :style="{ background: kind.bg, color: kind.fg }"
       >
         <UIcon :name="kind.icon" class="size-[18px]" />
@@ -175,11 +175,12 @@ const menu = computed(() => [
           </a>
         </div>
         <div class="flex min-w-0 flex-[1_1_220px] flex-col gap-2">
+          <span v-if="triage" class="omb-meta">
+            {{ t(`mobile.kind.${item.kind}`) }} · {{ t(`sources.${item.source}`) }} ·
+            {{ fmt.relative(item.capturedAt) }}
+          </span>
           <div v-if="heading" class="text-[15px] font-semibold break-words">{{ heading }}</div>
-          <blockquote
-            v-if="item.quote"
-            class="m-0 rounded-lg bg-(--omb-highlight-quote) px-3 py-2 text-[14.5px] leading-normal text-(--omb-quote-text)"
-          >
+          <blockquote v-if="item.quote" class="omb-quote m-0 text-[18px] leading-normal">
             “{{ item.quote }}”
           </blockquote>
 
@@ -219,22 +220,19 @@ const menu = computed(() => [
             <template v-for="r in item.reminders" :key="r.id">
               <template v-if="r.isAiSuggested">
                 <span class="omb-chip omb-chip-rem-ai">
-                  <UIcon name="i-lucide-clock" class="size-3.5" />
                   {{ t('reminder.suggested', { when: fmt.reminder(r) }) }}
                 </span>
                 <button
                   type="button"
-                  class="h-[26px] rounded-full bg-(--omb-rem-solid) px-2.5 text-[12.5px] font-semibold text-(--omb-surface)"
+                  class="h-6 rounded-full bg-(--omb-rem-bg) px-2.5 text-[12px] font-semibold text-(--omb-rem-text)"
                   @click.stop="emit('acceptReminder', r.id)"
                 >
                   {{ t('actions.accept') }}
                 </button>
               </template>
               <span v-else class="omb-chip omb-chip-rem group pr-1">
-                <UIcon
-                  :name="r.kind === 'RECURRING' ? 'i-lucide-repeat' : 'i-lucide-clock'"
-                  class="size-3.5"
-                />
+                <UIcon v-if="r.kind === 'RECURRING'" name="i-lucide-repeat" class="size-3.5" />
+                <span v-else class="omb-rem-dot" />
                 {{ fmt.reminder(r) }}
                 <button
                   type="button"
@@ -257,7 +255,7 @@ const menu = computed(() => [
               :class="['omb-chip', tag.suggested ? 'omb-chip-ai' : 'omb-chip-tag']"
               @click.stop
             >
-              #{{ tag.name }}
+              {{ tag.name }}{{ tag.suggested ? '?' : '' }}
             </NuxtLink>
             <input
               v-if="tagging"
@@ -275,7 +273,7 @@ const menu = computed(() => [
               :href="item.url"
               target="_blank"
               rel="noopener noreferrer"
-              class="omb-meta max-w-64 truncate text-(--omb-link-text)! hover:underline"
+              class="omb-meta max-w-64 truncate underline hover:text-(--omb-text)!"
               @click.stop
             >
               {{ linkLabel }}
@@ -284,11 +282,12 @@ const menu = computed(() => [
               <UIcon name="i-lucide-cloud-off" class="size-3.5" />
               {{ t('offline.pending') }}
             </span>
-            <span class="omb-meta">
+            <span v-if="!triage" class="omb-meta">
               <template v-if="hasAiTags">{{ t('item.aiTags') }} · </template>
-              <template v-if="!triage">{{ t(`statuses.${item.status}`) }} · </template>
-              {{ t(`sources.${item.source}`) }} · {{ fmt.relative(item.capturedAt) }}
+              {{ t(`statuses.${item.status}`) }} · {{ t(`sources.${item.source}`) }} ·
+              {{ fmt.relative(item.capturedAt) }}
             </span>
+            <span v-else-if="hasAiTags" class="omb-meta">{{ t('item.aiTags') }}</span>
           </div>
         </div>
       </div>
@@ -307,27 +306,31 @@ const menu = computed(() => [
     </div>
 
     <div
-      v-if="selected && !pending"
+      v-if="(selected || triage) && !pending"
       role="toolbar"
       :aria-label="t('inbox.triage')"
-      class="flex flex-wrap gap-1.5 border-t border-(--omb-border-muted) pt-3"
+      :class="['flex flex-wrap gap-1.5', !triage && 'pl-[50px]']"
       @click.stop
     >
       <button
         v-for="a in statusActions"
         :key="a.status"
         type="button"
-        :class="['omb-act', a.status === 'KEPT' && triage && 'omb-act-primary']"
+        :class="[
+          'omb-act',
+          a.status === 'KEPT' ? 'order-0' : 'order-3',
+          a.status === 'KEPT' && triage && 'omb-act-primary',
+        ]"
         @click="emit('status', a.status)"
       >
         {{ t(a.label) }} <span v-if="prefs.keyboardHints" class="omb-kbd">{{ a.key }}</span>
       </button>
       <RemindPopover v-model:open="remindOpen" @pick="emit('remind', $event)">
-        <button type="button" class="omb-act">
+        <button type="button" class="omb-act order-2">
           {{ t('actions.remind') }} <span v-if="prefs.keyboardHints" class="omb-kbd">R</span>
         </button>
       </RemindPopover>
-      <button type="button" class="omb-act" @click="emit('remember')">
+      <button type="button" class="omb-act order-1" @click="emit('remember')">
         {{ t('actions.remember') }} <span v-if="prefs.keyboardHints" class="omb-kbd">M</span>
       </button>
     </div>
@@ -346,12 +349,11 @@ const menu = computed(() => [
 .omb-act {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 34px;
-  padding: 0 10px 0 12px;
-  border: 1px solid var(--omb-border);
-  border-radius: 9px;
-  background: var(--omb-surface);
+  gap: 7px;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: var(--omb-chip);
   font-size: 13px;
   font-weight: 500;
   color: var(--omb-text);
@@ -361,7 +363,6 @@ const menu = computed(() => [
 }
 .omb-act-primary,
 .omb-act-primary:hover {
-  border-color: var(--omb-accent);
   background: var(--omb-accent);
   color: var(--omb-on-accent);
 }

@@ -1,101 +1,120 @@
 /*
- * Design tokens from the mockups (same names and values as the web app's main.css).
- * The accent comes from data-accent on <html>; dark from the `dark` class (Settings › Appearance).
+ * Design tokens from the "Calm" mockups: warm off-white, white cards with a soft shadow and no
+ * borders, near-black text, neutral grey chips, amber reminders, black pill buttons.
+ * The accent comes from data-accent on <html> (graphite = black & white is the default);
+ * dark from the `dark` class (Settings › Appearance). Reminders stay amber whatever the accent.
  */
 :root {
-  --omb-bg: #f5f6f8;
+  --omb-bg: #f7f7f5;
   --omb-surface: #ffffff;
-  --omb-surface-muted: #f7f8fa;
-  --omb-hover: #eceef2;
-  --omb-segment: #e9ebef;
-  --omb-border: #e3e5ea;
-  --omb-border-muted: #eef0f3;
-  --omb-text: #15171c;
-  --omb-text-toned: #3c414d;
-  --omb-text-muted: #5b6170;
+  --omb-surface-muted: #f7f7f5;
+  --omb-hover: #ededea;
+  --omb-segment: #f1f1ee;
+  --omb-border: #e3e3df;
+  --omb-border-muted: #ecece9;
+  --omb-divider: #f0f0ed;
+  --omb-text: #111111;
+  --omb-text-toned: #3a3a3a;
+  --omb-text-muted: #6b6b6b;
+  --omb-text-faint: #9a9a9a;
+  --omb-icon: #4a4a4a;
   --omb-on-accent: #ffffff;
-  --omb-tabbar: #ffffff;
+  --omb-tabbar: rgba(247, 247, 245, 0.92);
+  --omb-tab: #8a8a8a;
   --omb-danger: #b42318;
-  --omb-badge: #c2410c;
-  --omb-scrim: rgba(15, 17, 21, 0.45);
+  --omb-scrim: rgba(17, 17, 17, 0.28);
+  --omb-grabber: #dadad6;
+  --omb-node: #bdbdb8;
+  --omb-dot: #cfcfcb;
+  --omb-shadow: 0 1px 2px rgba(17, 17, 17, 0.04), 0 8px 24px rgba(17, 17, 17, 0.05);
+  --omb-shadow-sm: 0 1px 2px rgba(17, 17, 17, 0.04), 0 6px 18px rgba(17, 17, 17, 0.05);
+  --omb-shadow-lg: 0 2px 4px rgba(17, 17, 17, 0.04), 0 18px 40px rgba(17, 17, 17, 0.08);
 
-  --omb-accent: #0f766e;
-  --omb-accent-soft: #e0f2ef;
+  --omb-accent: #111111;
+  --omb-accent-soft: #ededea;
 
-  --omb-keep: #1f7a45;
-  --omb-on-keep: #ffffff;
-  --omb-archive: #5b6170;
-  --omb-rem-bg: #fff1dc;
-  --omb-rem-text: #8a4300;
-  --omb-rem-row: #fff8ee;
-  --omb-tag-bg: #eef1fb;
-  --omb-tag-text: #2b3f9e;
-  --omb-highlight-bg: #fff6d6;
-  --omb-highlight-quote: #fff9e3;
-  --omb-highlight-text: #7a5a00;
-  --omb-kind-bg: #f0f1f4;
-  --omb-kind-text: #3c414d;
-  --omb-voice-bg: #e6f4ec;
-  --omb-voice-text: #1f6b3a;
-  --omb-image-bg: #f1ecff;
-  --omb-image-text: #5b3cc4;
-  --omb-link-bg: #eef1fb;
-  --omb-link-text: #2b3f9e;
-  --omb-link: #2f5bea;
-  --omb-ai-text: #4b5160;
-  --omb-ai-border: #9aa1af;
-  --omb-quote-text: #2a2d35;
-  --omb-inverse-bg: #15171c;
+  /* Keep is the primary action, so it follows the accent. */
+  --omb-keep: var(--omb-accent);
+  --omb-on-keep: var(--omb-on-accent);
+  --omb-archive: #6b6b6b;
+
+  --omb-rem: #d97706;
+  --omb-rem-bg: #fbf6ee;
+  --omb-rem-text: #8a4b00;
+  --omb-rem-row: #fbf6ee;
+
+  --omb-chip-bg: #f1f1ee;
+  --omb-chip-text: #3a3a3a;
+  --omb-tag-bg: var(--omb-chip-bg);
+  --omb-tag-text: var(--omb-chip-text);
+  --omb-ai-text: #6b6b6b;
+  --omb-ai-border: #bdbdb8;
+
+  --omb-highlight-bg: var(--omb-chip-bg);
+  --omb-highlight-quote: transparent;
+  --omb-highlight-text: var(--omb-chip-text);
+  --omb-kind-bg: var(--omb-chip-bg);
+  --omb-kind-text: var(--omb-chip-text);
+  --omb-voice-bg: var(--omb-chip-bg);
+  --omb-voice-text: var(--omb-chip-text);
+  --omb-image-bg: var(--omb-chip-bg);
+  --omb-image-text: var(--omb-chip-text);
+  --omb-link-bg: var(--omb-chip-bg);
+  --omb-link-text: var(--omb-chip-text);
+  --omb-link: #6b6b6b;
+  --omb-quote-text: #2a2a2a;
+  --omb-quote-font: Georgia, 'Times New Roman', serif;
+  --omb-inverse-bg: #111111;
   --omb-inverse-text: #ffffff;
-  --omb-inverse-muted: #c9ccd4;
+  --omb-inverse-muted: #bbbbbb;
 }
 
 :root.dark {
-  --omb-bg: #0f1115;
-  --omb-surface: #1c1f26;
-  --omb-surface-muted: #181b21;
-  --omb-hover: #232830;
-  --omb-segment: #23272f;
-  --omb-border: #2e333c;
-  --omb-border-muted: #262a32;
-  --omb-text: #e8eaee;
-  --omb-text-toned: #c3c8d2;
-  --omb-text-muted: #a0a6b3;
-  --omb-on-accent: #0f1115;
-  --omb-tabbar: #13161b;
+  --omb-bg: #121212;
+  --omb-surface: #1c1c1c;
+  --omb-surface-muted: #242424;
+  --omb-hover: #2a2a2a;
+  --omb-segment: #2a2a2a;
+  --omb-border: #2e2e2c;
+  --omb-border-muted: #262626;
+  --omb-divider: #262626;
+  --omb-text: #ededeb;
+  --omb-text-toned: #c8c8c4;
+  --omb-text-muted: #9c9c98;
+  --omb-text-faint: #6a6a66;
+  --omb-icon: #bbbbb7;
+  --omb-on-accent: #121212;
+  --omb-tabbar: rgba(18, 18, 18, 0.92);
+  --omb-tab: #8c8c88;
   --omb-danger: #ff8a80;
-  --omb-badge: #e0662f;
-  --omb-scrim: rgba(0, 0, 0, 0.6);
+  --omb-scrim: rgba(0, 0, 0, 0.5);
+  --omb-grabber: #3a3a3a;
+  --omb-node: #6a6a66;
+  --omb-dot: #3a3a3a;
+  --omb-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  --omb-shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  --omb-shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 40px rgba(0, 0, 0, 0.35);
 
-  --omb-accent: #4fd1c5;
-  --omb-accent-soft: #12302d;
+  --omb-accent: #ededeb;
+  --omb-accent-soft: #2a2a2a;
 
-  --omb-keep: #3fb56a;
-  --omb-on-keep: #0f1115;
-  --omb-archive: #3a404b;
-  --omb-rem-bg: #3a2a12;
-  --omb-rem-text: #ffc97a;
-  --omb-rem-row: #2a2114;
-  --omb-tag-bg: #1e2747;
-  --omb-tag-text: #b7c6ff;
-  --omb-highlight-bg: #332b10;
-  --omb-highlight-quote: #26220f;
-  --omb-highlight-text: #f2cf63;
-  --omb-kind-bg: #232830;
-  --omb-kind-text: #c3c8d2;
-  --omb-voice-bg: #15301f;
-  --omb-voice-text: #8fdcaa;
-  --omb-image-bg: #2a2040;
-  --omb-image-text: #cdb4f5;
-  --omb-link-bg: #172a40;
-  --omb-link-text: #9cc4f0;
-  --omb-link: #9db2ff;
-  --omb-ai-text: #b3b9c6;
-  --omb-ai-border: #5a6170;
-  --omb-quote-text: #ede6c8;
-  --omb-inverse-bg: #e8eaee;
-  --omb-inverse-text: #0f1115;
-  --omb-inverse-muted: #3c414d;
+  --omb-archive: #3a3a3a;
+
+  --omb-rem: #f59e0b;
+  --omb-rem-bg: #2a2116;
+  --omb-rem-text: #f3b866;
+  --omb-rem-row: #2a2116;
+
+  --omb-chip-bg: #2a2a2a;
+  --omb-chip-text: #c8c8c4;
+  --omb-ai-text: #9c9c98;
+  --omb-ai-border: #6a6a66;
+
+  --omb-link: #9c9c98;
+  --omb-quote-text: #dadad6;
+  --omb-inverse-bg: #ededeb;
+  --omb-inverse-text: #121212;
+  --omb-inverse-muted: #3a3a3a;
 }
 
 :root[data-accent='violet'] {
@@ -110,9 +129,9 @@
   --omb-accent: #c0365a;
   --omb-accent-soft: #fbe7ed;
 }
-:root[data-accent='graphite'] {
-  --omb-accent: #15171c;
-  --omb-accent-soft: #eceef2;
+:root[data-accent='teal'] {
+  --omb-accent: #0f766e;
+  --omb-accent-soft: #e0f2ef;
 }
 :root.dark[data-accent='violet'] {
   --omb-accent: #b79cff;
@@ -126,9 +145,9 @@
   --omb-accent: #ff8fab;
   --omb-accent-soft: #3a1a24;
 }
-:root.dark[data-accent='graphite'] {
-  --omb-accent: #e8eaee;
-  --omb-accent-soft: #2a2f38;
+:root.dark[data-accent='teal'] {
+  --omb-accent: #4fd1c5;
+  --omb-accent-soft: #12302d;
 }
 
 /* Ionic follows our tokens (also over its dark palette, which sets its own on body). */
@@ -136,15 +155,15 @@
 html.ion-palette-dark.dark {
   --ion-font-family: 'Inter Variable', Inter, system-ui, sans-serif;
   --ion-background-color: var(--omb-bg);
-  --ion-background-color-rgb: 245, 246, 248;
+  --ion-background-color-rgb: 247, 247, 245;
   --ion-text-color: var(--omb-text);
-  --ion-text-color-rgb: 21, 23, 28;
+  --ion-text-color-rgb: 17, 17, 17;
   --ion-item-background: var(--omb-surface);
   --ion-toolbar-background: var(--omb-bg);
   --ion-toolbar-border-color: transparent;
   --ion-tab-bar-background: var(--omb-tabbar);
-  --ion-tab-bar-border-color: var(--omb-border);
-  --ion-tab-bar-color: var(--omb-text-muted);
+  --ion-tab-bar-border-color: var(--omb-border-muted);
+  --ion-tab-bar-color: var(--omb-tab);
   --ion-tab-bar-color-selected: var(--omb-accent);
   --ion-border-color: var(--omb-border-muted);
   --ion-color-primary: var(--omb-accent);
@@ -153,9 +172,13 @@ html.ion-palette-dark.dark {
   --ion-color-primary-tint: var(--omb-accent);
   --ion-color-step-50: var(--omb-surface-muted);
   --ion-overlay-background-color: var(--omb-surface);
+  --ion-backdrop-color: #111111;
+  --ion-backdrop-opacity: 0.28;
 }
 html.dark,
 html.ion-palette-dark.dark {
-  --ion-background-color-rgb: 15, 17, 21;
-  --ion-text-color-rgb: 232, 234, 238;
+  --ion-background-color-rgb: 18, 18, 18;
+  --ion-text-color-rgb: 237, 237, 235;
+  --ion-backdrop-color: #000000;
+  --ion-backdrop-opacity: 0.5;
 }

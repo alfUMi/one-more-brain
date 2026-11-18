@@ -17,10 +17,10 @@ function goBack() {
     <IonContent>
       <header class="top">
         <button type="button" class="omb-back" @click="goBack">
-          <AppIcon name="chevron-left" :stroke="2" />{{ back }}
+          <AppIcon name="chevron-left" :size="18" :stroke="1.8" />{{ back }}
         </button>
+        <h1 class="title">{{ title }}</h1>
       </header>
-      <h1 class="title">{{ title }}</h1>
       <main class="main">
         <slot />
       </main>
@@ -31,56 +31,61 @@ function goBack() {
 <style scoped>
 .top {
   display: flex;
-  align-items: center;
-  padding: calc(var(--ion-safe-area-top, 0px) + 8px) 12px 4px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: calc(var(--ion-safe-area-top, 0px) + 12px) 16px 6px;
 }
 .title {
   margin: 0;
-  padding: 0 20px 12px;
-  font-size: 26px;
-  font-weight: 700;
+  padding: 0 6px;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
 }
 .main {
-  padding: 0 16px calc(var(--ion-safe-area-bottom, 0px) + 32px);
+  padding: 8px 16px calc(var(--ion-safe-area-bottom, 0px) + 32px);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 .main :deep(.group) {
   background: var(--omb-surface);
-  border: 1px solid var(--omb-border);
-  border-radius: 14px;
+  border-radius: 20px;
+  box-shadow: var(--omb-shadow-sm);
   overflow: hidden;
 }
 .main :deep(.cap) {
-  margin: 6px 4px 0;
-  font-size: 12px;
+  padding: 14px 6px 0;
+  font-size: 12.5px;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   color: var(--omb-text-muted);
 }
 .main :deep(.row) {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  min-height: 48px;
-  padding: 0 14px;
+  min-height: 50px;
+  margin: 0;
+  padding: 0 18px;
   border: 0;
-  border-top: 1px solid var(--omb-border-muted);
+  border-top: 1px solid var(--omb-divider);
   background: transparent;
-  font: 500 15px var(--ion-font-family);
+  font: 400 15px var(--ion-font-family);
   color: var(--omb-text);
   text-align: left;
   box-sizing: border-box;
+}
+.main :deep(button.row:active:not(:disabled)) {
+  background: var(--omb-surface-muted);
 }
 .main :deep(.row:first-child) {
   border-top: 0;
 }
 .main :deep(.row:disabled) {
   opacity: 1;
-  color: var(--omb-text-muted);
+  color: var(--omb-text-faint);
 }
 .main :deep(.val) {
   margin-left: auto;
@@ -90,12 +95,8 @@ function goBack() {
 }
 .main :deep(.soon) {
   margin-left: auto;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--omb-text-muted);
-  background: var(--omb-kind-bg);
-  border-radius: 999px;
-  padding: 3px 8px;
+  font-size: 12.5px;
+  color: var(--omb-text-faint);
 }
 .main :deep(.pad) {
   padding: 12px 14px;
@@ -104,6 +105,6 @@ function goBack() {
   gap: 12px;
 }
 .main :deep(.note) {
-  margin: 2px 4px 0;
+  margin: 2px 6px 0;
 }
 </style>

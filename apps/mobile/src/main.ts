@@ -1,8 +1,4 @@
 import '@fontsource-variable/inter'
-import '@fontsource/space-grotesk/500.css'
-import '@fontsource/space-grotesk/600.css'
-import '@fontsource/space-grotesk/700.css'
-import '@fontsource/source-serif-4/400.css'
 
 import '@ionic/vue/css/core.css'
 import '@ionic/vue/css/normalize.css'

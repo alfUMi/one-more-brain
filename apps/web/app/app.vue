@@ -1,6 +1,6 @@
 <script setup lang="ts">
 useHead({
-  meta: [{ name: 'theme-color', content: '#0f766e' }],
+  meta: [{ name: 'theme-color', content: '#111111' }],
   link: [
     { rel: 'manifest', href: '/manifest.webmanifest' },
     { rel: 'icon', type: 'image/svg+xml', href: '/icons/icon.svg' },
@@ -9,7 +9,7 @@ useHead({
     { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
     {
       rel: 'stylesheet',
-      href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap',
+      href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
     },
   ],
 })

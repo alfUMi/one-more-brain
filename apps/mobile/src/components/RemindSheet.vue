@@ -42,33 +42,25 @@ const nowIso = new Date().toISOString()
 <template>
   <div class="ion-page">
     <div class="sheet-body">
-      <div class="head">
-        <span class="badge"><AppIcon name="clock" :size="18" :stroke="1.9" /></span>
-        <h2>{{ t('mobile.remind.title') }}</h2>
-      </div>
+      <h2 class="head">{{ t('mobile.remind.title') }}</h2>
 
-      <label class="omb-label">
-        {{ t('mobile.remind.typeTime') }}
+      <label class="typed">
         <input
           v-model="typed"
-          class="omb-input"
           :placeholder="t('reminder.customPlaceholder')"
+          :aria-label="t('mobile.remind.typeTime')"
           enterkeyhint="done"
           @keydown.enter.prevent="choice && pick(choice)"
         />
+        <span v-if="parsed" class="parsed">
+          <span class="omb-rem-dot" />
+          {{ formatter.reminder(parsed) }}
+          <template v-if="parsed.kind === 'RECURRING'">
+            · {{ t('mobile.remind.next', { when: formatter.when(parsed.fireAt) }) }}
+          </template>
+        </span>
+        <span v-else-if="typed.trim()" class="omb-hint">{{ t('reminder.notUnderstood') }}</span>
       </label>
-      <span v-if="parsed" class="omb-chip omb-chip-rem parsed">
-        <AppIcon
-          :name="parsed.kind === 'RECURRING' ? 'repeat' : 'clock'"
-          :size="14"
-          :stroke="2.2"
-        />
-        {{ formatter.reminder(parsed) }}
-        <template v-if="parsed.kind === 'RECURRING'">
-          · {{ t('mobile.remind.next', { when: formatter.when(parsed.fireAt) }) }}
-        </template>
-      </span>
-      <p v-else-if="typed.trim()" class="omb-hint">{{ t('reminder.notUnderstood') }}</p>
 
       <div class="options">
         <button
@@ -81,7 +73,7 @@ const nowIso = new Date().toISOString()
           {{ t(`mobile.remind.${p.key}`) }}
           <span class="when">{{ formatter.when(p.at) }}</span>
         </button>
-        <button type="button" class="opt" @click="picking = !picking">
+        <button type="button" class="opt" :aria-expanded="picking" @click="picking = !picking">
           {{ t('mobile.remind.pick') }}
           <AppIcon class="when" :name="picking ? 'chevron-down' : 'chevron-right'" :size="18" />
         </button>
@@ -96,7 +88,6 @@ const nowIso = new Date().toISOString()
           class="picker"
         />
         <button type="button" class="opt" disabled>
-          <AppIcon name="pin" :size="18" />
           {{ t('mobile.remind.place') }}
           <span class="when soon">{{ t('mobile.remind.placeSoon') }}</span>
         </button>
@@ -104,7 +95,7 @@ const nowIso = new Date().toISOString()
 
       <button
         type="button"
-        class="omb-btn omb-btn-primary"
+        class="omb-btn omb-btn-primary set"
         :disabled="!choice"
         @click="choice && pick(choice)"
       >
@@ -115,50 +106,71 @@ const nowIso = new Date().toISOString()
 </template>
 
 <style scoped>
-.head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.sheet-body {
+  gap: 4px !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
 }
-.head h2 {
+.head {
   margin: 0;
+  padding: 0 16px 10px;
   font-size: 20px;
   font-weight: 600;
+  letter-spacing: -0.015em;
 }
-.badge {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  background: var(--omb-rem-bg);
-  color: var(--omb-rem-text);
+.typed {
+  margin: 0 4px 8px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--omb-surface-muted);
+}
+.typed input {
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  font: 400 16px var(--ion-font-family);
+  color: var(--omb-text);
+}
+.typed input::placeholder {
+  color: var(--omb-text-faint);
 }
 .parsed {
-  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--omb-rem-text);
 }
 .opt {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
-  min-height: 52px;
-  padding: 0 4px;
+  height: 54px;
+  padding: 0 16px;
   border: 0;
-  border-top: 1px solid var(--omb-border-muted);
+  border-radius: 16px;
   background: transparent;
-  font: 500 16px var(--ion-font-family);
+  font: 400 16px var(--ion-font-family);
   color: var(--omb-text);
   text-align: left;
 }
+.opt:active:not(:disabled) {
+  background: var(--omb-surface-muted);
+}
 .opt:disabled {
-  color: var(--omb-text-muted);
+  opacity: 1;
+  color: var(--omb-text-faint);
 }
 .when {
   margin-left: auto;
   font-size: 14px;
   color: var(--omb-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 .soon {
   font-size: 12.5px;
@@ -167,5 +179,10 @@ const nowIso = new Date().toISOString()
   --background: var(--omb-surface);
   width: 100%;
   max-width: 100%;
+}
+.set {
+  margin: 10px 4px 0;
+  min-height: 52px;
+  font-size: 15.5px;
 }
 </style>

@@ -25,6 +25,16 @@ export function itemTitle(item: ItemDto): string {
   return text.trim()
 }
 
+/** Whether the list line is the quote of a highlight (shown in serif italics, in quotes). */
+export function titleIsQuote(item: ItemDto): boolean {
+  return !!item.quote?.trim() && itemTitle(item) === item.quote.trim()
+}
+
+/** The list line, with quotes around a highlight's quote. */
+export function displayTitle(item: ItemDto): string {
+  return titleIsQuote(item) ? `“${itemTitle(item)}”` : itemTitle(item)
+}
+
 /** "learning-science.example" from a URL. */
 export function hostOf(url: string | null): string {
   if (!url) return ''

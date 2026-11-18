@@ -4,7 +4,7 @@ defineProps<{ title: string; hint?: string }>()
 
 <template>
   <header class="flex flex-col gap-1">
-    <h2 class="text-[28px] font-bold">{{ title }}</h2>
+    <h2 class="text-xl font-semibold">{{ title }}</h2>
     <p v-if="hint" class="m-0 text-sm text-(--omb-text-muted)">{{ hint }}</p>
   </header>
 </template>

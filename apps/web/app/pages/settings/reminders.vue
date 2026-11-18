@@ -35,7 +35,7 @@ function saveTime() {
 
 <template>
   <div class="flex max-w-[680px] flex-col gap-[18px]">
-    <SettingsHeader :title="t('settings.sections.reminders')" :hint="t('settings.synced')" />
+    <SettingsHeader :title="t('settings.sections.reminders')" />
 
     <section class="omb-card" aria-labelledby="digest-h">
       <div class="flex flex-col gap-1">
@@ -56,7 +56,7 @@ function saveTime() {
             v-model="time"
             type="time"
             :disabled="!user?.digestEnabled"
-            class="h-9 rounded-lg border border-(--omb-border) bg-(--omb-surface) px-2.5 text-sm disabled:opacity-50"
+            class="h-9 rounded-full bg-(--omb-chip) px-3.5 text-sm disabled:opacity-50"
             @change="saveTime"
           />
         </label>

@@ -45,51 +45,49 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="grid min-h-dvh bg-(--omb-surface) lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+  <div class="flex min-h-dvh flex-wrap bg-(--omb-bg)">
     <!-- Form side -->
-    <div class="flex flex-col px-6 py-8 sm:px-12 lg:px-16 lg:py-10">
-      <div class="flex items-center gap-2.5">
-        <AppLogo class="size-8" />
-        <span class="font-display text-lg font-bold">{{ t('app.name') }}</span>
+    <div class="flex min-w-0 flex-[1_1_480px] flex-col px-6 py-8 sm:px-14 lg:py-9">
+      <div class="flex items-center gap-2.5 text-base font-semibold">
+        <AppLogo class="size-[26px]" />
+        {{ t('app.name') }}
       </div>
 
-      <main class="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center gap-8 py-12">
+      <main class="mx-auto flex w-full max-w-[400px] flex-1 flex-col justify-center gap-8 py-16">
         <template v-if="sentTo">
           <span
-            class="flex size-14 items-center justify-center rounded-2xl bg-(--omb-accent-soft) text-(--omb-accent)"
+            class="flex size-14 items-center justify-center rounded-full bg-(--omb-surface) shadow-(--omb-shadow)"
           >
             <UIcon name="i-lucide-mail-check" class="size-7" />
           </span>
           <div class="flex flex-col gap-3">
-            <h1 class="text-4xl leading-[1.1] font-bold tracking-tight">
-              {{ t('auth.checkEmail') }}
-            </h1>
-            <p class="text-base leading-relaxed text-(--omb-text-muted)">
+            <h1 class="text-[40px] leading-[1.08] font-semibold">{{ t('auth.checkEmail') }}</h1>
+            <p class="text-[16.5px] leading-relaxed text-(--omb-text-muted)">
               {{ t('auth.checkEmailBody', { email: sentTo }) }}
             </p>
           </div>
-          <button type="button" class="omb-btn omb-btn-outline" @click="sentTo = null">
+          <button type="button" class="omb-auth-btn omb-auth-white" @click="sentTo = null">
             {{ t('auth.useAnother') }}
           </button>
         </template>
 
         <template v-else>
-          <div class="flex flex-col gap-4">
-            <h1 class="text-[40px] leading-[1.05] font-bold tracking-tight sm:text-5xl">
+          <div class="flex flex-col gap-3">
+            <h1 class="text-[40px] leading-[1.08] font-semibold tracking-[-0.035em] sm:text-[44px]">
               {{ t('auth.headline') }}
             </h1>
-            <p class="text-base leading-relaxed text-(--omb-text-muted)">
+            <p class="text-[16.5px] leading-relaxed text-(--omb-text-muted)">
               {{ t('auth.subtitle') }}
             </p>
           </div>
 
-          <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-3">
             <template v-if="providers.google">
-              <button type="button" class="omb-btn omb-btn-outline" @click="google">
-                <UIcon name="i-simple-icons-google" class="size-4" />
+              <button type="button" class="omb-auth-btn omb-auth-white" @click="google">
+                <UIcon name="i-simple-icons-google" class="size-[18px]" />
                 {{ t('auth.google') }}
               </button>
-              <div class="flex items-center gap-3 text-[13px] text-(--omb-text-muted)">
+              <div class="flex items-center gap-3 py-1 text-[12.5px] text-(--omb-text-muted)">
                 <span class="h-px flex-1 bg-(--omb-border)" />
                 {{ t('auth.or') }}
                 <span class="h-px flex-1 bg-(--omb-border)" />
@@ -98,25 +96,25 @@ onMounted(() => {
 
             <form class="flex flex-col gap-3" @submit.prevent="sendLink">
               <label class="flex flex-col gap-1.5">
-                <span class="text-sm font-semibold">{{ t('auth.email') }}</span>
+                <span class="text-[13.5px] font-medium">{{ t('auth.email') }}</span>
                 <input
                   v-model="email"
                   type="email"
                   required
                   autocomplete="email"
                   :placeholder="t('auth.emailPlaceholder')"
-                  class="h-12 rounded-lg border border-(--omb-border) bg-(--omb-surface) px-4 text-base outline-0 transition placeholder:text-(--omb-text-muted) focus:border-(--omb-accent) focus:ring-4 focus:ring-(--omb-accent-soft)"
+                  class="h-[50px] rounded-[14px] border border-(--omb-border) bg-(--omb-surface) px-[18px] text-[15px] outline-0 transition placeholder:text-(--omb-text-muted) focus:border-(--omb-accent)"
                 />
               </label>
-              <button type="submit" class="omb-btn omb-btn-primary" :disabled="loading">
+              <button type="submit" class="omb-auth-btn omb-auth-primary" :disabled="loading">
                 <UIcon v-if="loading" name="i-lucide-loader-circle" class="size-4 animate-spin" />
                 {{ t('auth.sendLink') }}
-                <UIcon v-if="!loading" name="i-lucide-arrow-right" class="size-4" />
+                <template v-if="!loading">→</template>
               </button>
               <p v-if="error" role="alert" class="text-sm text-(--ui-error)">{{ error }}</p>
             </form>
 
-            <p class="text-[13px] leading-relaxed text-(--omb-text-muted)">
+            <p class="mt-1 text-[12.5px] leading-relaxed text-(--omb-text-muted)">
               {{ t('auth.footnote') }}
             </p>
           </div>
@@ -127,75 +125,54 @@ onMounted(() => {
     <!-- Brand panel: real product moments from the mockups -->
     <aside
       aria-hidden="true"
-      class="omb-hero relative hidden overflow-hidden bg-(--omb-hero-bg) text-(--omb-hero-text) lg:flex lg:flex-col lg:justify-between lg:p-12"
+      class="omb-dotted m-4 hidden min-w-0 flex-[1.1_1_520px] flex-col justify-center gap-9 rounded-[32px] px-12 py-16 lg:flex"
     >
-      <div
-        class="relative mx-auto mt-6 flex w-full max-w-[460px] flex-1 flex-col justify-center gap-5"
-      >
+      <div class="mx-auto flex w-full max-w-[440px] flex-col gap-[22px]">
         <!-- Smart capture -->
-        <div class="omb-demo omb-float-a -ml-6 rotate-[-2deg] border-2 border-(--omb-accent)">
-          <p class="text-[17px] font-medium">{{ t('auth.demo.capture') }}</p>
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="omb-chip bg-(--omb-rem-bg) text-(--omb-rem-text)">
-              <UIcon name="i-lucide-clock" class="size-3.5" />
+        <div class="omb-demo omb-float-a -ml-6 rotate-[-2deg]">
+          <span class="text-[17px]">{{ t('auth.demo.capture') }}</span>
+          <span class="flex flex-wrap items-center gap-2">
+            <span class="omb-chip omb-chip-rem">
+              <span class="omb-rem-dot" />
               {{ t('auth.demo.reminder') }}
             </span>
-            <span class="omb-chip bg-(--omb-tag-bg) text-(--omb-tag-text)">{{
-              t('auth.demo.tag')
-            }}</span>
-            <span class="text-xs text-(--omb-text-muted)">{{ t('auth.demo.pickedUp') }}</span>
-          </div>
+            <span class="omb-chip omb-chip-tag">{{ t('auth.demo.tag').replace(/^#/, '') }}</span>
+            <span class="omb-meta">{{ t('auth.demo.pickedUp') }}</span>
+          </span>
         </div>
 
         <!-- Book highlight -->
-        <div class="omb-demo omb-float-b ml-10 rotate-[1.5deg] flex-row! gap-3.5">
-          <span
-            class="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-(--omb-highlight-bg) text-(--omb-highlight-text)"
-          >
-            <UIcon name="i-lucide-highlighter" class="size-[18px]" />
+        <div class="omb-demo omb-float-b ml-10 rotate-[1.5deg]">
+          <span class="text-[15px] font-semibold">{{ t('auth.demo.highlightTitle') }}</span>
+          <span class="omb-quote text-[16.5px] leading-normal">
+            “{{ t('auth.demo.highlightQuote') }}”
           </span>
-          <div class="flex min-w-0 flex-col gap-2">
-            <span class="text-[15px] font-semibold">{{ t('auth.demo.highlightTitle') }}</span>
-            <blockquote
-              class="rounded-lg bg-(--omb-highlight-quote) px-3 py-2 text-sm leading-normal"
-            >
-              “{{ t('auth.demo.highlightQuote') }}”
-            </blockquote>
-            <span class="text-xs text-(--omb-text-muted)">{{
-              t('auth.demo.highlightSource')
-            }}</span>
-          </div>
+          <span class="omb-meta">{{ t('auth.demo.highlightSource') }}</span>
         </div>
 
         <!-- Spaced-repetition review -->
         <div class="omb-demo omb-float-c -ml-2 rotate-[-1deg]">
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-medium text-(--omb-text-muted)">{{
-              t('auth.demo.reviewMeta')
-            }}</span>
+          <span class="flex items-center gap-1.5">
+            <span class="omb-meta">{{ t('auth.demo.reviewMeta') }}</span>
             <span class="flex-1" />
-            <span class="h-1 w-5 rounded bg-(--omb-accent)" />
-            <span class="h-1 w-5 rounded bg-(--omb-accent)" />
-            <span class="h-1 w-5 rounded bg-(--omb-border)" />
-            <span class="h-1 w-5 rounded bg-(--omb-border)" />
-          </div>
-          <p class="font-display text-lg leading-snug font-medium">
+            <span class="h-1 w-[18px] rounded-full bg-(--omb-accent)" />
+            <span class="h-1 w-[18px] rounded-full bg-(--omb-accent)" />
+            <span class="h-1 w-[18px] rounded-full bg-(--omb-border)" />
+            <span class="h-1 w-[18px] rounded-full bg-(--omb-border)" />
+          </span>
+          <span class="font-(family-name:--font-quote) text-[19px] leading-[1.45]">
             “{{ t('auth.demo.reviewText') }}”
-          </p>
-          <div class="flex gap-2">
-            <span class="omb-demo-btn border border-(--omb-border)">{{
-              t('auth.demo.reviewForgot')
-            }}</span>
-            <span class="omb-demo-btn bg-(--omb-accent) text-(--omb-on-accent)">{{
+          </span>
+          <span class="grid grid-cols-2 gap-2">
+            <span class="omb-demo-btn bg-(--omb-hover)">{{ t('auth.demo.reviewForgot') }}</span>
+            <span class="omb-demo-btn bg-(--omb-accent) font-semibold text-(--omb-on-accent)">{{
               t('auth.demo.reviewGotIt')
             }}</span>
-          </div>
+          </span>
         </div>
       </div>
 
-      <p
-        class="relative mx-auto mt-10 max-w-[460px] text-[15px] leading-relaxed font-medium opacity-90"
-      >
+      <p class="mx-auto w-full max-w-[440px] text-[15.5px] leading-normal text-(--omb-text-toned)">
         {{ t('auth.heroCaption') }}
       </p>
     </aside>
@@ -203,86 +180,65 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.omb-btn {
+.omb-auth-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 48px;
-  padding: 0 18px;
-  border-radius: 8px;
+  gap: 10px;
+  height: 50px;
+  padding: 0 20px;
+  border-radius: 999px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition:
-    filter 0.15s,
+    opacity 0.15s,
     background 0.15s,
     transform 0.15s;
 }
-.omb-btn:active:not(:disabled) {
+.omb-auth-btn:active:not(:disabled) {
   transform: translateY(1px);
 }
-.omb-btn:disabled {
+.omb-auth-btn:disabled {
   opacity: 0.7;
   cursor: default;
 }
-.omb-btn-primary {
+.omb-auth-primary {
   background: var(--omb-accent);
   color: var(--omb-on-accent);
 }
-.omb-btn-primary:hover:not(:disabled) {
-  filter: brightness(0.92);
+.omb-auth-primary:hover:not(:disabled) {
+  opacity: 0.88;
 }
-.omb-btn-outline {
-  border: 1px solid var(--omb-border);
+.omb-auth-white {
   background: var(--omb-surface);
   color: var(--omb-text);
+  box-shadow:
+    0 1px 2px rgba(17, 17, 17, 0.05),
+    0 6px 18px rgba(17, 17, 17, 0.06);
 }
-.omb-btn-outline:hover {
-  background: var(--omb-hover);
-}
-
-/* Dot grid on the brand panel. */
-.omb-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(currentColor 1px, transparent 1px);
-  background-size: 22px 22px;
-  opacity: 0.12;
+.omb-auth-white:hover {
+  background: var(--omb-surface-muted);
 }
 
 .omb-demo {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px 18px;
-  border-radius: 16px;
+  padding: 18px 20px;
+  border-radius: 20px;
   background: var(--omb-surface);
   color: var(--omb-text);
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.06),
-    0 18px 40px -12px rgb(0 0 0 / 0.35);
-}
-.omb-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 26px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 500;
+  box-shadow: var(--omb-shadow-lift);
 }
 .omb-demo-btn {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 38px;
-  border-radius: 10px;
+  border-radius: 999px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 @keyframes omb-float {

@@ -1,4 +1,10 @@
-import type { Accent, Theme, UiPrefs, UpdateMeInput } from '@omb/shared'
+import {
+  DEFAULT_ACCENT,
+  type Accent,
+  type Theme,
+  type UiPrefs,
+  type UpdateMeInput,
+} from '@omb/shared'
 import type { Me } from '~~/server/utils/me'
 
 /** The signed-in user's settings: read, save (optimistically) and apply at once. */
@@ -29,7 +35,7 @@ export function useProfile() {
     }
     appearance.apply(
       (user.value?.theme ?? 'system') as Theme,
-      (user.value?.accent ?? 'teal') as Accent,
+      (user.value?.accent ?? DEFAULT_ACCENT) as Accent,
     )
     if (patch.locale) await setLocale(patch.locale)
   }

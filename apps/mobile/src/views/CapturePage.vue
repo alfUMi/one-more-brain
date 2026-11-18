@@ -5,13 +5,13 @@ import { parseCapture } from '@omb/shared'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import AppLogo from '../components/AppLogo.vue'
 import AppIcon from '../components/AppIcon.vue'
 import { tap } from '../lib/actions'
 import { buildCapture, localItem } from '../lib/capture'
-import { formatter, itemTitle } from '../lib/format'
+import { formatter, itemTitle, titleIsQuote } from '../lib/format'
 import { capture, pending } from '../lib/outbox'
 import { choosePhotos, takePhoto } from '../lib/photos'
+import { session } from '../lib/session'
 import { rememberRecent, store, upsertItem } from '../lib/store'
 import { saveFailed, toast } from '../lib/toast'
 
@@ -116,6 +116,11 @@ function talk() {
   void toast(t('mobile.capture.talkSoon'))
 }
 
+/** The settings button is the user's initial (mockup: a round avatar). */
+const initial = computed(() =>
+  (session.profile?.name || session.profile?.email || '').trim().charAt(0).toUpperCase(),
+)
+
 const pendingIds = computed(() => new Set(pending.value.map((e) => e.id)))
 const recent = computed(() => {
   // Captures still waiting in the outbox first (they may not be in `recent` after a restart).
@@ -140,17 +145,17 @@ function open(id: string) {
 <template>
   <IonPage>
     <IonContent>
-      <header class="omb-header">
-        <AppLogo :size="28" />
-        <span class="font-display title">{{ t('mobile.capture.title') }}</span>
+      <header class="omb-header head">
+        <h1>{{ t('mobile.capture.title') }}</h1>
         <div class="grow" />
         <button
           type="button"
-          class="icon-btn"
+          class="avatar"
           :aria-label="t('mobile.capture.settings')"
           @click="router.push('/settings')"
         >
-          <AppIcon name="gear" :size="20" />
+          <template v-if="initial">{{ initial }}</template>
+          <AppIcon v-else name="gear" :size="20" />
         </button>
       </header>
       <p v-if="!store.online" class="omb-banner" role="status">{{ t('offline.banner') }}</p>
@@ -184,11 +189,6 @@ function open(id: string) {
             aria-live="polite"
           >
             <span v-if="reminder" class="omb-chip omb-chip-rem">
-              <AppIcon
-                :name="reminder.kind === 'RECURRING' ? 'repeat' : 'clock'"
-                :size="14"
-                :stroke="2.2"
-              />
               {{ formatter.reminder(reminder) }}
               <button
                 type="button"
@@ -198,9 +198,9 @@ function open(id: string) {
                 <AppIcon name="x" :size="14" :stroke="2.2" />
               </button>
             </span>
-            <span v-for="tag in parsed?.tags" :key="tag" class="omb-chip omb-chip-tag"
-              >#{{ tag }}</span
-            >
+            <span v-for="tag in parsed?.tags" :key="tag" class="omb-chip omb-chip-tag">{{
+              tag
+            }}</span>
             <span v-if="parsed?.remember" class="omb-chip omb-chip-accent">
               <AppIcon name="repeat" :size="14" />{{ t('mobile.capture.remember') }}
             </span>
@@ -220,7 +220,7 @@ function open(id: string) {
 
         <div class="big-row">
           <button type="button" class="big" @click="talk">
-            <span class="circle dark"><AppIcon name="mic" :stroke="2" /></span>
+            <span class="circle"><AppIcon name="mic" /></span>
             {{ t('mobile.capture.talk') }}
           </button>
           <button type="button" class="big" @click="photo">
@@ -238,7 +238,7 @@ function open(id: string) {
             <h2 id="recent-h">{{ t('mobile.capture.justCaptured') }}</h2>
             <div class="grow" />
             <span v-if="pending.length" class="waiting">
-              <span class="dot" />{{ t('mobile.capture.waiting', { n: pending.length }) }}
+              <span class="omb-rem-dot" />{{ t('mobile.capture.waiting', { n: pending.length }) }}
             </span>
           </div>
           <p v-if="!recent.length" class="omb-hint">{{ t('mobile.capture.nothingYet') }}</p>
@@ -246,10 +246,12 @@ function open(id: string) {
             v-for="item in recent"
             :key="item.id"
             type="button"
-            class="recent-card omb-card"
+            class="recent-row"
             @click="open(item.id)"
           >
-            <span class="recent-text">{{ itemTitle(item) || t(`mobile.kind.${item.kind}`) }}</span>
+            <span class="recent-text" :class="{ 'omb-quote': titleIsQuote(item) }">{{
+              itemTitle(item) || t(`mobile.kind.${item.kind}`)
+            }}</span>
             <span class="omb-meta">{{ recentMeta(item.id, item.kind, item.capturedAt) }}</span>
           </button>
         </section>
@@ -259,57 +261,61 @@ function open(id: string) {
 </template>
 
 <style scoped>
-.title {
-  font-weight: 700;
-  font-size: 18px;
+.head {
+  align-items: center;
+  padding-bottom: 16px;
 }
-.icon-btn {
-  width: 44px;
-  height: 44px;
+.avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
   border: 0;
-  border-radius: 12px;
-  background: transparent;
-  color: var(--omb-text-toned);
+  border-radius: 999px;
+  background: var(--omb-surface);
+  box-shadow: 0 1px 2px rgba(17, 17, 17, 0.06);
+  color: var(--omb-text);
+  font: 600 14px var(--ion-font-family);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .main {
-  padding: 4px 16px 24px;
+  padding: 0 16px 24px;
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 .box {
   background: var(--omb-surface);
-  border: 2px solid var(--omb-accent);
   border-radius: 20px;
-  padding: 16px;
+  box-shadow: var(--omb-shadow);
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.12);
+  gap: 14px;
 }
 textarea {
   border: 0;
   outline: 0;
+  padding: 0;
   resize: none;
-  font: 500 19px/1.4 var(--ion-font-family);
+  font: 400 19px/1.4 var(--ion-font-family);
   color: var(--omb-text);
   background: transparent;
 }
 textarea::placeholder {
-  color: var(--omb-text-muted);
+  color: var(--omb-text-faint);
 }
 .chips {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 .images {
   display: flex;
   gap: 8px;
   overflow-x: auto;
+  padding-top: 6px;
 }
 .img {
   position: relative;
@@ -318,7 +324,7 @@ textarea::placeholder {
 .img img {
   width: 72px;
   height: 72px;
-  border-radius: 12px;
+  border-radius: 14px;
   object-fit: cover;
   display: block;
 }
@@ -338,7 +344,8 @@ textarea::placeholder {
   padding: 0;
 }
 .save {
-  min-height: 48px;
+  min-height: 50px;
+  font-size: 15.5px;
 }
 .big-row {
   display: grid;
@@ -351,43 +358,46 @@ textarea::placeholder {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 96px;
-  border: 1px solid var(--omb-border);
-  border-radius: 18px;
+  height: 92px;
+  border: 0;
+  border-radius: 20px;
   background: var(--omb-surface);
-  font: 600 13px var(--ion-font-family);
+  box-shadow: var(--omb-shadow-sm);
+  font: 500 13px var(--ion-font-family);
   color: var(--omb-text);
   text-align: center;
   padding: 0 4px;
 }
+.big:active {
+  background: var(--omb-hover);
+}
 .circle {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
-  background: var(--omb-kind-bg);
+  background: var(--omb-chip-bg);
   color: var(--omb-text);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.circle.dark {
-  background: var(--omb-inverse-bg);
-  color: var(--omb-inverse-text);
-}
 .recent {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-top: 6px;
+  padding: 8px 4px 0;
 }
 .recent-head {
   display: flex;
   align-items: center;
+  padding-bottom: 4px;
 }
 .recent-head h2 {
   margin: 0;
   font-size: 15px;
   font-weight: 600;
+}
+.recent .omb-hint {
+  padding-top: 8px;
 }
 .waiting {
   display: inline-flex;
@@ -396,23 +406,23 @@ textarea::placeholder {
   font-size: 12px;
   color: var(--omb-text-muted);
 }
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: #c77700;
-}
-.recent-card {
-  padding: 12px 14px;
+.recent-row {
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--omb-divider);
+  background: transparent;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   text-align: left;
   font: inherit;
   color: var(--omb-text);
 }
+.recent-head + .recent-row {
+  border-top-color: transparent;
+}
 .recent-text {
-  font-size: 14.5px;
+  font-size: 15px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

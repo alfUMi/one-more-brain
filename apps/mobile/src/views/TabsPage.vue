@@ -21,20 +21,27 @@ const { t } = useI18n()
       <IonRouterOutlet />
       <IonTabBar id="omb-tab-bar" slot="bottom">
         <IonTabButton tab="capture" href="/tabs/capture">
-          <AppIcon name="plus" :size="22" :stroke="2" />
+          <AppIcon name="plus" :size="22" />
           <IonLabel>{{ t('mobile.tabs.capture') }}</IonLabel>
         </IonTabButton>
         <IonTabButton tab="inbox" href="/tabs/inbox">
-          <AppIcon name="inbox" :size="22" />
+          <AppIcon name="inbox" :size="22" :stroke="1.7" />
           <IonBadge v-if="store.inbox.length" class="omb-badge">{{ store.inbox.length }}</IonBadge>
           <IonLabel>{{ t('mobile.tabs.inbox') }}</IonLabel>
         </IonTabButton>
         <IonTabButton tab="today" href="/tabs/today">
-          <AppIcon name="sun" :size="22" />
+          <AppIcon name="sun" :size="22" :stroke="1.7" />
           <IonLabel>{{ t('mobile.tabs.today') }}</IonLabel>
         </IonTabButton>
+        <IonTabButton tab="review" href="/tabs/review">
+          <AppIcon name="repeat" :size="22" :stroke="1.7" />
+          <IonBadge v-if="store.today?.reviewsDue" class="omb-badge">
+            {{ store.today.reviewsDue }}
+          </IonBadge>
+          <IonLabel>{{ t('mobile.tabs.review') }}</IonLabel>
+        </IonTabButton>
         <IonTabButton tab="library" href="/tabs/library">
-          <AppIcon name="search" :size="22" />
+          <AppIcon name="search" :size="22" :stroke="1.7" />
           <IonLabel>{{ t('mobile.tabs.library') }}</IonLabel>
         </IonTabButton>
       </IonTabBar>

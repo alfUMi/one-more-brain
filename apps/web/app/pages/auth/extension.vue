@@ -72,24 +72,24 @@ async function connect() {
     <main class="omb-card w-full max-w-[460px] gap-6! p-8!">
       <div class="flex items-center gap-2.5">
         <AppLogo class="size-8" />
-        <span class="font-display text-lg font-bold">{{ t('app.name') }}</span>
+        <span class="text-base font-semibold">{{ t('app.name') }}</span>
       </div>
 
       <template v-if="state === 'done'">
         <span
-          class="flex size-12 items-center justify-center rounded-2xl bg-(--omb-accent-soft) text-(--omb-accent)"
+          class="flex size-12 items-center justify-center rounded-full bg-(--omb-chip) text-(--omb-text)"
         >
           <UIcon name="i-lucide-check" class="size-6" />
         </span>
         <div class="flex flex-col gap-2">
-          <h1 class="text-2xl font-bold">{{ t('auth.extension.doneTitle') }}</h1>
+          <h1 class="text-2xl font-semibold">{{ t('auth.extension.doneTitle') }}</h1>
           <p class="omb-hint m-0 text-sm!">{{ t('auth.extension.doneBody', { keys }) }}</p>
         </div>
       </template>
 
       <template v-else>
         <div class="flex flex-col gap-2">
-          <h1 class="text-2xl font-bold">{{ t('auth.extension.title') }}</h1>
+          <h1 class="text-2xl font-semibold">{{ t('auth.extension.title') }}</h1>
           <p class="omb-hint m-0 text-sm!">
             {{ t('auth.extension.body', { email: user?.email ?? '' }) }}
           </p>

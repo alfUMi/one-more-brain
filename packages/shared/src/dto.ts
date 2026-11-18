@@ -141,4 +141,10 @@ export interface TodayDto {
   reviewsDue: number
   onThisDay: OnThisDayEntry[]
   inbox: { count: number; oldestCapturedAt: string | null }
+  /** Notes captured today (any status), newest first. */
+  captured: ItemDto[]
+  /** Active reminders after today, for the next 7 days, in time order. */
+  upcoming: { reminder: ReminderDto; item: ItemDto }[]
+  /** Every note being remembered (spaced repetition), soonest review first. */
+  remembering: ReviewCardDto[]
 }

@@ -53,60 +53,74 @@ async function answer(gotIt: boolean) {
     busy.value = false
   }
 }
+
+// F = forgot, G = got it.
+function onKeydown(e: KeyboardEvent) {
+  if (!card.value || busy.value || e.metaKey || e.ctrlKey || e.altKey) return
+  if ((e.target as HTMLElement | null)?.closest('input, textarea, [contenteditable="true"]')) return
+  const key = e.key.toLowerCase()
+  if (key === 'f' || key === 'g') {
+    e.preventDefault()
+    void answer(key === 'g')
+  }
+}
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
   <section
-    class="omb-panel border-2! border-(--omb-accent)!"
+    class="flex flex-col gap-7"
     :aria-labelledby="hideTitle ? undefined : 'review-h'"
     :aria-label="hideTitle ? t('review.title') : undefined"
   >
-    <div v-if="!hideTitle || card" class="flex items-center gap-2.5">
-      <h2 v-if="!hideTitle" id="review-h" class="text-lg font-semibold">{{ t('review.title') }}</h2>
-      <span v-if="card" class="omb-meta">
-        {{ t('review.cardOf', { i: index + 1, n: total }) }}
-      </span>
-      <div class="flex-1" />
-      <div v-if="total" aria-hidden="true" class="flex gap-1">
+    <div class="flex flex-col gap-3">
+      <div v-if="!hideTitle || card" class="flex items-center gap-2.5">
+        <h2 v-if="!hideTitle" id="review-h" class="text-lg font-semibold">
+          {{ t('review.title') }}
+        </h2>
+        <div class="flex-1" />
+        <span v-if="card" class="text-[13.5px] text-(--omb-text-muted)">
+          {{ t('review.cardOf', { i: index + 1, n: total }) }}
+        </span>
+      </div>
+      <div v-if="total" aria-hidden="true" class="flex gap-1.5">
         <span
           v-for="b in bars"
           :key="b"
-          class="h-1 w-[22px] rounded-sm"
+          class="h-1 flex-1 rounded-full"
           :class="b - 1 <= index ? 'bg-(--omb-accent)' : 'bg-(--omb-border)'"
         />
       </div>
     </div>
 
     <template v-if="card">
-      <div
-        class="flex flex-col gap-3 rounded-xl bg-(--omb-surface-muted) px-[22px] pt-[22px] pb-[18px]"
+      <article
+        class="flex min-h-[300px] flex-col gap-[22px] rounded-3xl bg-(--omb-surface) px-6 py-8 shadow-(--omb-shadow-lift) md:px-12 md:py-11"
       >
-        <div class="omb-meta">
+        <span class="text-[13.5px] text-(--omb-text-muted)">
           {{ t('review.saved', { when: fmt.relative(card.item.capturedAt) }) }} ·
           {{ t(`review.from.${card.item.kind}`) }}
-        </div>
+        </span>
         <div v-if="heading" class="font-semibold">{{ heading }}</div>
         <p
-          class="font-display m-0 text-[22px] leading-[1.35] font-medium break-words whitespace-pre-line"
+          class="m-0 font-(family-name:--font-quote) text-[22px] leading-[1.45] break-words whitespace-pre-line text-(--omb-quote-text) md:text-[27px]"
         >
           <template v-if="card.item.quote">“{{ text }}”</template>
           <template v-else>{{ text }}</template>
         </p>
+        <span class="flex-1" />
         <div v-if="card.item.tags.length" class="flex flex-wrap gap-2">
-          <span
-            v-for="tag in card.item.tags"
-            :key="tag.name"
-            class="omb-chip omb-chip-tag h-6 text-[12.5px]"
-          >
-            #{{ tag.name }}
+          <span v-for="tag in card.item.tags" :key="tag.name" class="omb-chip omb-chip-tag">
+            {{ tag.name }}
           </span>
         </div>
-      </div>
-      <div class="flex flex-wrap gap-2.5">
+      </article>
+      <div class="flex flex-wrap justify-center gap-3">
         <button
           type="button"
           :disabled="busy"
-          class="h-11 flex-[1_1_140px] rounded-[11px] border border-(--omb-border) bg-(--omb-surface) text-sm font-semibold hover:bg-(--omb-hover)"
+          class="omb-btn h-12 px-6 text-[15px]"
           @click="answer(false)"
         >
           {{ t('review.forgot') }}
@@ -114,19 +128,28 @@ async function answer(gotIt: boolean) {
         <button
           type="button"
           :disabled="busy"
-          class="h-11 flex-[1_1_140px] rounded-[11px] bg-(--omb-accent) text-sm font-semibold text-(--omb-on-accent)"
+          class="omb-btn omb-btn-primary h-12 px-6 text-[15px]"
           @click="answer(true)"
         >
           {{ nextDays ? t('review.gotIt', { n: nextDays }) : t('review.gotItLast') }}
         </button>
       </div>
+      <span class="flex items-center gap-1.5 self-center text-[13.5px] text-(--omb-text-muted)">
+        <span class="omb-kbd">F</span> {{ t('review.keyForgot') }}
+        <span class="omb-kbd ml-2">G</span> {{ t('review.keyGotIt') }}
+      </span>
     </template>
 
-    <div v-else class="flex flex-col gap-1 rounded-xl bg-(--omb-surface-muted) px-[22px] py-6">
-      <span class="font-semibold">{{
+    <div
+      v-else
+      class="flex flex-col gap-1 rounded-3xl bg-(--omb-surface) px-8 py-10 text-center shadow-(--omb-shadow)"
+    >
+      <span class="text-lg font-semibold">{{
         total ? t('review.finishedTitle') : t('review.emptyTitle')
       }}</span>
-      <span class="omb-meta">{{ total ? t('review.finishedBody') : t('review.emptyBody') }}</span>
+      <span class="text-sm text-(--omb-text-muted)">{{
+        total ? t('review.finishedBody') : t('review.emptyBody')
+      }}</span>
     </div>
   </section>
 </template>

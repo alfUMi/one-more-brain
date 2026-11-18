@@ -1,10 +1,17 @@
 import { StatusBar, Style } from '@capacitor/status-bar'
-import { ACCENT_COLORS, ACCENTS, THEMES, type Accent, type Theme } from '@omb/shared'
+import {
+  ACCENT_COLORS,
+  ACCENTS,
+  DEFAULT_ACCENT,
+  THEMES,
+  type Accent,
+  type Theme,
+} from '@omb/shared'
 import { ref } from 'vue'
 import { isNative } from './config'
 
 const media = window.matchMedia('(prefers-color-scheme: dark)')
-const current = { theme: 'system' as Theme, accent: 'teal' as Accent }
+const current = { theme: 'system' as Theme, accent: DEFAULT_ACCENT as Accent }
 
 /** Whether the dark palette is showing right now. */
 export const isDark = ref(media.matches)
@@ -14,7 +21,7 @@ export function asTheme(value: string | null | undefined): Theme {
 }
 
 export function asAccent(value: string | null | undefined): Accent {
-  return (ACCENTS as readonly string[]).includes(value ?? '') ? (value as Accent) : 'teal'
+  return (ACCENTS as readonly string[]).includes(value ?? '') ? (value as Accent) : DEFAULT_ACCENT
 }
 
 function render() {

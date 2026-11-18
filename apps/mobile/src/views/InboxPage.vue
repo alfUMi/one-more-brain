@@ -13,7 +13,7 @@ import {
   onIonViewWillEnter,
   type Gesture,
 } from '@ionic/vue'
-import type { ItemDto, ItemStatus } from '@omb/shared'
+import { toLocal, type ItemDto, type ItemStatus } from '@omb/shared'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -29,7 +29,7 @@ import { pickReminder } from '../lib/remind'
 import { loadInbox, store } from '../lib/store'
 
 /** Mockups: Mobile · Inbox swipe triage, Inbox list view, Hold for more, Remind sheet. */
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 
 const view = ref<'cards' | 'list'>('cards')
@@ -48,23 +48,38 @@ async function refresh(event: CustomEvent) {
   ;(event.target as HTMLIonRefresherElement).complete()
 }
 
-// "3 of 7": how far this triage session got.
+// Swiping only flips through the cards; the buttons below decide what happens to one.
+/** Which card is on top. */
+const index = ref(0)
 const triaged = ref(0)
-const total = computed(() => triaged.value + store.inbox.length)
-const position = computed(() => Math.min(triaged.value + 1, total.value))
-const progress = computed(() => (total.value ? triaged.value / total.value : 0))
+const total = computed(() => store.inbox.length)
+const position = computed(() => Math.min(index.value + 1, total.value))
+const progress = computed(() => (total.value ? position.value / total.value : 0))
 watch(
   () => store.inbox.length,
-  (n) => n === 0 && (triaged.value = 0),
+  (n) => {
+    if (n === 0) triaged.value = 0
+    if (index.value > Math.max(0, n - 1)) index.value = Math.max(0, n - 1)
+  },
 )
 
-const current = computed<ItemDto | undefined>(() => store.inbox[0])
-const next = computed<ItemDto | undefined>(() => store.inbox[1])
+const current = computed<ItemDto | undefined>(() => store.inbox[index.value])
+const next = computed<ItemDto | undefined>(
+  () => store.inbox[index.value + 1] ?? store.inbox[index.value - 1],
+)
 
 async function triage(item: ItemDto, status: ItemStatus) {
   triaged.value += 1
   const saved = await setStatus(item, status)
   if (!saved) triaged.value = Math.max(0, triaged.value - 1)
+}
+
+/** +1 = next card, -1 = previous. Springs back at either end. */
+function flip(step: 1 | -1) {
+  const to = index.value + step
+  if (to < 0 || to >= store.inbox.length) return false
+  index.value = to
+  return true
 }
 
 async function remindItem(item: ItemDto) {
@@ -102,14 +117,16 @@ function attach() {
     onEnd: (d) => {
       dragging.value = false
       dragEndedAt = Date.now()
-      const item = current.value
-      if (item && Math.abs(d.deltaX) > THRESHOLD) {
-        const direction = d.deltaX > 0 ? 1 : -1
+      // Left shows the next card, right goes back to the previous one.
+      const direction = d.deltaX > 0 ? 1 : -1
+      const step = direction > 0 ? -1 : 1
+      const to = index.value + step
+      if (Math.abs(d.deltaX) > THRESHOLD && to >= 0 && to < store.inbox.length) {
         flying.value = direction
         setTimeout(() => {
           flying.value = 0
           dx.value = 0
-          void triage(item, direction > 0 ? 'KEPT' : 'ARCHIVED')
+          flip(step)
         }, 180)
       } else dx.value = 0
     },
@@ -126,7 +143,6 @@ const cardStyle = computed(() => {
     transition: dragging.value ? 'none' : 'transform 0.2s ease-out',
   }
 })
-const reveal = computed(() => (dx.value > 0 || flying.value > 0 ? 'keep' : 'archive'))
 
 const press = useLongPress(() => current.value && openItemMenu(current.value, router))
 
@@ -135,7 +151,34 @@ function openCurrent() {
   if (current.value && Date.now() - dragEndedAt > 300) void router.push(`/item/${current.value.id}`)
 }
 
+/** Pager dots under the header; a long inbox gets a thin bar instead. */
+const MAX_DOTS = 9
+
 // ── List view ──
+/** "Today", "Yesterday" or the date, shown once above each day's notes. */
+function dayOf(iso: string) {
+  const l = toLocal(new Date(iso), formatter.value.timeZone)
+  return Date.UTC(l.year, l.month - 1, l.day) / 86_400_000
+}
+function dayLabel(iso: string) {
+  const diff = dayOf(iso) - dayOf(new Date().toISOString())
+  if (diff === 0) return t('reminder.today')
+  if (diff === -1) return t('reminder.yesterday')
+  return new Intl.DateTimeFormat(locale.value, {
+    day: 'numeric',
+    month: 'long',
+    timeZone: formatter.value.timeZone,
+  }).format(new Date(iso))
+}
+const listDays = computed(() =>
+  store.inbox.map((item, i) => {
+    const prev = store.inbox[i - 1]
+    return !prev || dayOf(prev.capturedAt) !== dayOf(item.capturedAt)
+      ? dayLabel(item.capturedAt)
+      : null
+  }),
+)
+
 async function slide(item: ItemDto, status: ItemStatus, el: EventTarget | null) {
   await (el as HTMLElement | null)?.closest('ion-item-sliding')?.close()
   await setStatus(item, status)
@@ -166,13 +209,18 @@ const cachedNote = computed(() =>
             }}
           </span>
           <div class="grow" />
-          <button type="button" class="omb-btn omb-btn-sm toggle" @click="toggleView">
+          <button type="button" class="toggle" @click="toggleView">
             {{ view === 'cards' ? t('mobile.inbox.listView') : t('mobile.inbox.cardView') }}
           </button>
         </header>
-        <div v-if="view === 'cards' && store.inbox.length" class="progress" aria-hidden="true">
-          <div :style="{ width: `${progress * 100}%` }" />
-        </div>
+        <template v-if="view === 'cards' && store.inbox.length > 1">
+          <div v-if="total <= MAX_DOTS" class="dots" aria-hidden="true">
+            <span v-for="n in total" :key="n" :class="{ on: n - 1 === index }" />
+          </div>
+          <div v-else class="progress" aria-hidden="true">
+            <div :style="{ width: `${progress * 100}%` }" />
+          </div>
+        </template>
         <p v-if="cachedNote" class="omb-banner">{{ cachedNote }}</p>
 
         <div v-if="store.inboxLoaded && !store.inbox.length" class="omb-empty">
@@ -185,16 +233,6 @@ const cachedNote = computed(() =>
         <template v-else-if="view === 'cards' && current">
           <main class="stack">
             <div v-if="next" class="under" />
-            <div
-              class="reveal"
-              :class="reveal"
-              :style="{ opacity: Math.min(1, Math.abs(dx) / 80) || (flying ? 1 : 0) }"
-            >
-              <span>
-                <AppIcon :name="reveal === 'keep' ? 'check' : 'archive'" :size="30" :stroke="2.4" />
-                {{ reveal === 'keep' ? t('actions.keep') : t('actions.archive') }}
-              </span>
-            </div>
             <div
               :key="current.id"
               ref="cardEl"
@@ -218,7 +256,7 @@ const cachedNote = computed(() =>
               >{{ t('actions.remind') }}
             </button>
             <button type="button" class="act" @click="remember(current)">
-              <span class="ring accent"><AppIcon name="repeat" :size="22" /></span>
+              <span class="ring"><AppIcon name="repeat" :size="22" /></span>
               {{ t('actions.remember') }}
             </button>
             <button type="button" class="act" @click="triage(current, 'KEPT')">
@@ -232,33 +270,36 @@ const cachedNote = computed(() =>
         <!-- List -->
         <template v-else-if="view === 'list'">
           <IonList class="list" lines="none">
-            <IonItemSliding v-for="item in store.inbox" :key="item.id">
-              <IonItemOptions side="start" @ion-swipe="slide(item, 'KEPT', $event.target)">
-                <IonItemOption
-                  class="opt keep"
-                  expandable
-                  @click="slide(item, 'KEPT', $event.target)"
-                >
-                  <AppIcon name="check" :size="20" :stroke="2.2" />{{ t('actions.keep') }}
-                </IonItemOption>
-              </IonItemOptions>
-              <IonItem class="list-item">
-                <ItemRow
-                  :item="item"
-                  @open="router.push(`/item/${item.id}`)"
-                  @hold="openItemMenu(item, router)"
-                />
-              </IonItem>
-              <IonItemOptions side="end" @ion-swipe="slide(item, 'ARCHIVED', $event.target)">
-                <IonItemOption
-                  class="opt archive"
-                  expandable
-                  @click="slide(item, 'ARCHIVED', $event.target)"
-                >
-                  <AppIcon name="archive" :size="20" />{{ t('actions.archive') }}
-                </IonItemOption>
-              </IonItemOptions>
-            </IonItemSliding>
+            <template v-for="(item, i) in store.inbox" :key="item.id">
+              <h2 v-if="listDays[i]" class="omb-section-label day">{{ listDays[i] }}</h2>
+              <IonItemSliding>
+                <IonItemOptions side="start" @ion-swipe="slide(item, 'KEPT', $event.target)">
+                  <IonItemOption
+                    class="opt keep"
+                    expandable
+                    @click="slide(item, 'KEPT', $event.target)"
+                  >
+                    <AppIcon name="check" :size="20" :stroke="2.2" />{{ t('actions.keep') }}
+                  </IonItemOption>
+                </IonItemOptions>
+                <IonItem class="list-item">
+                  <ItemRow
+                    :item="item"
+                    @open="router.push(`/item/${item.id}`)"
+                    @hold="openItemMenu(item, router)"
+                  />
+                </IonItem>
+                <IonItemOptions side="end" @ion-swipe="slide(item, 'ARCHIVED', $event.target)">
+                  <IonItemOption
+                    class="opt archive"
+                    expandable
+                    @click="slide(item, 'ARCHIVED', $event.target)"
+                  >
+                    <AppIcon name="archive" :size="20" />{{ t('actions.archive') }}
+                  </IonItemOption>
+                </IonItemOptions>
+              </IonItemSliding>
+            </template>
           </IonList>
           <p class="hint">{{ t('mobile.inbox.listHint') }}</p>
         </template>
@@ -273,62 +314,66 @@ const cachedNote = computed(() =>
   display: flex;
   flex-direction: column;
 }
+.omb-header {
+  padding-bottom: 8px;
+}
 .toggle {
-  border-color: var(--omb-border);
+  flex: none;
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--omb-hover);
+  font: 500 13px var(--ion-font-family);
+  color: var(--omb-text);
+}
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 0 0;
+}
+.dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--omb-dot);
+  transition:
+    width 0.2s,
+    background 0.2s;
+}
+.dots span.on {
+  width: 18px;
+  background: var(--omb-text);
 }
 .progress {
-  margin: 4px 20px 0;
+  margin: 8px 22px 0;
   height: 4px;
-  border-radius: 2px;
-  background: var(--omb-border);
+  border-radius: 999px;
+  background: var(--omb-dot);
   overflow: hidden;
 }
 .progress div {
   height: 100%;
-  background: var(--omb-accent);
+  border-radius: 999px;
+  background: var(--omb-text);
   transition: width 0.25s;
 }
 .stack {
   position: relative;
   flex: 1 1 auto;
   min-height: 360px;
-  max-height: 470px;
-  margin: 26px 20px 18px;
+  max-height: 500px;
+  margin: 22px 20px 26px;
 }
 .under {
   position: absolute;
-  left: 14px;
-  right: 14px;
-  top: 16px;
-  bottom: -16px;
-  background: var(--omb-surface);
-  border: 1px solid var(--omb-border-muted);
-  border-radius: 22px;
-}
-.reveal {
-  position: absolute;
-  inset: 0;
-  border-radius: 22px;
-  display: flex;
-  align-items: center;
-  padding: 0 26px;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 14px;
-}
-.reveal span {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-.reveal.keep {
-  background: var(--omb-keep);
-  color: var(--omb-on-keep);
-}
-.reveal.archive {
-  background: var(--omb-archive);
-  justify-content: flex-end;
+  left: 16px;
+  right: 16px;
+  top: 14px;
+  bottom: -12px;
+  background: var(--omb-hover);
+  border-radius: 26px;
 }
 .top {
   position: absolute;
@@ -340,43 +385,44 @@ const cachedNote = computed(() =>
   -webkit-touch-callout: none;
 }
 .top :deep(.card) {
-  box-shadow: 0 18px 40px rgba(21, 23, 28, 0.16);
+  box-shadow: var(--omb-shadow-lg);
 }
 .actions {
   display: flex;
   justify-content: space-around;
-  padding: 0 20px 10px;
+  padding: 0 18px 10px;
 }
 .act {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   border: 0;
   background: transparent;
-  font: 600 12px var(--ion-font-family);
+  font: 500 12px var(--ion-font-family);
   color: var(--omb-text-toned);
 }
 .ring {
-  width: 56px;
-  height: 56px;
+  width: 58px;
+  height: 58px;
   border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--omb-surface);
-  border: 1px solid var(--omb-border);
+  box-shadow:
+    0 1px 2px rgba(17, 17, 17, 0.05),
+    0 6px 18px rgba(17, 17, 17, 0.06);
   color: var(--omb-text);
 }
-.ring.rem {
-  color: var(--omb-rem-text);
+.act:active .ring {
+  transform: scale(0.96);
 }
-.ring.accent {
-  color: var(--omb-accent);
+.ring.rem {
+  color: var(--omb-rem);
 }
 .ring.keep {
   background: var(--omb-keep);
-  border-color: var(--omb-keep);
   color: var(--omb-on-keep);
 }
 .hint {
@@ -389,13 +435,17 @@ const cachedNote = computed(() =>
 .list {
   background: transparent;
   margin: 0;
-  padding: 10px 16px 0 !important;
+  padding: 0 16px !important;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+.day {
+  margin: 0;
+  padding: 8px 4px 2px;
+}
 .list + .hint {
-  margin-top: 10px;
+  margin-top: 12px;
 }
 .list-item {
   --background: transparent;
@@ -404,13 +454,14 @@ const cachedNote = computed(() =>
   --inner-padding-start: 0;
   --inner-padding-end: 0;
   --min-height: 0;
+  overflow: visible;
 }
 .list ion-item-sliding {
-  border-radius: 14px;
+  border-radius: 18px;
 }
 .opt {
-  font: 700 12px var(--ion-font-family);
-  min-width: 96px;
+  font: 600 12.5px var(--ion-font-family);
+  min-width: 104px;
 }
 .opt::part(native) {
   flex-direction: column;
@@ -427,9 +478,10 @@ const cachedNote = computed(() =>
 .zero {
   width: 56px;
   height: 56px;
-  border-radius: 18px;
-  background: var(--omb-accent-soft);
-  color: var(--omb-accent);
+  border-radius: 999px;
+  background: var(--omb-surface);
+  box-shadow: var(--omb-shadow);
+  color: var(--omb-text);
   display: flex;
   align-items: center;
   justify-content: center;

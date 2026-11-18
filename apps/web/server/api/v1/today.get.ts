@@ -22,65 +22,96 @@ export default defineEventHandler(async (event): Promise<TodayDto> => {
   const live = { userId, deletedAt: null, isAiSuggested: false, item: { deletedAt: null } }
   const withItem = { item: { include: itemInclude } }
 
-  const [todays, missed, reviews, reviewsDue, inboxCount, oldest, ...onThisDay] = await Promise.all(
-    [
-      // Everything scheduled for today, including what was already done or has fired.
-      db.reminder.findMany({
+  const [
+    todays,
+    missed,
+    reviews,
+    reviewsDue,
+    inboxCount,
+    oldest,
+    captured,
+    upcoming,
+    remembering,
+    ...onThisDay
+  ] = await Promise.all([
+    // Everything scheduled for today, including what was already done or has fired.
+    db.reminder.findMany({
+      where: {
+        ...live,
+        OR: [
+          { fireAt: { gte: startOfToday, lt: endOfToday } },
+          // Recurring reminders that fired today have already moved on to their next date.
+          { kind: 'RECURRING', lastFiredAt: { gte: startOfToday, lt: endOfToday } },
+        ],
+        status: { in: ['ACTIVE', 'FIRED', 'DONE'] },
+      },
+      include: withItem,
+      take: 100,
+    }),
+    // One-off reminders from the past week that fired and were never dealt with.
+    db.reminder.findMany({
+      where: {
+        ...live,
+        kind: 'TIME',
+        status: 'FIRED',
+        fireAt: { gte: new Date(now.getTime() - 7 * DAY_MS), lt: startOfToday },
+        item: { deletedAt: null, status: { in: ['INBOX', 'KEPT'] } },
+      },
+      include: withItem,
+      orderBy: { fireAt: 'asc' },
+      take: 20,
+    }),
+    db.review.findMany({
+      where: { userId, graduatedAt: null, nextAt: { lte: now }, item: { deletedAt: null } },
+      include: withItem,
+      orderBy: { nextAt: 'asc' },
+      take: 20,
+    }),
+    db.review.count({
+      where: { userId, graduatedAt: null, nextAt: { lte: now }, item: { deletedAt: null } },
+    }),
+    db.item.count({ where: { userId, deletedAt: null, status: 'INBOX' } }),
+    db.item.findFirst({
+      where: { userId, deletedAt: null, status: 'INBOX' },
+      orderBy: { capturedAt: 'asc' },
+      select: { capturedAt: true },
+    }),
+    db.item.findMany({
+      where: { userId, deletedAt: null, capturedAt: { gte: startOfToday, lt: endOfToday } },
+      include: itemInclude,
+      orderBy: { capturedAt: 'desc' },
+      take: 50,
+    }),
+    db.reminder.findMany({
+      where: {
+        ...live,
+        status: 'ACTIVE',
+        fireAt: { gte: endOfToday, lt: new Date(endOfToday.getTime() + 7 * DAY_MS) },
+      },
+      include: withItem,
+      orderBy: { fireAt: 'asc' },
+      take: 30,
+    }),
+    db.review.findMany({
+      where: { userId, graduatedAt: null, item: { deletedAt: null } },
+      include: withItem,
+      orderBy: { nextAt: 'asc' },
+      take: 30,
+    }),
+    ...onThisDayWindows(now, tz).map(async ({ ago, start, end }) => {
+      const item = await db.item.findFirst({
         where: {
-          ...live,
-          OR: [
-            { fireAt: { gte: startOfToday, lt: endOfToday } },
-            // Recurring reminders that fired today have already moved on to their next date.
-            { kind: 'RECURRING', lastFiredAt: { gte: startOfToday, lt: endOfToday } },
-          ],
-          status: { in: ['ACTIVE', 'FIRED', 'DONE'] },
+          userId,
+          deletedAt: null,
+          status: { not: 'DONE' },
+          capturedAt: { gte: start, lt: end },
         },
-        include: withItem,
-        take: 100,
-      }),
-      // One-off reminders from the past week that fired and were never dealt with.
-      db.reminder.findMany({
-        where: {
-          ...live,
-          kind: 'TIME',
-          status: 'FIRED',
-          fireAt: { gte: new Date(now.getTime() - 7 * DAY_MS), lt: startOfToday },
-          item: { deletedAt: null, status: { in: ['INBOX', 'KEPT'] } },
-        },
-        include: withItem,
-        orderBy: { fireAt: 'asc' },
-        take: 20,
-      }),
-      db.review.findMany({
-        where: { userId, graduatedAt: null, nextAt: { lte: now }, item: { deletedAt: null } },
-        include: withItem,
-        orderBy: { nextAt: 'asc' },
-        take: 20,
-      }),
-      db.review.count({
-        where: { userId, graduatedAt: null, nextAt: { lte: now }, item: { deletedAt: null } },
-      }),
-      db.item.count({ where: { userId, deletedAt: null, status: 'INBOX' } }),
-      db.item.findFirst({
-        where: { userId, deletedAt: null, status: 'INBOX' },
+        include: itemInclude,
         orderBy: { capturedAt: 'asc' },
-        select: { capturedAt: true },
-      }),
-      ...onThisDayWindows(now, tz).map(async ({ ago, start, end }) => {
-        const item = await db.item.findFirst({
-          where: {
-            userId,
-            deletedAt: null,
-            status: { not: 'DONE' },
-            capturedAt: { gte: start, lt: end },
-          },
-          include: itemInclude,
-          orderBy: { capturedAt: 'asc' },
-        })
-        return item ? { ago, item: await toItemDto(item) } : null
-      }),
-    ],
-  )
+      })
+      return item ? { ago, item: await toItemDto(item) } : null
+    }),
+  ])
 
   /** When the reminder sits on today's timeline. */
   const timeOf = (r: (typeof todays)[number]) =>
@@ -107,21 +138,26 @@ export default defineEventHandler(async (event): Promise<TodayDto> => {
     state,
   })
 
+  const card = async (r: (typeof remembering)[number]) => ({
+    item: await toItemDto(r.item),
+    step: r.step,
+    lapses: r.lapses,
+    nextAt: r.nextAt.toISOString(),
+  })
+
   return {
     reminders: [
       ...(await Promise.all(missed.map((r) => entry(r, 'missed')))),
       ...(await Promise.all(today.map((r) => entry(r, stateOf(r))))),
     ],
-    reviews: await Promise.all(
-      reviews.map(async (r) => ({
-        item: await toItemDto(r.item),
-        step: r.step,
-        lapses: r.lapses,
-        nextAt: r.nextAt.toISOString(),
-      })),
-    ),
+    reviews: await Promise.all(reviews.map(card)),
     reviewsDue,
     onThisDay: onThisDay.filter((x) => x !== null),
     inbox: { count: inboxCount, oldestCapturedAt: oldest?.capturedAt.toISOString() ?? null },
+    captured: await Promise.all(captured.map((i) => toItemDto(i))),
+    upcoming: await Promise.all(
+      upcoming.map(async (r) => ({ reminder: toReminderDto(r), item: await toItemDto(r.item) })),
+    ),
+    remembering: await Promise.all(remembering.map(card)),
   }
 })

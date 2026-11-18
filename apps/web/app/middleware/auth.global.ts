@@ -1,5 +1,5 @@
 import type { Me } from '~~/server/utils/me'
-import { ACCENTS, THEMES, type Accent, type Theme } from '@omb/shared'
+import { ACCENTS, DEFAULT_ACCENT, THEMES, type Accent, type Theme } from '@omb/shared'
 
 declare module '#app' {
   interface PageMeta {
@@ -18,7 +18,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
         : 'system'
       const accent = (ACCENTS as readonly string[]).includes(me.accent)
         ? (me.accent as Accent)
-        : 'teal'
+        : DEFAULT_ACCENT
       useAppearance().apply(theme, accent)
       // New accounts start on UTC; adopt the browser's zone so dates in captures mean local time.
       const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone

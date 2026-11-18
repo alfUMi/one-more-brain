@@ -1,11 +1,11 @@
 export const THEMES = ['light', 'dark', 'system'] as const
 export type Theme = (typeof THEMES)[number]
 
-export const ACCENTS = ['teal', 'violet', 'blue', 'rose', 'graphite'] as const
+export const ACCENTS = ['graphite', 'teal', 'violet', 'blue', 'rose'] as const
 export type Accent = (typeof ACCENTS)[number]
 
 export const DEFAULT_THEME: Theme = 'system'
-export const DEFAULT_ACCENT: Accent = 'teal'
+export const DEFAULT_ACCENT: Accent = 'graphite'
 
 /** Accent hex values per theme. See docs/PLAN.md, "Visual design". */
 export const ACCENT_COLORS: Record<Accent, { light: string; dark: string }> = {
@@ -13,7 +13,7 @@ export const ACCENT_COLORS: Record<Accent, { light: string; dark: string }> = {
   violet: { light: '#6D4AE0', dark: '#B79CFF' },
   blue: { light: '#2F5BEA', dark: '#7C98FF' },
   rose: { light: '#C0365A', dark: '#FF8FAB' },
-  graphite: { light: '#15171C', dark: '#E8EAEE' },
+  graphite: { light: '#111111', dark: '#EDEDEB' },
 }
 
 /** Soft accent backgrounds (selected nav item, chips), as in main.css. */
@@ -22,5 +22,5 @@ export const ACCENT_SOFT: Record<Accent, { light: string; dark: string }> = {
   violet: { light: '#EEE9FC', dark: '#2A2245' },
   blue: { light: '#E8ECFB', dark: '#1E2747' },
   rose: { light: '#FBE7ED', dark: '#3A1A24' },
-  graphite: { light: '#ECEEF2', dark: '#2A2F38' },
+  graphite: { light: '#EDEDEA', dark: '#262626' },
 }

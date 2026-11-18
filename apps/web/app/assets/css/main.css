@@ -3,7 +3,8 @@
 
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, sans-serif;
+  --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-quote: Georgia, 'Times New Roman', serif;
 }
 
 /*
@@ -12,87 +13,98 @@
  * The accent is picked with data-accent on <html>; light/dark comes from the color-mode class.
  */
 :root {
-  --omb-bg: #f5f6f8;
-  --omb-sidebar: #fafafb;
+  --omb-bg: #f7f7f5;
+  --omb-sidebar: #f7f7f5;
   --omb-surface: #ffffff;
-  --omb-surface-muted: #f7f8fa;
-  --omb-hover: #eceef2;
-  --omb-border: #e3e5ea;
-  --omb-border-muted: #eef0f3;
-  --omb-text: #15171c;
-  --omb-text-toned: #3c414d;
-  --omb-text-muted: #5b6170;
+  --omb-surface-muted: #f7f7f5;
+  --omb-hover: #ededea;
+  --omb-border: #e3e3df;
+  --omb-border-muted: #ecece9;
+  --omb-text: #111111;
+  --omb-text-toned: #3a3a3a;
+  --omb-text-muted: #6b6b6b;
   --omb-on-accent: #ffffff;
+  --omb-shadow: 0 1px 2px rgba(17, 17, 17, 0.04), 0 8px 24px rgba(17, 17, 17, 0.05);
+  --omb-shadow-lift: 0 1px 2px rgba(17, 17, 17, 0.04), 0 20px 44px -14px rgba(17, 17, 17, 0.22);
+  --omb-chip: #f1f1ee;
+  --omb-dots: #d6d6d1;
+  --omb-panel: #ededea;
 
-  --omb-accent: #0f766e;
-  --omb-accent-soft: #e0f2ef;
+  --omb-accent: #111111;
+  --omb-accent-soft: #ededea;
 
-  /* Fixed tints that never follow the accent. */
-  --omb-rem-bg: #fff3e2;
-  --omb-rem-text: #8a4300;
-  --omb-tag-bg: #eef1fb;
-  --omb-tag-text: #2b3f9e;
-  --omb-highlight-bg: #fff6d6;
-  --omb-highlight-quote: #fff9e3;
-  --omb-highlight-text: #7a5a00;
-  --omb-kind-bg: #f0f1f4;
-  --omb-kind-text: #3c414d;
-  --omb-voice-bg: #eaf5ee;
-  --omb-voice-text: #1f6b3a;
-  --omb-image-bg: #f3ecfb;
-  --omb-image-text: #5b2d91;
-  --omb-link-bg: #e8f1fb;
-  --omb-link-text: #1d4f86;
-  --omb-ai-text: #4b5160;
-  --omb-ai-border: #9aa1af;
-  --omb-rem-ai-border: #d9a066;
-  --omb-rem-solid: #8a4300;
-  --omb-kbd-border: #d5d8df;
-  --omb-quote-text: #2a2d35;
+  /* Fixed tints that never follow the accent. Reminders are always amber. */
+  --omb-rem-dot: #d97706;
+  --omb-rem-bg: #fbf6ee;
+  --omb-rem-text: #8a4b00;
+  --omb-tag-bg: #f1f1ee;
+  --omb-tag-text: #3a3a3a;
+  --omb-highlight-bg: #fbefd9;
+  --omb-highlight-quote: #f7f7f5;
+  --omb-highlight-text: #3a3a3a;
+  --omb-kind-bg: #ededea;
+  --omb-kind-text: #4a4a4a;
+  --omb-voice-bg: #ededea;
+  --omb-voice-text: #4a4a4a;
+  --omb-image-bg: #ededea;
+  --omb-image-text: #4a4a4a;
+  --omb-link-bg: #ededea;
+  --omb-link-text: #4a4a4a;
+  --omb-ai-text: #6b6b6b;
+  --omb-ai-border: #bdbdb8;
+  --omb-rem-ai-border: #d9b27a;
+  --omb-rem-solid: #8a4b00;
+  --omb-kbd-border: #e3e3df;
+  --omb-quote-text: #2a2a2a;
 
-  /* Brand panel on the sign-in page. */
-  --omb-hero-bg: var(--omb-accent);
-  --omb-hero-text: var(--omb-on-accent);
+  --omb-hero-bg: var(--omb-panel);
+  --omb-hero-text: var(--omb-text);
 }
 .dark {
-  --omb-bg: #0f1115;
-  --omb-sidebar: #13161b;
-  --omb-surface: #181b21;
-  --omb-surface-muted: #1f232a;
-  --omb-hover: #1c2027;
-  --omb-border: #2a2f38;
-  --omb-border-muted: #22262e;
-  --omb-text: #e8eaee;
-  --omb-text-toned: #c3c8d2;
-  --omb-text-muted: #a0a6b3;
-  --omb-on-accent: #0f1115;
+  --omb-bg: #121212;
+  --omb-sidebar: #121212;
+  --omb-surface: #1c1c1c;
+  --omb-surface-muted: #181818;
+  --omb-hover: #242424;
+  --omb-border: #2c2c2c;
+  --omb-border-muted: #242424;
+  --omb-text: #ededeb;
+  --omb-text-toned: #c9c9c5;
+  --omb-text-muted: #9c9c98;
+  --omb-on-accent: #121212;
+  --omb-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+  --omb-shadow-lift: 0 1px 2px rgba(0, 0, 0, 0.3), 0 20px 44px -14px rgba(0, 0, 0, 0.6);
+  --omb-chip: #262626;
+  --omb-dots: #2e2e2e;
+  --omb-panel: #181818;
 
-  --omb-accent: #4fd1c5;
-  --omb-accent-soft: #12302d;
+  --omb-accent: #ededeb;
+  --omb-accent-soft: #262626;
 
-  --omb-rem-bg: #3a2a12;
-  --omb-rem-text: #ffc97a;
-  --omb-tag-bg: #1e2747;
-  --omb-tag-text: #b7c6ff;
-  --omb-highlight-bg: #3a3212;
-  --omb-highlight-quote: #26241a;
-  --omb-highlight-text: #f5d77a;
-  --omb-kind-bg: #232830;
-  --omb-kind-text: #c3c8d2;
-  --omb-voice-bg: #15301f;
-  --omb-voice-text: #8fdcaa;
-  --omb-image-bg: #2a2040;
-  --omb-image-text: #cdb4f5;
-  --omb-link-bg: #172a40;
-  --omb-link-text: #9cc4f0;
-  --omb-ai-text: #c3c8d2;
-  --omb-ai-border: #5b6170;
-  --omb-rem-ai-border: #a0743a;
-  --omb-rem-solid: #ffc97a;
-  --omb-kbd-border: #3a404b;
-  --omb-quote-text: #d6d9e0;
+  --omb-rem-dot: #f59e0b;
+  --omb-rem-bg: #2a2116;
+  --omb-rem-text: #f3b866;
+  --omb-tag-bg: #262626;
+  --omb-tag-text: #c9c9c5;
+  --omb-highlight-bg: #3a2e16;
+  --omb-highlight-quote: #181818;
+  --omb-highlight-text: #c9c9c5;
+  --omb-kind-bg: #262626;
+  --omb-kind-text: #c9c9c5;
+  --omb-voice-bg: #262626;
+  --omb-voice-text: #c9c9c5;
+  --omb-image-bg: #262626;
+  --omb-image-text: #c9c9c5;
+  --omb-link-bg: #262626;
+  --omb-link-text: #c9c9c5;
+  --omb-ai-text: #9c9c98;
+  --omb-ai-border: #4a4a48;
+  --omb-rem-ai-border: #8a6a3a;
+  --omb-rem-solid: #f3b866;
+  --omb-kbd-border: #333333;
+  --omb-quote-text: #dcdcd8;
 
-  --omb-hero-bg: var(--omb-accent-soft);
+  --omb-hero-bg: var(--omb-panel);
   --omb-hero-text: var(--omb-text);
 }
 
@@ -108,9 +120,9 @@
   --omb-accent: #c0365a;
   --omb-accent-soft: #fbe7ed;
 }
-:root[data-accent='graphite'] {
-  --omb-accent: #15171c;
-  --omb-accent-soft: #eceef2;
+:root[data-accent='teal'] {
+  --omb-accent: #0f766e;
+  --omb-accent-soft: #e0f2ef;
 }
 .dark[data-accent='violet'] {
   --omb-accent: #b79cff;
@@ -124,9 +136,9 @@
   --omb-accent: #ff8fab;
   --omb-accent-soft: #3a1a24;
 }
-.dark[data-accent='graphite'] {
-  --omb-accent: #e8eaee;
-  --omb-accent-soft: #2a2f38;
+.dark[data-accent='teal'] {
+  --omb-accent: #4fd1c5;
+  --omb-accent-soft: #12302d;
 }
 
 :root,
@@ -151,10 +163,8 @@ body {
   color: var(--omb-text);
 }
 
-h1,
-h2,
-h3 {
-  font-family: var(--font-display);
+h1 {
+  letter-spacing: -0.03em;
 }
 
 /* Shared bits of the inbox and library. */
@@ -163,11 +173,11 @@ h3 {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    height: 26px;
+    height: 24px;
     padding: 0 10px;
     border-radius: 999px;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 12.5px;
+    font-weight: 400;
     white-space: nowrap;
   }
   .omb-chip-tag {
@@ -175,7 +185,7 @@ h3 {
     color: var(--omb-tag-text);
   }
   .omb-chip-ai {
-    background: var(--omb-surface);
+    background: transparent;
     color: var(--omb-ai-text);
     border: 1px dashed var(--omb-ai-border);
   }
@@ -184,7 +194,7 @@ h3 {
     color: var(--omb-rem-text);
   }
   .omb-chip-rem-ai {
-    background: var(--omb-surface);
+    background: transparent;
     color: var(--omb-rem-text);
     border: 1px dashed var(--omb-rem-ai-border);
   }
@@ -195,12 +205,10 @@ h3 {
     min-width: 20px;
     height: 20px;
     padding: 0 5px;
-    border: 1px solid var(--omb-kbd-border);
-    border-bottom-width: 2px;
-    border-radius: 5px;
+    border-radius: 6px;
     font: 600 11px/1 var(--font-sans);
     color: var(--omb-text-toned);
-    background: var(--omb-surface);
+    background: var(--omb-hover);
   }
   .omb-meta {
     font-size: 12.5px;
@@ -215,18 +223,18 @@ h3 {
     flex-direction: column;
     gap: 14px;
     padding: 20px 22px;
-    border: 1px solid var(--omb-border);
-    border-radius: 16px;
+    border-radius: 20px;
     background: var(--omb-surface);
+    box-shadow: var(--omb-shadow);
   }
   .omb-side {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 16px 18px;
-    border: 1px solid var(--omb-border);
-    border-radius: 14px;
+    padding: 18px 20px;
+    border-radius: 18px;
     background: var(--omb-surface);
+    box-shadow: var(--omb-shadow);
   }
 }
 
@@ -236,13 +244,79 @@ h3 {
     display: flex;
     flex-direction: column;
     gap: 18px;
-    padding: 22px 24px;
-    border: 1px solid var(--omb-border);
-    border-radius: 16px;
+    padding: 24px 26px;
+    border-radius: 20px;
     background: var(--omb-surface);
+    box-shadow: var(--omb-shadow);
   }
   .omb-hint {
     font-size: 13px;
     color: var(--omb-text-muted);
+  }
+}
+
+/* Calm building blocks: pill buttons, the reminder dot, section labels, quotes, the dotted panel. */
+@layer components {
+  .omb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: var(--omb-chip);
+    color: var(--omb-text);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .omb-btn:hover {
+    background: var(--omb-hover);
+  }
+  .omb-btn-primary,
+  .omb-btn-primary:hover {
+    background: var(--omb-accent);
+    color: var(--omb-on-accent);
+    font-weight: 600;
+  }
+  .omb-btn-primary:hover {
+    opacity: 0.88;
+  }
+  .omb-btn-ghost {
+    background: transparent;
+  }
+  .omb-rem-dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--omb-rem-dot);
+  }
+  .omb-label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--omb-text-muted);
+  }
+  .omb-label::after {
+    content: '';
+    flex-grow: 1;
+    height: 1px;
+    background: var(--omb-border);
+  }
+  .omb-quote {
+    font-family: var(--font-quote);
+    font-style: italic;
+    color: var(--omb-quote-text);
+  }
+  .omb-dotted {
+    background-color: var(--omb-panel);
+    background-image: radial-gradient(var(--omb-dots) 1px, transparent 1px);
+    background-size: 22px 22px;
   }
 }

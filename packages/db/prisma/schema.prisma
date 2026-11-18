@@ -24,7 +24,7 @@ model User {
   digestEnabled Boolean   @default(true)
   lastDigestOn  DateTime? @db.Date
   theme         String    @default("system")
-  accent        String    @default("teal")
+  accent        String    @default("graphite")
   prefs         Json      @default("{}")
   aiTokensMonth Int       @default(0)
   /// Month ("2026-11") that aiTokensMonth counts; a new month starts the count again.

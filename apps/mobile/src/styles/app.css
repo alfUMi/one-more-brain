@@ -4,30 +4,37 @@ html,
 body {
   background: var(--omb-bg);
   color: var(--omb-text);
+  font-family: var(--ion-font-family);
   -webkit-font-smoothing: antialiased;
 }
 
-.font-display,
 h1,
 h2,
 h3 {
-  font-family: 'Space Grotesk', 'Inter Variable', sans-serif;
+  font-family: var(--ion-font-family);
+}
+
+/* Quotes and highlights read like a page from a book. */
+.omb-quote {
+  font-family: var(--omb-quote-font);
+  font-style: italic;
 }
 
 /* Page header from the mockups: big title, then meta, then actions on the right. */
 .omb-header {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 10px;
-  padding: calc(var(--ion-safe-area-top, 0px) + 12px) 20px 8px;
+  padding: calc(var(--ion-safe-area-top, 0px) + 18px) 22px 12px;
 }
 .omb-header h1 {
   margin: 0;
-  font-weight: 700;
-  font-size: 26px;
+  font-weight: 600;
+  font-size: 30px;
+  letter-spacing: -0.025em;
 }
 .omb-header .meta {
-  font-size: 14px;
+  font-size: 14.5px;
   color: var(--omb-text-muted);
 }
 .grow {
@@ -38,63 +45,78 @@ h3 {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  height: 44px;
-  padding: 0 8px;
+  height: 36px;
+  padding: 0 12px 0 4px;
   border: 0;
+  border-radius: 999px;
   background: transparent;
-  color: var(--omb-accent);
-  font: 500 16px var(--ion-font-family);
+  color: var(--omb-icon);
+  font: 400 15px var(--ion-font-family);
 }
 
+/* Buttons are pills: grey by default, black (the accent) for the main action. */
 .omb-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   min-height: 48px;
-  padding: 0 16px;
-  border: 1px solid var(--omb-border);
-  border-radius: 14px;
-  background: var(--omb-surface);
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--omb-chip-bg);
   color: var(--omb-text);
-  font: 600 16px var(--ion-font-family);
+  font: 500 15px var(--ion-font-family);
+}
+.omb-btn:active:not(:disabled) {
+  background: var(--omb-hover);
 }
 .omb-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
 }
-.omb-btn-primary {
-  border-color: var(--omb-accent);
+.omb-btn-primary,
+.omb-btn-primary:active:not(:disabled) {
   background: var(--omb-accent);
   color: var(--omb-on-accent);
+  font-weight: 600;
 }
-.omb-btn-dark {
-  border-color: var(--omb-inverse-bg);
+.omb-btn-dark,
+.omb-btn-dark:active:not(:disabled) {
   background: var(--omb-inverse-bg);
   color: var(--omb-inverse-text);
 }
+.omb-btn-white,
+.omb-btn-white:active:not(:disabled) {
+  background: var(--omb-surface);
+  color: var(--omb-text);
+  box-shadow: var(--omb-shadow-sm);
+}
 .omb-btn-sm {
   min-height: 36px;
-  padding: 0 12px;
-  border-radius: 10px;
-  font-size: 13px;
+  padding: 0 14px;
+  font-size: 13.5px;
 }
-.omb-btn-ghost {
-  border-color: transparent;
+.omb-btn-ghost,
+.omb-btn-ghost:active:not(:disabled) {
   background: transparent;
 }
-.omb-btn-danger {
+.omb-btn-danger,
+.omb-btn-danger:active:not(:disabled) {
+  background: transparent;
   color: var(--omb-danger);
 }
 
+/* White cards with a soft shadow, no borders. */
 .omb-card {
   background: var(--omb-surface);
-  border: 1px solid var(--omb-border);
-  border-radius: 14px;
+  border: 0;
+  border-radius: 18px;
+  box-shadow: var(--omb-shadow-sm);
 }
 .omb-panel {
   background: var(--omb-surface);
-  border: 1px solid var(--omb-border);
-  border-radius: 16px;
+  border-radius: 20px;
+  box-shadow: var(--omb-shadow);
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
@@ -102,12 +124,28 @@ h3 {
 }
 .omb-panel h2 {
   margin: 0;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
 }
 
+/* Section label with a hairline after it ("Captured today ———"). */
+.omb-section-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--omb-text-muted);
+}
+.omb-section-label::after {
+  content: '';
+  flex-grow: 1;
+  height: 1px;
+  background: var(--omb-border);
+}
+
 .omb-meta {
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--omb-text-muted);
 }
 .omb-hint {
@@ -117,27 +155,43 @@ h3 {
   margin: 0;
 }
 
-/* Chips: amber = reminder, blue = tag, dashed = AI suggestion, accent = remember. */
+/* Chips: amber = reminder, grey = tag, dashed = AI suggestion, accent = remember. */
 .omb-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 28px;
-  padding: 0 10px;
+  min-height: 26px;
+  box-sizing: border-box;
+  padding: 3px 11px;
   border-radius: 999px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12.5px;
+  font-weight: 400;
   border: 1px solid transparent;
   white-space: nowrap;
+  background: var(--omb-chip-bg);
+  color: var(--omb-chip-text);
 }
 .omb-chip-sm {
-  height: 24px;
-  padding: 0 8px;
+  min-height: 22px;
+  padding: 1px 9px;
   font-size: 12px;
 }
 .omb-chip-rem {
   background: var(--omb-rem-bg);
   color: var(--omb-rem-text);
+}
+/* The amber dot that marks a reminder everywhere. */
+.omb-rem-dot,
+.omb-chip-rem::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--omb-rem);
+}
+.omb-chip-rem.omb-chip-ai::before {
+  display: none;
 }
 .omb-chip-tag {
   background: var(--omb-tag-bg);
@@ -153,8 +207,8 @@ h3 {
   color: var(--omb-accent);
 }
 .omb-chip-place {
-  background: var(--omb-voice-bg);
-  color: var(--omb-voice-text);
+  background: var(--omb-chip-bg);
+  color: var(--omb-chip-text);
 }
 .omb-chip button {
   display: flex;
@@ -163,67 +217,72 @@ h3 {
   color: inherit;
   padding: 0;
   margin-right: -2px;
+  font: inherit;
 }
 
+/* Segmented control: a grey pill track with a white thumb. */
 .omb-segment {
   display: flex;
-  gap: 2px;
-  padding: 3px;
+  gap: 4px;
+  padding: 4px;
   background: var(--omb-segment);
-  border-radius: 10px;
+  border-radius: 999px;
 }
 .omb-segment button {
   flex: 1;
   height: 34px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 999px;
   background: transparent;
-  font: 600 13px var(--ion-font-family);
-  color: var(--omb-text-toned);
+  font: 500 13.5px var(--ion-font-family);
+  color: var(--omb-icon);
 }
 .omb-segment button[aria-pressed='true'] {
   background: var(--omb-surface);
   color: var(--omb-text);
-  box-shadow: 0 1px 2px rgba(21, 23, 28, 0.12);
+  box-shadow: 0 1px 2px rgba(17, 17, 17, 0.08);
+}
+:root.dark .omb-segment button[aria-pressed='true'] {
+  background: #3a3a3a;
 }
 
 .omb-input {
   width: 100%;
   box-sizing: border-box;
   min-height: 48px;
-  padding: 0 14px;
-  border: 1px solid var(--omb-border);
-  border-radius: 12px;
-  background: var(--omb-surface);
+  padding: 0 16px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--omb-surface-muted);
   color: var(--omb-text);
-  font: 500 16px var(--ion-font-family);
+  font: 400 16px var(--ion-font-family);
   outline: 0;
+  box-shadow: inset 0 0 0 1px transparent;
+}
+.omb-input::placeholder {
+  color: var(--omb-text-faint);
 }
 .omb-input:focus {
-  border: 2px solid var(--omb-accent);
-  padding: 0 13px;
+  box-shadow: inset 0 0 0 1.5px var(--omb-accent);
 }
 textarea.omb-input {
-  padding: 12px 14px;
+  padding: 12px 16px;
   line-height: 1.4;
   resize: none;
-}
-textarea.omb-input:focus {
-  padding: 11px 13px;
 }
 .omb-label {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--omb-text-toned);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--omb-text-muted);
 }
 
 .omb-banner {
   margin: 0 16px 8px;
-  padding: 10px 12px;
-  border-radius: 12px;
+  padding: 10px 14px;
+  border-radius: 16px;
   background: var(--omb-rem-bg);
   color: var(--omb-rem-text);
   font-size: 13px;
@@ -243,6 +302,8 @@ textarea.omb-input:focus {
   margin: 0;
   color: var(--omb-text);
   font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
 }
 .omb-empty p {
   margin: 0;
@@ -261,35 +322,174 @@ textarea.omb-input:focus {
 
 /* Bottom sheets (Remind, Share, edit): rounded top, grabber. */
 ion-modal.omb-sheet {
-  --border-radius: 24px;
+  --border-radius: 28px;
   --background: var(--omb-surface);
+  --backdrop-opacity: var(--ion-backdrop-opacity);
+}
+ion-modal.omb-sheet-page {
+  --background: var(--omb-bg);
+}
+ion-modal.omb-sheet::part(handle) {
+  width: 40px;
+  height: 5px;
+  background: var(--omb-grabber);
+  top: 10px;
 }
 ion-toast.omb-toast {
   --background: var(--omb-inverse-bg);
   --color: var(--omb-inverse-text);
-  --button-color: var(--omb-accent-soft);
-  --border-radius: 12px;
+  --button-color: var(--omb-inverse-muted);
+  --border-radius: 999px;
+  --box-shadow: var(--omb-shadow-lg);
+  font-weight: 500;
 }
 ion-toast.omb-toast-error {
   --background: var(--omb-danger);
 }
-ion-action-sheet {
-  --button-color: var(--omb-text);
+ion-alert {
+  --background: var(--omb-surface);
+  --backdrop-opacity: var(--ion-backdrop-opacity);
 }
+ion-alert .alert-wrapper {
+  border-radius: 22px;
+}
+ion-alert .alert-button {
+  color: var(--omb-text);
+}
+ion-alert .alert-button-role-destructive {
+  color: var(--omb-danger);
+}
+
+/* Action sheets ("Hold for more", snooze, kind, photo): one white sheet, rows on the left. */
+ion-action-sheet {
+  --background: var(--omb-surface);
+  --backdrop-opacity: var(--ion-backdrop-opacity);
+  --button-background: transparent;
+  --button-background-activated: var(--omb-text);
+  --button-background-activated-opacity: 0.05;
+  --button-color: var(--omb-text);
+  --max-width: 100%;
+  text-align: left;
+}
+ion-action-sheet .action-sheet-wrapper {
+  padding-bottom: 0;
+}
+ion-action-sheet .action-sheet-container {
+  padding: 0;
+}
+ion-action-sheet .action-sheet-group,
+ion-action-sheet .action-sheet-group:first-child,
+ion-action-sheet .action-sheet-group:last-child {
+  margin: 0;
+  border-radius: 0;
+}
+ion-action-sheet .action-sheet-group:first-child {
+  border-radius: 28px 28px 0 0;
+  padding-top: 10px;
+}
+ion-action-sheet .action-sheet-group:first-child::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 5px;
+  margin: 0 auto 14px;
+  border-radius: 999px;
+  background: var(--omb-grabber);
+}
+ion-action-sheet .action-sheet-group:last-child {
+  padding-bottom: calc(var(--ion-safe-area-bottom, 0px) + 24px);
+}
+ion-action-sheet .action-sheet-title {
+  padding: 0 20px 12px;
+  background: transparent;
+  text-align: left;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--omb-text);
+}
+ion-action-sheet.omb-quote-title .action-sheet-title {
+  font-family: var(--omb-quote-font);
+  font-style: italic;
+  font-weight: 400;
+}
+ion-action-sheet .action-sheet-sub-title {
+  padding-top: 4px;
+  font-family: var(--ion-font-family);
+  font-style: normal;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--omb-text-muted);
+}
+ion-action-sheet .action-sheet-button {
+  height: 52px;
+  padding: 0 20px;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--omb-text);
+}
+ion-action-sheet .action-sheet-button-inner,
+ion-action-sheet .action-sheet-button-label-text {
+  justify-content: flex-start;
+  gap: 14px;
+}
+ion-action-sheet .action-sheet-icon {
+  flex: none;
+  margin: 0;
+  font-size: 20px;
+  color: var(--omb-icon);
+}
+ion-action-sheet .action-sheet-destructive,
+ion-action-sheet .action-sheet-destructive .action-sheet-icon {
+  color: var(--omb-danger);
+}
+ion-action-sheet .action-sheet-group-cancel {
+  padding: 12px 16px calc(var(--ion-safe-area-bottom, 0px) + 24px);
+}
+ion-action-sheet .action-sheet-cancel {
+  height: 50px;
+  border-radius: 999px;
+  background: var(--omb-chip-bg);
+  font-size: 15.5px;
+  font-weight: 500;
+}
+ion-action-sheet .action-sheet-cancel .action-sheet-button-inner {
+  justify-content: center;
+}
+
+/* Tab bar: translucent page colour, hairline on top, grey icons, the current one dark. */
 ion-tab-bar {
-  height: 60px;
+  height: 62px;
+  padding: 6px 6px 0;
+  border-top: 1px solid var(--omb-border-muted);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
 }
 ion-tab-button {
-  font: 500 11px var(--ion-font-family);
+  --padding-top: 0;
+  --padding-bottom: 0;
+  gap: 4px;
+  font: 500 10.5px var(--ion-font-family);
+}
+ion-tab-button ion-label {
+  margin: 0;
+  font-size: 10.5px;
 }
 ion-tab-button.tab-selected {
-  font-weight: 700;
+  font-weight: 600;
+}
+ion-tab-button.tab-selected svg {
+  stroke-width: 2;
 }
 ion-badge.omb-badge {
-  --background: var(--omb-badge);
-  --color: #ffffff;
-  font-size: 10.5px;
-  min-width: 18px;
+  --background: var(--omb-accent);
+  --color: var(--omb-on-accent);
+  --padding-start: 5px;
+  --padding-end: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 16px;
+  border-radius: 999px;
 }
 
 /* Sheets as tall as their content. */
@@ -304,7 +504,7 @@ ion-modal.omb-auto-sheet .ion-page {
 ion-modal.omb-auto-sheet .sheet-body {
   max-height: 86vh;
   overflow-y: auto;
-  padding: 18px 20px calc(var(--ion-safe-area-bottom, 0px) + 20px);
+  padding: 30px 16px calc(var(--ion-safe-area-bottom, 0px) + 24px);
   display: flex;
   flex-direction: column;
   gap: 14px;

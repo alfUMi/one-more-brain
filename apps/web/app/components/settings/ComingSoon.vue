@@ -8,7 +8,7 @@ const { t } = useI18n()
   <section class="omb-card">
     <div class="flex items-start gap-3.5">
       <span
-        class="flex size-10 flex-none items-center justify-center rounded-[10px] bg-(--omb-accent-soft) text-(--omb-accent)"
+        class="flex size-10 flex-none items-center justify-center rounded-full bg-(--omb-chip) text-(--omb-text)"
       >
         <UIcon :name="icon" class="size-5" />
       </span>

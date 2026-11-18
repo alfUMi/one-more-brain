@@ -77,6 +77,6 @@ async function toggle(event: CustomEvent<{ checked: boolean }>) {
 .toggle {
   width: 100%;
   --track-background-checked: var(--omb-accent);
-  font: 500 15px var(--ion-font-family);
+  font: 400 15px var(--ion-font-family);
 }
 </style>

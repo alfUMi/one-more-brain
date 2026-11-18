@@ -46,10 +46,10 @@ function later() {
 <template>
   <div
     v-if="visible"
-    class="flex flex-wrap items-center gap-3 rounded-[14px] border border-(--omb-border) bg-(--omb-surface) px-4 py-3"
+    class="flex flex-wrap items-center gap-3 rounded-[18px] bg-(--omb-surface) px-5 py-3.5 shadow-(--omb-shadow)"
   >
     <span
-      class="flex size-9 flex-none items-center justify-center rounded-[10px] bg-(--omb-rem-bg) text-(--omb-rem-text)"
+      class="flex size-9 flex-none items-center justify-center rounded-full bg-(--omb-rem-bg) text-(--omb-rem-text)"
     >
       <UIcon name="i-lucide-bell" class="size-[18px]" />
     </span>

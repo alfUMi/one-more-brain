@@ -5,7 +5,7 @@ import AppIcon from './AppIcon.vue'
 
 const props = withDefaults(defineProps<{ kind: ItemKind; size?: number }>(), { size: 32 })
 
-/** Each kind keeps its own tint: yellow highlight, green voice, violet image, blue link. */
+/** A quiet round badge per kind (Calm keeps every kind the same neutral grey). */
 const look = computed(
   () =>
     ({
@@ -39,7 +39,7 @@ const look = computed(
 <style scoped>
 .kind {
   flex: none;
-  border-radius: 9px;
+  border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;

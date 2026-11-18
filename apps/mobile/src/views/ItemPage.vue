@@ -187,7 +187,7 @@ const images = computed(() => item.value?.attachments.filter((a) => a.kind !== '
 
         <img v-for="img in images" :key="img.id" :src="img.url" alt="" class="image" />
 
-        <label class="omb-label">
+        <label class="omb-label section">
           {{ t('mobile.item.text') }}
           <textarea
             ref="bodyEl"
@@ -209,11 +209,6 @@ const images = computed(() => item.value?.attachments.filter((a) => a.kind !== '
           <p v-if="!reminders.length" class="omb-hint">{{ t('mobile.item.noReminders') }}</p>
           <div v-for="r in reminders" :key="r.id" class="rem-row">
             <span class="omb-chip omb-chip-rem" :class="{ 'omb-chip-ai': r.isAiSuggested }">
-              <AppIcon
-                :name="r.kind === 'RECURRING' ? 'repeat' : 'clock'"
-                :size="14"
-                :stroke="2.2"
-              />
               {{
                 r.isAiSuggested
                   ? t('reminder.suggested', { when: formatter.reminder(r) })
@@ -254,9 +249,9 @@ const images = computed(() => item.value?.attachments.filter((a) => a.kind !== '
               :class="tag.suggested ? 'omb-chip-ai' : 'omb-chip-tag'"
             >
               <button v-if="tag.suggested" type="button" @click="confirmTag(tag.name)">
-                #{{ tag.name }}
+                {{ tag.name }}?
               </button>
-              <template v-else>#{{ tag.name }}</template>
+              <template v-else>{{ tag.name }}</template>
               <button
                 type="button"
                 :aria-label="t('actions.remove')"
@@ -334,60 +329,63 @@ const images = computed(() => item.value?.attachments.filter((a) => a.kind !== '
   padding: calc(var(--ion-safe-area-top, 0px) + 8px) 12px 4px;
 }
 .icon-btn {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border: 0;
-  border-radius: 12px;
-  background: transparent;
-  color: var(--omb-text-toned);
+  border-radius: 999px;
+  background: var(--omb-surface);
+  box-shadow: 0 1px 2px rgba(17, 17, 17, 0.06);
+  color: var(--omb-text);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .main {
-  padding: 4px 20px calc(var(--ion-safe-area-bottom, 0px) + 32px);
+  padding: 8px 16px calc(var(--ion-safe-area-bottom, 0px) + 32px);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 .meta-row {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 0 6px;
 }
 .title {
   margin: 0;
-  font-size: 24px;
+  padding: 0 6px;
+  font-size: 26px;
   font-weight: 600;
   line-height: 1.25;
+  letter-spacing: -0.02em;
   overflow-wrap: anywhere;
 }
 .quote {
   margin: 0;
-  padding: 12px 14px;
-  background: var(--omb-highlight-quote);
-  border-radius: 12px;
-  font-family: 'Source Serif 4', Georgia, serif;
-  font-size: 17px;
+  padding: 0 6px;
+  font-family: var(--omb-quote-font);
+  font-size: 19px;
   line-height: 1.55;
   color: var(--omb-quote-text);
 }
 .link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 20px;
   text-align: left;
   font: inherit;
   color: var(--omb-text-muted);
 }
 .link-icon {
   flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: var(--omb-link-bg);
-  color: var(--omb-link-text);
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--omb-hover);
+  color: var(--omb-text-muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -401,32 +399,37 @@ const images = computed(() => item.value?.attachments.filter((a) => a.kind !== '
 }
 .link-title {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--omb-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .link-host {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--omb-link);
 }
 .image {
   width: 100%;
-  border-radius: 14px;
+  border-radius: 20px;
   background: var(--omb-hover);
 }
+/* Each block is a white card, like the settings groups. */
 .section {
+  background: var(--omb-surface);
+  border-radius: 20px;
+  box-shadow: var(--omb-shadow-sm);
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 .section h2 {
   margin: 0;
-  font-size: 13px;
+  font-size: 12.5px;
   font-family: var(--ion-font-family);
   font-weight: 600;
-  color: var(--omb-text-toned);
+  color: var(--omb-text-muted);
 }
 .extracted {
   margin: 0;

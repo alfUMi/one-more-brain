@@ -4,7 +4,6 @@ import { ACCENTS, THEMES, type Accent, type Theme } from '@omb/shared'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import AppIcon from '../../components/AppIcon.vue'
 import SettingsShell from '../../components/settings/SettingsShell.vue'
 import { accentHex, asAccent, asTheme } from '../../lib/appearance'
 import { APP_HOST, APP_VERSION } from '../../lib/config'
@@ -78,10 +77,10 @@ async function confirmSignOut() {
       <button type="button" class="row account" @click="router.push('/settings/account')">
         <span class="avatar">{{ initial }}</span>
         <span class="who">
-          <span>{{ profile?.name || t('settings.sections.account') }}</span>
+          <span class="name">{{ profile?.name || t('settings.sections.account') }}</span>
           <span class="email">{{ profile?.email }}</span>
         </span>
-        <AppIcon class="chev" name="chevron-right" :size="18" />
+        <span class="val">›</span>
       </button>
     </div>
 
@@ -118,17 +117,22 @@ async function confirmSignOut() {
     <span class="cap">{{ t('mobile.settings.general') }}</span>
     <div class="group">
       <button type="button" class="row" @click="router.push('/settings/region')">
-        {{ t('settings.sections.region') }}<span class="val">{{ regionValue }}</span>
+        {{ t('settings.sections.region') }}<span class="val">{{ regionValue }} ›</span>
       </button>
       <button type="button" class="row" @click="router.push('/settings/reminders')">
-        {{ t('settings.sections.reminders') }}<span class="val">{{ digestValue }}</span>
+        {{ t('settings.sections.reminders') }}<span class="val">{{ digestValue }} ›</span>
       </button>
       <button type="button" class="row" @click="router.push('/settings/notifications')">
-        {{ t('settings.sections.notifications') }}<span class="val">{{ pushValue }}</span>
+        {{ t('settings.sections.notifications') }}<span class="val">{{ pushValue }} ›</span>
       </button>
       <button type="button" class="row" @click="router.push('/settings/devices')">
-        {{ t('settings.sections.devices') }}<span class="val">{{ deviceCount ?? '' }}</span>
+        {{ t('settings.sections.devices')
+        }}<span class="val">{{ deviceCount === null ? '' : `${deviceCount} ` }}›</span>
       </button>
+    </div>
+
+    <span class="cap">{{ t('mobile.settings.later') }}</span>
+    <div class="group">
       <button type="button" class="row" disabled>
         {{ t('settings.sections.telegram')
         }}<span class="soon">{{ t('mobile.settings.soon', { n: 3 }) }}</span>
@@ -160,51 +164,54 @@ async function confirmSignOut() {
 </template>
 
 <style scoped>
-.account {
-  min-height: 64px;
+.row.account {
+  min-height: 72px;
+  gap: 14px;
 }
 .avatar {
   flex: none;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
-  background: var(--omb-accent-soft);
-  color: var(--omb-accent);
+  background: var(--omb-hover);
+  color: var(--omb-text);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: 600;
 }
 .who {
   flex-grow: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   padding: 8px 0;
 }
+.name {
+  font-size: 15.5px;
+  font-weight: 500;
+}
 .email {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--omb-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.chev {
-  color: var(--omb-text-muted);
 }
 .accents {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 2px 4px;
 }
 .accent-label {
   flex-grow: 1;
-  font-size: 14px;
-  color: var(--omb-text-toned);
+  font-size: 15px;
+  color: var(--omb-text);
 }
 .swatch {
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   border-radius: 999px;
   border: 0;
   padding: 0;
@@ -215,6 +222,6 @@ async function confirmSignOut() {
     0 0 0 4px currentColor;
 }
 .signout {
-  margin-top: 6px;
+  margin-top: 16px;
 }
 </style>

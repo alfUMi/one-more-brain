@@ -90,21 +90,20 @@ function onKeydown(e: KeyboardEvent) {
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
-const segment = (active: boolean) => [
-  'h-8 rounded-lg border px-3 text-[13px] font-medium',
-  active
-    ? 'border-(--omb-border) bg-(--omb-surface) text-(--omb-text)'
-    : 'border-transparent text-(--omb-text-muted) hover:bg-(--omb-hover)',
-]
+const segment = (active: boolean) => ['omb-btn h-8', active ? 'omb-btn-primary' : 'omb-btn-ghost']
+/** Most used tags (they used to live in the sidebar); the active one stays first. */
+const topTags = computed(() => {
+  const names = sidebar.tags.value.slice(0, 12).map((tag) => tag.name)
+  const active = filters.value.tag
+  return active ? [active, ...names.filter((n) => n !== active)] : names
+})
 </script>
 
 <template>
   <section class="flex flex-col gap-[18px]">
-    <header class="flex items-baseline gap-3">
-      <h1 class="text-[30px] font-bold">{{ t('library.title') }}</h1>
-      <span v-if="filters.q && !loading" class="text-sm text-(--omb-text-muted)">
-        {{ t('library.results', { n: items.length + (cursor ? '+' : '') }) }}
-      </span>
+    <header class="flex flex-col gap-1.5">
+      <h1 class="text-[36px] leading-tight font-semibold">{{ t('library.title') }}</h1>
+      <span class="text-[15px] text-(--omb-text-muted)">{{ t('library.subtitle') }}</span>
     </header>
 
     <form role="search" @submit.prevent>
@@ -117,80 +116,101 @@ const segment = (active: boolean) => [
         :aria-label="t('inbox.search')"
         :loading="loading && Boolean(filters.q)"
         size="xl"
-        class="w-full"
+        variant="none"
+        class="w-full rounded-2xl bg-(--omb-surface) shadow-(--omb-shadow)"
+        :ui="{ base: 'h-[52px] text-base' }"
         autofocus
         @keydown.esc="($event.target as HTMLInputElement).blur()"
       >
-        <template #trailing><span class="omb-kbd">/</span></template>
+        <template #trailing>
+          <span v-if="filters.q && !loading" class="omb-meta">
+            {{ t('library.results', { n: items.length + (cursor ? '+' : '') }) }}
+          </span>
+          <span v-else class="omb-kbd">/</span>
+        </template>
       </UInput>
     </form>
 
-    <div class="flex flex-col gap-2">
-      <div role="group" :aria-label="t('library.filterByStatus')" class="flex flex-wrap gap-1">
-        <button
-          v-for="s in ['ALL', ...ITEM_STATUSES] as const"
-          :key="s"
-          type="button"
-          :aria-pressed="(filters.status ?? 'ALL') === s"
-          :class="segment((filters.status ?? 'ALL') === s)"
-          @click="setFilter({ status: s === 'ALL' ? undefined : s })"
-        >
-          {{ t(`statuses.${s}`) }}
-        </button>
+    <div class="flex flex-col gap-2.5">
+      <div class="flex flex-wrap items-center gap-1">
+        <div role="group" :aria-label="t('library.filterByStatus')" class="contents">
+          <button
+            v-for="s in ['ALL', ...ITEM_STATUSES] as const"
+            :key="s"
+            type="button"
+            :aria-pressed="(filters.status ?? 'ALL') === s"
+            :class="segment((filters.status ?? 'ALL') === s)"
+            @click="setFilter({ status: s === 'ALL' ? undefined : s })"
+          >
+            {{ t(`statuses.${s}`) }}
+          </button>
+        </div>
+        <span class="mx-2 h-5 w-px bg-(--omb-border)" aria-hidden="true" />
+        <div role="group" :aria-label="t('inbox.filterByKind')" class="contents">
+          <button
+            v-for="k in ITEM_KINDS"
+            :key="k"
+            type="button"
+            :aria-pressed="filters.kind === k"
+            :class="segment(filters.kind === k)"
+            @click="setFilter({ kind: filters.kind === k ? undefined : k })"
+          >
+            {{ t(`kinds.${k}`) }}
+          </button>
+        </div>
       </div>
       <div
+        v-if="topTags.length"
         role="group"
-        :aria-label="t('inbox.filterByKind')"
-        class="flex flex-wrap items-center gap-1"
+        :aria-label="t('library.tags')"
+        class="flex flex-wrap gap-1.5"
       >
-        <button
-          v-for="k in ['ALL', ...ITEM_KINDS] as const"
-          :key="k"
-          type="button"
-          :aria-pressed="(filters.kind ?? 'ALL') === k"
-          :class="segment((filters.kind ?? 'ALL') === k)"
-          @click="setFilter({ kind: k === 'ALL' ? undefined : k })"
-        >
-          {{ t(`kinds.${k}`) }}
-        </button>
-        <span v-if="filters.tag" class="omb-chip omb-chip-tag ml-1 pr-1">
-          #{{ filters.tag }}
+        <template v-for="name in topTags" :key="name">
           <button
+            v-if="name === filters.tag"
             type="button"
             :aria-label="t('library.removeTag')"
-            class="flex size-5 items-center justify-center rounded-full hover:bg-black/10"
+            class="omb-chip bg-(--omb-accent) text-(--omb-on-accent)"
             @click="setFilter({ tag: undefined })"
           >
-            <UIcon name="i-lucide-x" class="size-3" />
+            {{ name }} ×
           </button>
-        </span>
+          <button
+            v-else
+            type="button"
+            class="omb-chip omb-chip-tag hover:bg-(--omb-hover)"
+            @click="setFilter({ tag: name })"
+          >
+            {{ name }}
+          </button>
+        </template>
       </div>
     </div>
 
     <ItemList
       v-if="items.length"
       v-model="items"
+      group="month"
       :keeps-item="(i) => !filters.status || i.status === filters.status"
       @change="sidebar.refresh"
     />
 
-    <UButton
+    <button
       v-if="cursor"
-      color="neutral"
-      variant="outline"
-      class="self-center"
-      :loading="loading"
+      type="button"
+      class="omb-btn omb-btn-ghost self-center"
+      :disabled="loading"
       @click="load(true)"
     >
       {{ t('inbox.loadMore') }}
-    </UButton>
+    </button>
 
     <div
       v-if="!loading && !items.length"
-      class="flex flex-col items-center gap-2 rounded-[14px] border border-(--omb-border) bg-(--omb-surface) px-6 py-12 text-center"
+      class="flex flex-col items-center gap-2 rounded-[20px] bg-(--omb-surface) px-6 py-12 text-center shadow-(--omb-shadow)"
     >
       <span
-        class="mb-1 flex size-10 items-center justify-center rounded-[10px] bg-(--omb-accent-soft) text-(--omb-accent)"
+        class="mb-1 flex size-10 items-center justify-center rounded-full bg-(--omb-chip) text-(--omb-text)"
       >
         <UIcon :name="hasFilters ? 'i-lucide-search-x' : 'i-lucide-book'" class="size-5" />
       </span>

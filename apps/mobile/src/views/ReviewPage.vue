@@ -3,6 +3,7 @@ import { IonContent, IonPage, onIonViewWillEnter, useIonRouter } from '@ionic/vu
 import { REVIEW_INTERVALS_DAYS, type ReviewCardDto } from '@omb/shared'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import { tap } from '../lib/actions'
 import { formatter } from '../lib/format'
@@ -10,8 +11,11 @@ import { api } from '../lib/session'
 import { loadToday, store } from '../lib/store'
 import { saveFailed } from '../lib/toast'
 
-/** Mockup: Mobile · Review. Opened from Today. */
+/** Mockup: Mobile · Review. A tab of its own, and also opened from Today. */
 const { t } = useI18n()
+const route = useRoute()
+/** On the tab there is nowhere to go back to. */
+const asTab = computed(() => route.path.startsWith('/tabs/'))
 const ionRouter = useIonRouter()
 
 /** The deck is fixed when the screen opens, so answering doesn't reshuffle it. */
@@ -20,7 +24,7 @@ const index = ref(0)
 const busy = ref(false)
 
 onIonViewWillEnter(async () => {
-  if (!store.today) await loadToday()
+  await loadToday()
   cards.value = [...(store.today?.reviews ?? [])]
   index.value = 0
 })
@@ -59,6 +63,16 @@ async function answer(gotIt: boolean) {
   }
 }
 
+/** "Forgot · again tomorrow" → a main line and a small line, as on the mockup buttons. */
+function split(label: string) {
+  const [main, ...rest] = label.split(' · ')
+  return { main, sub: rest.join(' · ') }
+}
+const forgotLabel = computed(() => split(t('review.forgot')))
+const gotItLabel = computed(() =>
+  split(nextDays.value ? t('review.gotIt', { n: nextDays.value }) : t('review.gotItLast')),
+)
+
 function back() {
   if (ionRouter.canGoBack()) ionRouter.back()
   else ionRouter.navigate('/tabs/today', 'back', 'replace')
@@ -69,10 +83,11 @@ function back() {
   <IonPage>
     <IonContent>
       <div class="page">
-        <header class="top">
-          <button type="button" class="omb-back" @click="back">
-            <AppIcon name="chevron-left" :stroke="2" />{{ t('mobile.review.back') }}
-          </button>
+        <button v-if="!asTab" type="button" class="omb-back back" @click="back">
+          <AppIcon name="chevron-left" :stroke="2" />{{ t('mobile.review.back') }}
+        </button>
+        <header class="omb-header head" :class="{ 'after-back': !asTab }">
+          <h1>{{ t('review.title') }}</h1>
           <div class="grow" />
           <span v-if="card" class="meta">{{ t('review.cardOf', { i: index + 1, n: total }) }}</span>
         </header>
@@ -81,47 +96,41 @@ function back() {
         </div>
 
         <main class="main">
-          <h1>{{ t('review.title') }}</h1>
-          <template v-if="card">
-            <article class="card omb-card">
-              <span class="omb-meta">
-                {{ t('review.saved', { when: formatter.relative(card.item.capturedAt) }) }} ·
-                {{ t(`review.from.${card.item.kind}`) }}
+          <article v-if="card" class="card">
+            <span class="meta-line">
+              {{ t('review.saved', { when: formatter.relative(card.item.capturedAt) }) }} ·
+              {{ t(`review.from.${card.item.kind}`) }}
+            </span>
+            <h2 v-if="heading" class="heading">{{ heading }}</h2>
+            <p class="text" :class="{ quote: card.item.quote }">
+              <template v-if="card.item.quote">“{{ text }}”</template>
+              <template v-else>{{ text }}</template>
+            </p>
+            <img v-if="image" :src="image" alt="" class="image" />
+            <div class="grow" />
+            <div v-if="card.item.tags.length" class="chips">
+              <span v-for="tag in card.item.tags" :key="tag.name" class="omb-chip omb-chip-tag">
+                {{ tag.name }}
               </span>
-              <h2 v-if="heading" class="heading">{{ heading }}</h2>
-              <p class="text">
-                <template v-if="card.item.quote">“{{ text }}”</template>
-                <template v-else>{{ text }}</template>
-              </p>
-              <img v-if="image" :src="image" alt="" class="image" />
-              <div class="grow" />
-              <div v-if="card.item.tags.length" class="chips">
-                <span v-for="tag in card.item.tags" :key="tag.name" class="omb-chip omb-chip-tag">
-                  #{{ tag.name }}
-                </span>
-              </div>
-            </article>
-          </template>
+            </div>
+          </article>
           <div v-else class="omb-empty">
             <h2>{{ total ? t('review.finishedTitle') : t('review.emptyTitle') }}</h2>
             <p>{{ total ? t('review.finishedBody') : t('review.emptyBody') }}</p>
-            <button type="button" class="omb-btn" @click="back">
+            <button v-if="!asTab" type="button" class="omb-btn" @click="back">
               {{ t('mobile.review.backToToday') }}
             </button>
           </div>
         </main>
 
         <div v-if="card" class="answers">
-          <button
-            type="button"
-            class="omb-btn omb-btn-primary"
-            :disabled="busy"
-            @click="answer(true)"
-          >
-            {{ nextDays ? t('review.gotIt', { n: nextDays }) : t('review.gotItLast') }}
+          <button type="button" class="answer forgot" :disabled="busy" @click="answer(false)">
+            {{ forgotLabel.main }}
+            <span v-if="forgotLabel.sub" class="answer-sub">{{ forgotLabel.sub }}</span>
           </button>
-          <button type="button" class="omb-btn" :disabled="busy" @click="answer(false)">
-            {{ t('review.forgot') }}
+          <button type="button" class="answer got" :disabled="busy" @click="answer(true)">
+            {{ gotItLabel.main }}
+            <span v-if="gotItLabel.sub" class="answer-sub">{{ gotItLabel.sub }}</span>
           </button>
         </div>
       </div>
@@ -135,26 +144,29 @@ function back() {
   display: flex;
   flex-direction: column;
 }
-.top {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: calc(var(--ion-safe-area-top, 0px) + 8px) 12px 8px;
+.back {
+  align-self: flex-start;
+  margin: calc(var(--ion-safe-area-top, 0px) + 8px) 0 0 12px;
+}
+.head {
+  padding-bottom: 14px;
+}
+.head.after-back {
+  padding-top: 4px;
 }
 .meta {
   font-size: 14px;
   color: var(--omb-text-muted);
-  padding-right: 8px;
 }
 .bars {
   display: flex;
-  gap: 4px;
-  padding: 0 20px;
+  gap: 5px;
+  padding: 0 22px;
 }
 .bars span {
   flex: 1;
   height: 4px;
-  border-radius: 2px;
+  border-radius: 999px;
   background: var(--omb-border);
 }
 .bars span.on {
@@ -162,59 +174,98 @@ function back() {
 }
 .main {
   flex-grow: 1;
-  padding: 20px 20px 0;
+  padding: 22px 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-.main h1 {
-  margin: 0;
-  font-size: 26px;
-  font-weight: 700;
 }
 .card {
   flex-grow: 1;
-  max-height: 470px;
-  min-height: 260px;
-  border-radius: 22px;
-  padding: 24px 22px;
+  max-height: 520px;
+  min-height: 280px;
+  background: var(--omb-surface);
+  border-radius: 26px;
+  box-shadow: var(--omb-shadow-lg);
+  padding: 28px 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   overflow: auto;
+}
+.meta-line {
+  font-size: 13px;
+  color: var(--omb-text-muted);
 }
 .heading {
   margin: 0;
   font-size: 17px;
   font-weight: 600;
+  letter-spacing: -0.01em;
 }
 .text {
   margin: 0;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 23px;
-  line-height: 1.38;
+  font-size: 22px;
+  line-height: 1.4;
   font-weight: 500;
+  letter-spacing: -0.015em;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+.text.quote {
+  font-family: var(--omb-quote-font);
+  font-size: 23px;
+  line-height: 1.45;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--omb-quote-text);
 }
 .image {
   width: 100%;
   max-height: 200px;
   object-fit: cover;
-  border-radius: 12px;
+  border-radius: 16px;
 }
 .chips {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 .answers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 16px calc(var(--ion-safe-area-bottom, 0px) + 16px);
+}
+.answer {
+  min-height: 52px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 18px 20px calc(var(--ion-safe-area-bottom, 0px) + 24px);
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font: 500 15px var(--ion-font-family);
 }
-.answers .omb-btn {
-  min-height: 54px;
+.answer:disabled {
+  opacity: 0.5;
+}
+.answer.forgot {
+  background: var(--omb-hover);
+  color: var(--omb-text);
+}
+.answer.got {
+  background: var(--omb-accent);
+  color: var(--omb-on-accent);
+  font-weight: 600;
+}
+.answer-sub {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--omb-text-muted);
+}
+.answer.got .answer-sub {
+  color: var(--omb-on-accent);
+  opacity: 0.7;
 }
 </style>

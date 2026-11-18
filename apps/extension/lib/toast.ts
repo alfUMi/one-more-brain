@@ -32,23 +32,25 @@ export function showToast(opts: ToastOptions) {
   const root = host.attachShadow({ mode: 'open' })
   root.innerHTML = `
     <style>
-      .t { display: flex; align-items: center; gap: 12px; min-height: 46px; box-sizing: border-box;
-        padding: 7px 8px 7px 16px; border-radius: 12px; background: #15171c; color: #fff;
-        box-shadow: 0 10px 30px rgba(21, 23, 28, .25); font: 400 14px/1.3 Inter, system-ui, sans-serif;
+      .t { display: flex; align-items: center; gap: 12px; min-height: 48px; box-sizing: border-box;
+        padding: 7px 8px 7px 18px; border-radius: 999px; background: #111111; color: #ffffff;
+        box-shadow: 0 10px 30px rgba(17, 17, 17, .2); font: 400 14px/1.3 Inter, system-ui, sans-serif;
         max-width: min(520px, calc(100vw - 48px)); }
       .msg { flex: 1; min-width: 0 }
-      button { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; cursor: pointer;
-        font: 600 13px Inter, system-ui, sans-serif; background: transparent; color: #c9ccd4 }
-      button.solid { background: #2a2d35; color: #fff }
-      button:hover { filter: brightness(1.2) }
-      button:focus-visible, input:focus-visible { outline: 2px solid #7be0a3; outline-offset: 1px }
-      input { flex: 1; min-width: 220px; height: 32px; box-sizing: border-box; padding: 0 10px;
-        border: 1px solid #3c414d; border-radius: 8px; background: #22252c; color: #fff;
+      button { height: 34px; padding: 0 12px; border: 0; border-radius: 999px; cursor: pointer;
+        font: 500 13px Inter, system-ui, sans-serif; background: transparent; color: #cfcfcb }
+      button.solid { padding: 0 14px; background: #2b2b2b; color: #ffffff }
+      button:hover { color: #ffffff }
+      button.solid:hover { background: #353535 }
+      button:focus-visible, input:focus-visible { outline: 2px solid #ffffff; outline-offset: 1px }
+      input { flex: 1; min-width: 220px; height: 34px; box-sizing: border-box; padding: 0 14px;
+        border: 0; border-radius: 999px; background: #2b2b2b; color: #ffffff;
         font: 400 14px Inter, system-ui, sans-serif }
+      input::placeholder { color: #9c9c98 }
       svg { flex: none }
     </style>
     <div class="t" role="status" aria-live="polite">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7BE0A3" stroke-width="2.4"
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#CFCFCB" stroke-width="2.4"
         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
       <span class="msg"></span>
     </div>`

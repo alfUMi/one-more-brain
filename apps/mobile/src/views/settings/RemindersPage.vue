@@ -86,15 +86,16 @@ async function test() {
 .toggle {
   width: 100%;
   --track-background-checked: var(--omb-accent);
-  font: 500 15px var(--ion-font-family);
+  font: 400 15px var(--ion-font-family);
 }
 .time {
   margin-left: auto;
-  border: 1px solid var(--omb-border);
-  border-radius: 10px;
-  padding: 6px 10px;
-  background: var(--omb-surface);
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: var(--omb-chip-bg);
   color: var(--omb-text);
-  font: 600 15px var(--ion-font-family);
+  font: 500 15px var(--ion-font-family);
+  font-variant-numeric: tabular-nums;
 }
 </style>

@@ -159,8 +159,8 @@ function onKeydown(e: KeyboardEvent) {
 <template>
   <div
     :class="[
-      'relative flex flex-col gap-2.5 rounded-2xl border-2 border-(--omb-accent) bg-(--omb-surface) px-4 pt-3.5 pb-3 shadow-[0_6px_20px_rgba(15,118,110,0.12)]',
-      dragging && 'border-dashed',
+      'relative flex flex-col gap-2.5 rounded-[18px] bg-(--omb-surface) px-5 pt-4 pb-3 shadow-(--omb-shadow) focus-within:ring-2 focus-within:ring-(--omb-accent)/25',
+      dragging && 'ring-2 ring-(--omb-accent) ring-dashed',
     ]"
     @dragover.prevent="dragging = true"
     @dragleave.self="dragging = false"
@@ -168,7 +168,7 @@ function onKeydown(e: KeyboardEvent) {
   >
     <div
       v-if="dragging"
-      class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-(--omb-accent-soft)/90 text-sm font-semibold text-(--omb-accent)"
+      class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-[18px] bg-(--omb-accent-soft)/90 text-sm font-semibold text-(--omb-accent)"
     >
       {{ t('inbox.dropHere') }}
     </div>
@@ -178,17 +178,17 @@ function onKeydown(e: KeyboardEvent) {
       :aria-label="t('inbox.captureLabel')"
       :placeholder="t('inbox.capturePlaceholder')"
       rows="2"
-      class="field-sizing-content max-h-80 min-h-[3lh] resize-none border-0 bg-transparent text-[17px] leading-normal font-medium outline-0 placeholder:font-normal placeholder:text-(--omb-text-muted)"
+      class="field-sizing-content max-h-80 min-h-[3lh] resize-none border-0 bg-transparent text-[15.5px] leading-normal outline-0 placeholder:text-(--omb-text-muted)"
       @keydown="onKeydown"
       @paste="onPaste"
     />
     <div v-if="images.length" class="flex flex-wrap gap-2">
       <div v-for="(img, i) in images" :key="img.preview" class="relative">
-        <img :src="img.preview" alt="" class="h-20 w-28 rounded-lg object-cover" />
+        <img :src="img.preview" alt="" class="h-20 w-28 rounded-xl object-cover" />
         <button
           type="button"
           :aria-label="t('inbox.removeImage')"
-          class="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full border border-(--omb-border) bg-(--omb-surface) shadow-sm hover:bg-(--omb-hover)"
+          class="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full bg-(--omb-surface) shadow-(--omb-shadow) hover:bg-(--omb-hover)"
           @click="removeImage(i)"
         >
           <UIcon name="i-lucide-x" class="size-3.5" />
@@ -197,10 +197,8 @@ function onKeydown(e: KeyboardEvent) {
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <span v-if="reminder" class="omb-chip omb-chip-rem pr-1">
-        <UIcon
-          :name="reminder.kind === 'RECURRING' ? 'i-lucide-repeat' : 'i-lucide-clock'"
-          class="size-3.5"
-        />
+        <UIcon v-if="reminder.kind === 'RECURRING'" name="i-lucide-repeat" class="size-3.5" />
+        <span v-else class="omb-rem-dot" />
         {{ fmt.reminder(reminder) }}
         <button
           type="button"
@@ -211,7 +209,7 @@ function onKeydown(e: KeyboardEvent) {
           <UIcon name="i-lucide-x" class="size-3" />
         </button>
       </span>
-      <span v-for="tag in parsed?.tags" :key="tag" class="omb-chip omb-chip-tag">#{{ tag }}</span>
+      <span v-for="tag in parsed?.tags" :key="tag" class="omb-chip omb-chip-tag">{{ tag }}</span>
       <span v-if="parsed?.remember" class="omb-chip omb-chip-tag">
         <UIcon name="i-lucide-refresh-cw" class="size-3.5" />
         {{ t('actions.remember') }}
@@ -232,21 +230,21 @@ function onKeydown(e: KeyboardEvent) {
       <UButton
         icon="i-lucide-mic"
         color="neutral"
-        variant="outline"
+        variant="soft"
         disabled
         :aria-label="t('inbox.recordVoice')"
         :title="t('inbox.recordVoiceSoon')"
-        class="size-9 justify-center rounded-[10px]"
+        class="size-9 justify-center rounded-full"
       />
       <UButton
         icon="i-lucide-image"
         color="neutral"
-        variant="outline"
+        variant="soft"
         :aria-label="t('inbox.attachImage')"
-        class="size-9 justify-center rounded-[10px]"
+        class="size-9 justify-center rounded-full"
         @click="fileInput?.click()"
       />
-      <UButton :disabled="!canSave" class="h-9 rounded-[10px] px-3.5 font-semibold" @click="save">
+      <UButton :disabled="!canSave" class="h-9 rounded-full px-[18px] font-semibold" @click="save">
         {{ t('inbox.save') }}
         <span class="text-xs opacity-85">⏎</span>
       </UButton>

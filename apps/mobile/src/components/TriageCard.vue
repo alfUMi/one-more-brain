@@ -4,9 +4,8 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { formatter, hostOf, itemTitle } from '../lib/format'
 import ItemChips from './ItemChips.vue'
-import KindIcon from './KindIcon.vue'
 
-/** The big card in the Inbox stack (mockup: Mobile · Inbox swipe triage). */
+/** The big card in the Inbox stack (mockup: Mobile · Inbox). */
 const props = defineProps<{ item: ItemDto }>()
 const { t } = useI18n()
 
@@ -31,10 +30,7 @@ const image = computed(() => props.item.attachments.find((a) => a.kind !== 'AUDI
 
 <template>
   <article class="card">
-    <div class="meta-row">
-      <KindIcon :kind="item.kind" />
-      <span class="omb-meta">{{ meta }}</span>
-    </div>
+    <span class="meta">{{ meta }}</span>
     <h2 v-if="title" class="title">{{ title }}</h2>
     <blockquote v-if="item.quote" class="quote">“{{ item.quote }}”</blockquote>
     <p v-if="body" class="body" :class="{ big: !title }">{{ body }}</p>
@@ -50,44 +46,41 @@ const image = computed(() => props.item.attachments.find((a) => a.kind !== 'AUDI
   height: 100%;
   box-sizing: border-box;
   background: var(--omb-surface);
-  border: 1px solid var(--omb-border);
-  border-radius: 22px;
-  padding: 22px;
+  border-radius: 26px;
+  padding: 26px 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   overflow: hidden;
 }
-.meta-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.meta {
+  font-size: 13px;
+  color: var(--omb-text-muted);
 }
 .title {
   margin: 0;
-  font-size: 22px;
+  font-size: 23px;
   font-weight: 600;
   line-height: 1.25;
+  letter-spacing: -0.02em;
   overflow-wrap: anywhere;
 }
 .quote {
   margin: 0;
-  padding: 12px 14px;
-  background: var(--omb-highlight-quote);
-  border-radius: 12px;
-  font-family: 'Source Serif 4', Georgia, serif;
-  font-size: 17px;
+  font-family: var(--omb-quote-font);
+  font-size: 19px;
   line-height: 1.55;
   color: var(--omb-quote-text);
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 7;
+  -webkit-line-clamp: 8;
   -webkit-box-orient: vertical;
 }
 .body {
   margin: 0;
   font-size: 16px;
   line-height: 1.5;
+  color: var(--omb-text-toned);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   overflow: hidden;
@@ -96,22 +89,25 @@ const image = computed(() => props.item.attachments.find((a) => a.kind !== 'AUDI
   -webkit-box-orient: vertical;
 }
 .body.big {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 21px;
-  line-height: 1.35;
-  font-weight: 500;
+  font-size: 23px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--omb-text);
 }
 .image {
   width: 100%;
   min-height: 0;
   max-height: 200px;
   object-fit: cover;
-  border-radius: 12px;
+  border-radius: 16px;
   background: var(--omb-hover);
 }
 .host {
   font-size: 13px;
   color: var(--omb-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 .grow {
   flex-grow: 1;

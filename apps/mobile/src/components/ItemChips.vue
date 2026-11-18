@@ -2,8 +2,8 @@
 import type { ItemDto } from '@omb/shared'
 import { computed } from 'vue'
 import { formatter } from '../lib/format'
-import AppIcon from './AppIcon.vue'
 
+/** Reminder chips (amber dot), then tags (grey; dashed with a "?" when the AI suggested them). */
 const props = withDefaults(defineProps<{ item: ItemDto; small?: boolean }>(), { small: true })
 
 const reminders = computed(() =>
@@ -19,7 +19,6 @@ const reminders = computed(() =>
       class="omb-chip omb-chip-rem"
       :class="{ 'omb-chip-sm': small, 'omb-chip-ai': r.isAiSuggested }"
     >
-      <AppIcon :name="r.kind === 'RECURRING' ? 'repeat' : 'clock'" :size="12" :stroke="2.2" />
       {{ formatter.reminder(r) }}
     </span>
     <span
@@ -28,7 +27,7 @@ const reminders = computed(() =>
       class="omb-chip"
       :class="[tag.suggested ? 'omb-chip-ai' : 'omb-chip-tag', { 'omb-chip-sm': small }]"
     >
-      #{{ tag.name }}
+      {{ tag.name }}{{ tag.suggested ? '?' : '' }}
     </span>
   </div>
 </template>

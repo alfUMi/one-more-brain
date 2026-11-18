@@ -109,10 +109,10 @@ async function setZone(zone: string) {
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--omb-border);
-  border-radius: 12px;
+  height: 46px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--omb-surface-muted);
   color: var(--omb-text-muted);
 }
 .search input {
@@ -121,7 +121,7 @@ async function setZone(zone: string) {
   border: 0;
   outline: 0;
   background: transparent;
-  font: 500 16px var(--ion-font-family);
+  font: 400 16px var(--ion-font-family);
   color: var(--omb-text);
 }
 </style>

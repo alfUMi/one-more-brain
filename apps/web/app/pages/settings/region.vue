@@ -30,7 +30,7 @@ const LANGUAGES = [
 
 <template>
   <div class="flex max-w-[680px] flex-col gap-[18px]">
-    <SettingsHeader :title="t('settings.sections.region')" :hint="t('settings.synced')" />
+    <SettingsHeader :title="t('settings.sections.region')" />
 
     <section class="omb-card">
       <div class="flex flex-wrap items-center justify-between gap-3">
@@ -45,12 +45,7 @@ const LANGUAGES = [
             type="button"
             role="radio"
             :aria-checked="user?.locale === l.code"
-            :class="[
-              'h-9 rounded-lg border px-3.5 text-sm font-medium',
-              user?.locale === l.code
-                ? 'border-(--omb-accent) bg-(--omb-accent-soft) text-(--omb-accent)'
-                : 'border-(--omb-border) hover:bg-(--omb-hover)',
-            ]"
+            :class="['omb-btn h-9 text-sm', user?.locale === l.code ? 'omb-btn-primary' : '']"
             @click="save({ locale: l.code })"
           >
             {{ l.name }}
