@@ -40,26 +40,26 @@ once written, are never seen again.
 | Auth | Email magic link + Google |
 | Languages | English, Russian (UI + date parsing) |
 | Build order | Web → Extension → Telegram → Resurfacing → Mobile → Location |
-| Look | Neutral UI, Inter + Space Grotesk. Light, dark, or system theme |
-| Accent | **Teal** by default (`#0F766E` light / `#4FD1C5` dark). User can switch to violet, blue, rose, or graphite |
+| Look | "Calm": warm off-white, soft shadows, no borders, pill buttons. Inter only, Georgia italic for quotes. Light, dark, or system theme |
+| Accent | **Black & white** (graphite) by default (`#111111` light / `#EDEDEB` dark). User can switch to teal, violet, blue, or rose |
 
 ## 2a. Visual design
 
 Mockups: https://claude.ai/artifact/Q8emX9hqdvXmZaHrf8TFHL
 
 - **Theme:** light / dark / system, set in Settings → Appearance and synced across devices.
-- **Accent:** one color for buttons, focus, selection, and the active menu item. Default teal. Options:
+- **Accent:** one color for buttons, focus, selection, and the active menu item. Default black & white. Options:
 
   | Name | Light | Dark |
   |---|---|---|
-  | Teal (default) | `#0F766E` | `#4FD1C5` |
+  | Black & white (default) | `#111111` | `#EDEDEB` |
+  | Teal | `#0F766E` | `#4FD1C5` |
   | Violet | `#6D4AE0` | `#B79CFF` |
   | Blue | `#2F5BEA` | `#7C98FF` |
   | Rose | `#C0365A` | `#FF8FAB` |
-  | Graphite | `#15171C` | `#E8EAEE` |
 
-- **Colors that never change with the accent:** amber = reminders, green = Keep, a dashed outline = AI suggestion.
-  Each note type also has its own tint: yellow = highlight, green = voice, violet = image, blue = link.
+- **Colors that never change with the accent:** amber = reminders, a dashed outline = AI suggestion. Tags and note types are neutral grey.
+- **Layout (Calm, approved 2026-11-18):** web has a slim top bar (Inbox, Today, Review, Library, search, + Capture) over one centered column; Today is a day timeline (time rail, "Now" marker, Captured today, Coming up, Review card).
 - **Implementation:** colors are CSS variables (`--accent`, `--accent-soft`, `--on-accent`, …) with a
   `data-theme` / `data-accent` attribute on `<html>`, shared by web, extension, and mobile through `packages/shared`.
   The extension popup and mobile app follow the same setting.
@@ -232,6 +232,8 @@ Started 2026-11-16, ahead of Phase 3. Spec: the "Mobile · Capture" and "Mobile 
 - [x] Share sheet on Android: text, links and images from any app open "Save to Brain" (also on a cold start). Tested on the emulator. `6c43fef`
 - [ ] Share sheet on iOS: Share Extension target with an App Group (needs the Apple Developer account).
 - [x] CI builds an Android debug APK (artifact `one-more-brain-android-debug`); install steps in [DEPLOY.md](./DEPLOY.md) §7. `dcd7171`
+- [x] Fixes from the owner's feedback: Today shows what was captured today, the next 7 days of reminders and remembered notes, with an error state; Review is its own tab; swiping the inbox card only browses (Keep / Archive are buttons, toasts say where the note went); black & white is the default accent. `fc7a99d`
+- [x] Calm redesign (web, mobile, extension) from the approved artboards in the mockups. `fc7a99d`
 - [ ] **Done when:** shipped to my own phone (TestFlight / internal track) and used daily.
 
 ### Phase 6: Location reminders
